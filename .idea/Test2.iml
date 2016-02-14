@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="CPP_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341_core.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/delay.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/FONT/font_16pts.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/FONT/correct_ANSI.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/FONT/correct_ANSI.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/FONT/font_16pts.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/spi_init.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/delay.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/spi_init.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341_core.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/system_stm32f10x.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/main.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/startup_stm32f10x.c" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/misc.c">
+      <sourceFolder url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/misc.c" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_dma.c">
+      <sourceFolder url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_dma.c" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c">
+      <sourceFolder url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c">
+      <sourceFolder url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_spi.c">
+      <sourceFolder url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_spi.c" isTestSource="false" />
+    </content>
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library">
+      <library name="Header Search Paths">
+        <CLASSES>
+          <root url="file:///usr/lib/gcc/arm-none-eabi/5.2.1/include-fixed" />
+          <root url="file:///usr/lib/gcc/arm-none-eabi/5.2.1/include" />
+          <root url="file:///usr/arm-none-eabi/include" />
+          <root url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/inc" />
+          <root url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/CMSIS/CM3/CoreSupport" />
+          <root url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x" />
+          <root url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Project/STM32F10x_StdPeriph_Template" />
+        </CLASSES>
+        <SOURCES>
+          <root url="file:///usr/lib/gcc/arm-none-eabi/5.2.1/include-fixed" />
+          <root url="file:///usr/lib/gcc/arm-none-eabi/5.2.1/include" />
+          <root url="file:///usr/arm-none-eabi/include" />
+          <root url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/inc" />
+          <root url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/CMSIS/CM3/CoreSupport" />
+          <root url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x" />
+          <root url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Project/STM32F10x_StdPeriph_Template" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+  </component>
+</module>
