@@ -1,3 +1,4 @@
+#include <stm32f10x.h>
 #include "ILI9341_core.h"
 #include "ILI9341_commands.h"
 #include "ILI9341_colors.h"
@@ -5,23 +6,7 @@
 #include "delay.h"
 #include "FONT/correct_ANSI.h"
 
-uint8_t SPI_work = 0;
 
-// RX
-void DMA1_Channel2_IRQHandler(void) {
-    if (DMA_GetITStatus(DMA1_IT_TC2) == SET) {
-        DMA_ClearITPendingBit(DMA1_IT_TC2);
-        TFT_CS_RESET;
-        SPI_work = 0;
-    }
-}
-
-// TX
-void DMA1_Channel3_IRQHandler(void) {
-    if (DMA_GetITStatus(DMA1_IT_TC3) == SET) {
-        DMA_ClearITPendingBit(DMA1_IT_TC3);
-    }
-}
 
 void pins_init(void) {
     GPIO_InitTypeDef GPIO_InitStructure;
@@ -30,22 +15,6 @@ void pins_init(void) {
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_0 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
-}
-
-
-void LCD_DMA_Tx(uint16_t size) {
-    DMA_SetCurrDataCounter(DMA1_Channel2, size);
-    DMA_SetCurrDataCounter(DMA1_Channel3, size);
-
-    SPI_work = 1;
-    TFT_CS_SET;
-
-    DMA_Cmd(DMA1_Channel2, ENABLE);
-    DMA_Cmd(DMA1_Channel3, ENABLE);
-}
-
-void LCD_DMA_Wait(void) {
-    while(SPI_work);
 }
 
 void LCD_SendCommand(u8 com) {
@@ -286,6 +255,8 @@ void LCD_Fill(uint16_t color) { // просто заливка одним цве
 #define Fram_Rate_90Hz  0 // частота кадров
 #define Fram_Rate_100Hz 0 // частота кадров
 #define Fram_Rate_119Hz 1 // частота кадров
+
+
 
 void LCD_Init(void) {
     pins_init();

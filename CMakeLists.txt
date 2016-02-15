@@ -27,7 +27,7 @@ SET(STARTUP ${STARTUP}
         lib/FONT/correct_ANSI.c
         lib/delay.c
         lib/spi_init.c
-        lib/ILI9341_core.c
+        lib/ILI9341_dma_core.c
         )
 
 #SET(DEBUG_FLAGS "-O3")

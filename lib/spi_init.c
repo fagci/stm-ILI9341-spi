@@ -1,9 +1,12 @@
 #include <stm32f10x_dma.h>
+#include <stm32f10x.h>
 #include "stm32f10x.h"
 #include "spi_init.h"
 
-uint16_t* SPIReceivedValue;
-uint16_t* SPITransmittedValue[8];
+#define ARRAYSIZE 800
+
+uint32_t rc_buf[ARRAYSIZE];
+uint32_t tx_buf[ARRAYSIZE];
 
 SPI_InitTypeDef SPI_InitStructure;
 DMA_InitTypeDef DMA_InitStructure;
@@ -13,7 +16,7 @@ void RCC_Configuration(void);
 void GPIO_Configuration(void);
 
 void SPI_DMA_Write(uint16_t addr, uint16_t data) {
-    SPITransmittedValue[addr] = data;
+    tx_buf[addr] = data;
 }
 
 void DMA_init_master(void) {
@@ -22,9 +25,9 @@ void DMA_init_master(void) {
     DMA_DeInit(DMA1_Channel2); //Set DMA registers to default values
     DMA_StructInit(&DMA_InitStructure);
     DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) &SPI1->DR; //Address of peripheral the DMA must map to
-    DMA_InitStructure.DMA_MemoryBaseAddr     = (uint32_t) SPIReceivedValue; //Variable to which received data will be stored
+    DMA_InitStructure.DMA_MemoryBaseAddr     = (uint32_t) rc_buf; //Variable to which received data will be stored
     DMA_InitStructure.DMA_DIR                = DMA_DIR_PeripheralSRC;
-    DMA_InitStructure.DMA_BufferSize         = 2; //Buffer size
+    DMA_InitStructure.DMA_BufferSize         = ARRAYSIZE; //Buffer size
     DMA_InitStructure.DMA_PeripheralInc      = DMA_PeripheralInc_Disable;
     DMA_InitStructure.DMA_MemoryInc          = DMA_MemoryInc_Enable;
     DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
@@ -42,9 +45,9 @@ void DMA_init_master(void) {
     DMA_DeInit(DMA1_Channel3); //Set DMA registers to default values
     DMA_StructInit(&DMA_InitStructure);
     DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) &SPI1->DR; //Address of peripheral the DMA must map to
-    DMA_InitStructure.DMA_MemoryBaseAddr     = (uint32_t) SPITransmittedValue; //Variable from which data will be transmitted
+    DMA_InitStructure.DMA_MemoryBaseAddr     = (uint32_t) tx_buf; //Variable from which data will be transmitted
     DMA_InitStructure.DMA_DIR                = DMA_DIR_PeripheralDST;
-    DMA_InitStructure.DMA_BufferSize         = 2; //Buffer size
+    DMA_InitStructure.DMA_BufferSize         = ARRAYSIZE; //Buffer size
     DMA_InitStructure.DMA_PeripheralInc      = DMA_PeripheralInc_Disable;
     DMA_InitStructure.DMA_MemoryInc          = DMA_MemoryInc_Enable;
     DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
@@ -80,7 +83,7 @@ void SPI_init_master(void) {
     SPI_SSOutputCmd(SPI_MASTER, ENABLE);
     SPI_Cmd(SPI_MASTER, ENABLE);
 
-//    SPI_I2S_DMACmd(SPI_MASTER, SPI_I2S_DMAReq_Rx | SPI_I2S_DMAReq_Tx, ENABLE);
+    SPI_I2S_DMACmd(SPI_MASTER, SPI_I2S_DMAReq_Rx | SPI_I2S_DMAReq_Tx, ENABLE);
 }
 
 void RCC_Configuration(void) {

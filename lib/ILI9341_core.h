@@ -5,10 +5,10 @@
 
 #define TEST1_ILI9341_CORE_H
 
+#define TFT_LED_PIN     GPIO_Pin_0
 #define TFT_RESET_PIN   GPIO_Pin_2
 #define TFT_DC_PIN      GPIO_Pin_3
 #define TFT_CS_PIN      GPIO_Pin_4
-#define TFT_LED_PIN     GPIO_Pin_0
 
 #define TFT_DC_SET      GPIO_SetBits(GPIOA, TFT_DC_PIN);
 #define TFT_DC_RESET    GPIO_ResetBits(GPIOA, TFT_DC_PIN);
@@ -27,6 +27,8 @@
 #define LCD_PIXEL_COUNT    LCD_WIDTH * LCD_HEIGHT
 
 void LCD_Init(void);
+
+void LCD_DMA_Init(void);
 
 void LCD_Fill(uint16_t color);
 
