@@ -1,5 +1,5 @@
 #include "ILI9341_dma_core.h"
-#include <stm32f10x.h>
+
 #include "ILI9341_commands.h"
 #include "ILI9341_colors.h"
 #include "spi_init.h"
@@ -102,6 +102,7 @@ void write16_cont(uint16_t d) {
     write8_cont(d >> 8);
     write8_cont(d & 0xFF);
 }
+
 #define setDCForCommand TFT_DC_RESET
 #define setDCForData TFT_DC_SET
 
@@ -125,18 +126,17 @@ void writecommand_last(uint8_t c) {
 }
 
 
-
 void setAddrAndRW_cont(uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
     setDCForCommand;
     write8_cont(ILI9341_CASET); // Column addr set
     setDCForData;
     write16_cont(x);   // XSTART
-    write16_cont(x+w-1);   // XEND
+    write16_cont((uint16_t) (x + w - 1));   // XEND
     setDCForCommand;
     write8_cont(ILI9341_PASET); // Row addr set
     setDCForData;
     write16_cont(y);   // YSTART
-    write16_cont(y+h-1);   // YEND
+    write16_cont((uint16_t) (y + h - 1));   // YEND
     setDCForCommand;
     write8_cont(ILI9341_RAMWR); // RAM write
 }
@@ -145,11 +145,13 @@ void LCD_DMA_Init(void) {
     pins_init();
     SPI_init_master();
 
-    delay_ms(1);
     TFT_RST_SET;
-    LCD_SendCommand(ILI9341_RESET);
+    delay_ms(5);
+    TFT_RST_RESET;
+    delay_ms(20);
+    TFT_RST_SET;
+    delay_ms(150);
 
-    delay_ms(100);
     const uint8_t *addr = init_commands;
     while (1) {
         uint8_t count = *(addr++);
@@ -164,14 +166,15 @@ void LCD_DMA_Init(void) {
     delay_ms(120);
     writecommand_last(ILI9341_DISPON);    // Display on
     delay_ms(120);
+    TFT_LED_SET;
+}
 
-    // ---------
+void LCD_DMA_Fill(uint16_t color) {
     TFT_CS_RESET;
     setAddrAndRW_cont(0, 0, LCD_WIDTH, LCD_HEIGHT);
     setDCForData;
-    for (uint32_t l = 0; l < LCD_PIXEL_COUNT; l++)
-    {
-        write16_cont(0);
+    for (uint32_t l = 0; l < 400; l++) {
+        write16_cont(color);
     }
     TFT_CS_SET;
 }

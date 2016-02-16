@@ -1,3 +1,5 @@
+#include <stm32f10x.h>
+
 #ifndef TEST1_ILI9341_DMA_CORE_H
 #define TEST1_ILI9341_DMA_CORE_H
 
@@ -82,5 +84,7 @@
 #define LCD_PIXEL_COUNT    LCD_WIDTH * LCD_HEIGHT
 
 void LCD_DMA_Init(void);
+
+void LCD_DMA_Fill(uint16_t color);
 
 #endif //TEST1_ILI9341_DMA_CORE_H
