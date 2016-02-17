@@ -84,6 +84,7 @@
 #define LCD_PIXEL_COUNT    LCD_WIDTH * LCD_HEIGHT
 
 void LCD_DMA_Init(void);
+void LCD_DMA_Init2(void);
 
 void LCD_DMA_Fill(uint16_t color);
 

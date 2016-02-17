@@ -2,20 +2,14 @@
 <module type="CPP_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/lib/delay.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/FONT/font_16pts.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/FONT/correct_ANSI.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/FONT/correct_ANSI.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/FONT/font_16pts.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/spi_init.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/delay.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/spi_init.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341_dma_core.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341_dma_core.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/system_stm32f10x.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/startup_stm32f10x.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/main.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/startup_stm32f10x.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/delay.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/ILI9341.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/delay.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/ILI9341.h" isTestSource="false" />
     </content>
     <content url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/misc.c">
       <sourceFolder url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/misc.c" isTestSource="false" />
@@ -31,6 +25,9 @@
     </content>
     <content url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_spi.c">
       <sourceFolder url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_spi.c" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c">
+      <sourceFolder url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c" isTestSource="false" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library">

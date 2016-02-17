@@ -73,13 +73,6 @@ void LCD_DMA_Wait(void) {
     while (SPI_work);
 }
 
-void LCD_SendCommand(u8 com) {
-    TFT_DC_RESET;       // прижимаем вывод DC LCD
-    TFT_CS_RESET;            // тоже с выводом CS, CS это выбор кристалла, используется при нескольких устройствах на одном SPI
-    SPI1->DR = com;            // отправляем байт в SPI (на отправку) ! изменить под свой МК,
-    TFT_CS_SET;         // отпускаем выбор (кристалла) LCD, (PS. CS - позволяет посадить на одну шину SPI несколько устройств)
-}
-
 int cb = 0;
 
 void write8_cont(uint8_t b) {
@@ -93,18 +86,19 @@ void write8_cont(uint8_t b) {
 
 void write8_last(uint8_t b) {
     SPI_DMA_Write((uint16_t) cb, b);
+    LCD_DMA_Tx((uint16_t) cb);
     cb = 0;
-    LCD_DMA_Tx(8);
     LCD_DMA_Wait();
 }
 
-void write16_cont(uint16_t d) {
-    write8_cont(d >> 8);
-    write8_cont(d & 0xFF);
+void write16_cont(uint16_t b) {
+    SPI_DMA_Write((uint16_t) cb++, b);
+    if (cb >= 8) {
+        cb = 0;
+        LCD_DMA_Tx(8);
+        LCD_DMA_Wait();
+    }
 }
-
-#define setDCForCommand TFT_DC_RESET
-#define setDCForData TFT_DC_SET
 
 void writecommand_cont(uint8_t c) {
     TFT_DC_RESET;
@@ -127,18 +121,36 @@ void writecommand_last(uint8_t c) {
 
 
 void setAddrAndRW_cont(uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
-    setDCForCommand;
+    TFT_DC_RESET;
     write8_cont(ILI9341_CASET); // Column addr set
-    setDCForData;
+    TFT_DC_SET;
+    spi16();
     write16_cont(x);   // XSTART
     write16_cont((uint16_t) (x + w - 1));   // XEND
-    setDCForCommand;
+    spi8();
+    TFT_DC_RESET;
     write8_cont(ILI9341_PASET); // Row addr set
-    setDCForData;
+    TFT_DC_SET;
+    spi16();
     write16_cont(y);   // YSTART
     write16_cont((uint16_t) (y + h - 1));   // YEND
-    setDCForCommand;
+    spi8();
+    TFT_DC_RESET;
     write8_cont(ILI9341_RAMWR); // RAM write
+}
+
+// ********* 16-bit SPI ************//
+void spi16(void) {
+    SPI1->CR1 &= ~SPI_CR1_SPE; //Отключаем SPI1
+    SPI1->CR1 |= SPI_CR1_DFF;  //16 бит данных //1
+    SPI1->CR1 |= SPI_CR1_SPE;  //Включаем SPI1
+}
+
+// *********  8-bit SPI ************//
+void spi8(void) {
+    SPI1->CR1 &= ~SPI_CR1_SPE; //Отключаем SPI1
+    SPI1->CR1 &= ~SPI_CR1_DFF; // 8 бит данных //0
+    SPI1->CR1 |= SPI_CR1_SPE;  //Включаем SPI1
 }
 
 void LCD_DMA_Init(void) {
@@ -172,9 +184,12 @@ void LCD_DMA_Init(void) {
 void LCD_DMA_Fill(uint16_t color) {
     TFT_CS_RESET;
     setAddrAndRW_cont(0, 0, LCD_WIDTH, LCD_HEIGHT);
-    setDCForData;
-    for (uint32_t l = 0; l < 400; l++) {
+    TFT_DC_SET;
+    spi16();
+    for (uint32_t l = 0; l < LCD_PIXEL_COUNT; l++) {
         write16_cont(color);
     }
+    spi8();
     TFT_CS_SET;
+
 }
