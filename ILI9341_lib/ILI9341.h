@@ -8,9 +8,6 @@
 
 // <editor-fold desc="Defaults">
 
-// TODO: set to 1 after generic SPI mode testing
-#define SPI_DMA_MODE 0
-
 #define TFT_LED_PIN     GPIO_Pin_0
 #define TFT_RESET_PIN   GPIO_Pin_2
 #define TFT_DC_PIN      GPIO_Pin_3
@@ -25,7 +22,7 @@
 #define SPI_MASTER_PIN_MISO          GPIO_Pin_6
 #define SPI_MASTER_PIN_MOSI          GPIO_Pin_7
 
-#define DMA_TX_BUF_SIZE 8
+#define DMA_TX_BUF_SIZE 1
 
 #define LCD_WIDTH       240
 #define LCD_HEIGHT      320
