@@ -145,6 +145,56 @@ void LCD_dmaInit() {
     SPI_I2S_DMACmd(SPI_MASTER, SPI_I2S_DMAReq_Rx | SPI_I2S_DMAReq_Tx, ENABLE);
 }
 
+static
+void stm32_dma_transfer(const u8 *buff, u32 btr) {
+    DMA_InitTypeDef DMA_InitStructure;
+    u32             rw_workbyte[] = {0xffff};
+
+    /* shared DMA configuration values */
+    DMA_InitStructure.DMA_PeripheralBaseAddr = (u32) (&(SPI1->DR));
+    DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+    DMA_InitStructure.DMA_MemoryDataSize     = DMA_MemoryDataSize_Byte;
+    DMA_InitStructure.DMA_PeripheralInc      = DMA_PeripheralInc_Disable;
+    DMA_InitStructure.DMA_BufferSize         = btr;
+    DMA_InitStructure.DMA_Mode               = DMA_Mode_Normal;
+    DMA_InitStructure.DMA_Priority           = DMA_Priority_High;
+
+    DMA_DeInit(DMA1_Channel3);
+    DMA_DeInit(DMA1_Channel2);
+
+    /* DMA1 channel2 configuration SPI2 TX ---------------------------------------------*/
+    DMA_InitStructure.DMA_MemoryBaseAddr = (u32) buff;
+    DMA_InitStructure.DMA_DIR            = DMA_DIR_PeripheralDST;
+    DMA_InitStructure.DMA_MemoryInc      = DMA_MemoryInc_Disable;
+    DMA_Init(DMA1_Channel3, &DMA_InitStructure);
+
+    /* DMA1 channel3 configuration SPI2 RX ---------------------------------------------*/
+    DMA_InitStructure.DMA_MemoryBaseAddr = (u32) rw_workbyte;
+    DMA_InitStructure.DMA_DIR            = DMA_DIR_PeripheralSRC;
+    DMA_InitStructure.DMA_MemoryInc      = DMA_MemoryInc_Enable;
+    DMA_Init(DMA1_Channel2, &DMA_InitStructure);
+
+    DMA_Cmd(DMA1_Channel3, ENABLE);
+    DMA_Cmd(DMA1_Channel2, ENABLE);
+
+    /* Enable SPI2 TX/RX request */
+    SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx | SPI_I2S_DMAReq_Tx, ENABLE);
+
+    // wait until tx complete
+    while (DMA_GetFlagStatus(DMA2_FLAG_TC3) == RESET) { ; }
+
+    /* Disable DMA1 Channel4 */
+    DMA_Cmd(DMA1_Channel2, DISABLE);
+    /* Disable DMA1 Channel5 */
+    DMA_Cmd(DMA1_Channel3, DISABLE);
+
+    /* Disable SPI1 RX/TX request */
+    SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx | SPI_I2S_DMAReq_Tx, DISABLE);
+
+    DMA_ClearFlag(DMA1_FLAG_TC2);
+    DMA_ClearFlag(DMA1_FLAG_TC3);
+}
+
 void LCD_configure() {
     TFT_RST_SET;
     LCD_sendCommand8(ILI9341_RESET);
@@ -192,5 +242,14 @@ void LCD_putPixel(u16 x, u16 y, u16 color) {
     LCD_allocateField(x, y, x, y);
     LCD_setSpi16();
     LCD_sendData16(color);
+    LCD_setSpi8();
+}
+
+void LCD_fillRect(u16 x, u16 y, u16 w, u16 h, u16 color) {
+    LCD_allocateField(x, y, (u16) (x + w - 1), (u16) (y + h - 1));
+    LCD_setSpi16();
+    for (u32 n = w * h; n--;) {
+        if (SPI1->SR | SPI_SR_TXE) LCD_sendData16(color);
+    }
     LCD_setSpi8();
 }
