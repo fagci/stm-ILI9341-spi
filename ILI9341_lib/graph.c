@@ -77,8 +77,13 @@ void LCD_fillScreen(u16 color) {
 }
 
 void LCD_setOrientation(u8 o) {
+#if SPI_DMA_MODE
+    dmaSendCmd(ILI9341_MAC);
+    dmaSendData8( &o, 1);
+#else
     LCD_sendCommand8(ILI9341_MAC);
     LCD_sendData8(o);
+#endif
 }
 
 void LCD_putPixel(u16 x, u16 y, u16 color) {

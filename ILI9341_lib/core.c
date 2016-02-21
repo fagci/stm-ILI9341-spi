@@ -105,6 +105,26 @@ void LCD_pinsInit() {
 }
 
 void LCD_configure() {
+#if SPI_DMA_MODE
+    TFT_RST_SET;
+    dmaSendCmd(ILI9341_RESET);
+    delay_ms(100);
+
+    const uint8_t *address = init_commands;
+    while (1) {
+        u8 count = *(address++);
+        if (count-- == 0) break;
+        dmaSendCmd(*(address++));
+        dmaSendData8(address, count);
+        address+=count;
+    }
+
+    dmaSendCmd(ILI9341_SLEEP_OUT);
+    delay_ms(100);
+    dmaSendCmd(ILI9341_DISPLAY_ON);
+    dmaSendCmd(ILI9341_GRAM);
+    TFT_LED_SET;
+#else
     TFT_RST_SET;
     LCD_sendCommand8(ILI9341_RESET);
     delay_ms(100);
@@ -122,6 +142,7 @@ void LCD_configure() {
     LCD_sendCommand8(ILI9341_DISPLAY_ON);
     LCD_sendCommand8(ILI9341_GRAM);
     TFT_LED_SET;
+#endif
 }
 
 void LCD_init() {
