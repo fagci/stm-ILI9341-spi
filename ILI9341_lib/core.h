@@ -1,6 +1,5 @@
 #include <stm32f10x.h>
 #include <stm32f10x_spi.h>
-#include <stm32f10x_dma.h>
 #include "delay.h"
 
 #ifndef TEST1_ILI9341_CORE_H
@@ -9,7 +8,7 @@
 // <editor-fold desc="Defaults">
 
 // TODO: set to 1 after generic SPI mode testing
-#define SPI_DMA_MODE 0
+#define SPI_DMA_MODE 1
 
 #define TFT_LED_PIN     GPIO_Pin_0
 #define TFT_RESET_PIN   GPIO_Pin_2
@@ -24,8 +23,6 @@
 #define SPI_MASTER_PIN_SCK           GPIO_Pin_5
 #define SPI_MASTER_PIN_MISO          GPIO_Pin_6
 #define SPI_MASTER_PIN_MOSI          GPIO_Pin_7
-
-#define DMA_TX_BUF_SIZE 8
 
 #define LCD_WIDTH       240
 #define LCD_HEIGHT      320

@@ -3,9 +3,11 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/delay.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/graph.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/dma.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/core.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/delay.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/graph.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/dma.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/core.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/graph.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />

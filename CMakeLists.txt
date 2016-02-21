@@ -26,6 +26,7 @@ SET(STARTUP ${STARTUP}
         ${PERIPH_LIB_SRC}/misc.c
         ILI9341_lib/delay.c
         ILI9341_lib/core.c
+        ILI9341_lib/dma.c
         ILI9341_lib/graph.c
         USART_lib/usart.c
         )

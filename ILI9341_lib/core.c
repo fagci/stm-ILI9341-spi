@@ -1,5 +1,9 @@
 #include "core.h"
 
+#if SPI_DMA_MODE
+#include "dma.h"
+#endif
+
 SPI_InitTypeDef SPI_InitStructure;
 
 //<editor-fold desc="Init commands">
@@ -125,8 +129,8 @@ void LCD_configure() {
 
 void LCD_init() {
     LCD_pinsInit();
-#if SPI_DMA_MODE
-    dmaInit();
-#endif
+//#if SPI_DMA_MODE
+//    dmaInit();
+//#endif
     LCD_configure();
 }
