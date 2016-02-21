@@ -126,8 +126,8 @@ void LCD_configure() {
 
 void LCD_init() {
     LCD_pinsInit();
-//#if SPI_DMA_MODE
-//    dmaInit();
-//#endif
+#if SPI_DMA_MODE
+    dmaInit();
+#endif
     LCD_configure();
 }

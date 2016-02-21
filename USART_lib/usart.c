@@ -35,7 +35,7 @@ void usartInit(void) {
 
 void usartSend(char chr) {
     while (!(USART3->SR & USART_FLAG_TXE));
-    USART3->DR = (uint16_t)(chr & 0xFF);
+    USART3->DR = (uint16_t) (chr & 0xFF);
 }
 
 void usartSendString(char *str) {

@@ -28,7 +28,7 @@ SET(STARTUP ${STARTUP}
         ILI9341_lib/core.c
         ILI9341_lib/dma.c
         ILI9341_lib/graph.c
-        USART_lib/usart.c
+#        USART_lib/usart.c
         )
 
 #SET(DEBUG_FLAGS "-O3")
