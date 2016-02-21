@@ -1,6 +1,5 @@
-#include "USART_lib/USART.h"
-#include "ILI9341_lib/ILI9341.h"
-
+#include "USART_lib/usart.h"
+#include "ILI9341_lib/graph.h"
 
 int main(void) {
     usartInit();

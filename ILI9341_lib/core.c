@@ -1,9 +1,6 @@
-#include "ILI9341.h"
+#include "core.h"
 
 SPI_InitTypeDef SPI_InitStructure;
-DMA_InitTypeDef DMA_InitStructure;
-
-uint32_t dmaTxBuf[DMA_TX_BUF_SIZE];
 
 //<editor-fold desc="Init commands">
 
@@ -55,20 +52,10 @@ void LCD_sendData16(u16 data) {
     TFT_CS_SET;
 }
 
-void LCD_allocateField(u16 x1, u16 y1, u16 x2, u16 y2) {
-    LCD_sendCommand8(ILI9341_COLUMN_ADDR);
-    LCD_sendData8((u8) (y1 >> 8));
-    LCD_sendData8((u8) (y1 & 0xFF));
-    LCD_sendData8((u8) (y2 >> 8));
-    LCD_sendData8((u8) (y2 & 0xFF));
-
-    LCD_sendCommand8(ILI9341_PAGE_ADDR);
-    LCD_sendData8((u8) (x1 >> 8));
-    LCD_sendData8((u8) (x1 & 0xFF));
-    LCD_sendData8((u8) (x2 >> 8));
-    LCD_sendData8((u8) (x2 & 0xFF));
-
-    LCD_sendCommand8(ILI9341_GRAM);
+void LCD_setSpi8(void) {
+    SPI1->CR1 &= ~SPI_CR1_SPE; // DISABLE SPI
+    SPI1->CR1 &= ~SPI_CR1_DFF; // SPI 8
+    SPI1->CR1 |= SPI_CR1_SPE;  // ENABLE SPI
 }
 
 void LCD_setSpi16(void) {
@@ -77,15 +64,9 @@ void LCD_setSpi16(void) {
     SPI1->CR1 |= SPI_CR1_SPE;  // ENABLE SPI
 }
 
-void LCD_setSpi8(void) {
-    SPI1->CR1 &= ~SPI_CR1_SPE; // DISABLE SPI
-    SPI1->CR1 &= ~SPI_CR1_DFF; // SPI 8
-    SPI1->CR1 |= SPI_CR1_SPE;  // ENABLE SPI
-}
-
 // </editor-fold>
 
-void LCD_spiInit() {
+void LCD_pinsInit() {
     RCC_PCLK2Config(RCC_HCLK_Div2);
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
@@ -122,29 +103,6 @@ void LCD_spiInit() {
     SPI_Cmd(SPI_MASTER, ENABLE);
 }
 
-void LCD_dmaInit() {
-    // TX
-    DMA_DeInit(DMA1_Channel3); //Set DMA registers to default values
-    DMA_StructInit(&DMA_InitStructure);
-    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) &SPI1->DR; //Address of peripheral the DMA must map to
-    DMA_InitStructure.DMA_MemoryBaseAddr     = (uint32_t) dmaTxBuf; //Variable from which data will be transmitted
-    DMA_InitStructure.DMA_DIR                = DMA_DIR_PeripheralDST;
-    DMA_InitStructure.DMA_BufferSize         = DMA_TX_BUF_SIZE; //Buffer size
-    DMA_InitStructure.DMA_PeripheralInc      = DMA_PeripheralInc_Disable;
-    DMA_InitStructure.DMA_MemoryInc          = DMA_MemoryInc_Enable;
-    DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
-    DMA_InitStructure.DMA_MemoryDataSize     = DMA_MemoryDataSize_HalfWord;
-    DMA_InitStructure.DMA_Mode               = DMA_Mode_Circular;
-    DMA_InitStructure.DMA_Priority           = DMA_Priority_High;
-    DMA_InitStructure.DMA_M2M                = DMA_M2M_Disable;
-    DMA_Init(DMA1_Channel3, &DMA_InitStructure);
-    DMA_Cmd(DMA1_Channel3, ENABLE);
-    NVIC_EnableIRQ(DMA1_Channel3_IRQn);
-    DMA_ITConfig(DMA1_Channel3, DMA_IT_TC, ENABLE);
-
-    SPI_I2S_DMACmd(SPI_MASTER, SPI_I2S_DMAReq_Rx | SPI_I2S_DMAReq_Tx, ENABLE);
-}
-
 void LCD_configure() {
     TFT_RST_SET;
     LCD_sendCommand8(ILI9341_RESET);
@@ -166,31 +124,9 @@ void LCD_configure() {
 }
 
 void LCD_init() {
-    LCD_spiInit();
+    LCD_pinsInit();
 #if SPI_DMA_MODE
     dmaInit();
 #endif
     LCD_configure();
-}
-
-void LCD_fillScreen(u16 color) {
-    LCD_allocateField(0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1);
-
-    LCD_setSpi16();
-    for (u32 n = LCD_PIXEL_COUNT; n--;) {
-        if (SPI1->SR | SPI_SR_TXE) LCD_sendData16(color);
-    }
-    LCD_setSpi8();
-}
-
-void LCD_setOrientation(u8 o) {
-    LCD_sendCommand8(ILI9341_MAC);
-    LCD_sendData8(o);
-}
-
-void LCD_putPixel(u16 x, u16 y, u16 color) {
-    LCD_allocateField(x, y, x, y);
-    LCD_setSpi16();
-    LCD_sendData16(color);
-    LCD_setSpi8();
 }

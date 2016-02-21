@@ -3,8 +3,8 @@
 #include <stm32f10x_dma.h>
 #include "delay.h"
 
-#ifndef TEST1_ILI9341_H
-#define TEST1_ILI9341_H
+#ifndef TEST1_ILI9341_CORE_H
+#define TEST1_ILI9341_CORE_H
 
 // <editor-fold desc="Defaults">
 
@@ -33,10 +33,14 @@
 
 // </editor-fold>
 
+//<editor-fold desc="Orientation">
+
 #define ORIENTATION_PORTRAIT 0x48
 #define ORIENTATION_LANDSCAPE 0x28
 #define ORIENTATION_PORTRAIT_MIRROR 0x88
 #define ORIENTATION_LANDSCAPE_MIRROR 0xE8
+
+//</editor-fold>
 
 // <editor-fold desc="Functions">
 
@@ -114,9 +118,10 @@
 
 // </editor-fold>
 
-void LCD_init();
-void LCD_fillScreen(u16 color);
-void LCD_setOrientation(u8 o);
-void LCD_putPixel(u16 x, u16 y, u16 color);
+void LCD_sendCommand8(u8 cmd);
+void LCD_sendData8(u8 data);
+void LCD_sendData16(u16 data);
+void LCD_setSpi8(void);
+void LCD_setSpi16(void);
 
-#endif //TEST1_ILI9341_H
+#endif //TEST1_ILI9341_CORE_H

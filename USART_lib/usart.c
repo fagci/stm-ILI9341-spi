@@ -19,7 +19,7 @@ void usartInit(void) {
     GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     USART_DeInit(USART3);
-    USART_InitStructure.USART_BaudRate            = 115200;
+    USART_InitStructure.USART_BaudRate            = 9600;
     USART_InitStructure.USART_WordLength          = USART_WordLength_8b;
     USART_InitStructure.USART_StopBits            = USART_StopBits_1;
     USART_InitStructure.USART_Parity              = USART_Parity_No;
@@ -27,8 +27,8 @@ void usartInit(void) {
     USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
     USART_Init(USART3, &USART_InitStructure);
 
-    USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
-    NVIC_EnableIRQ(USART3_IRQn);
+//    USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
+//    NVIC_EnableIRQ(USART3_IRQn);
 
     USART_Cmd(USART3, ENABLE);
 }
@@ -44,10 +44,10 @@ void usartSendString(char *str) {
         usartSend(str[i++]);
 }
 
-void USART3_IRQHandler(void) {
-    // Обработка события RXNE
-    if (USART_GetITStatus(USART3, USART_IT_RXNE)) {
-        USART_ClearITPendingBit(USART3, USART_IT_RXNE);
-        usartSendString("GOT!\r\n");
-    };
-};
+//void USART3_IRQHandler(void) {
+//    // Обработка события RXNE
+//    if (USART_GetITStatus(USART3, USART_IT_RXNE)) {
+//        USART_ClearITPendingBit(USART3, USART_IT_RXNE);
+//        usartSendString("GOT!\r\n");
+//    };
+//};

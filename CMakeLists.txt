@@ -25,8 +25,9 @@ SET(STARTUP ${STARTUP}
         ${PERIPH_LIB_SRC}/stm32f10x_usart.c
         ${PERIPH_LIB_SRC}/misc.c
         ILI9341_lib/delay.c
-        ILI9341_lib/ILI9341.c
-        USART_lib/USART.c
+        ILI9341_lib/core.c
+        ILI9341_lib/graph.c
+        USART_lib/usart.c
         )
 
 #SET(DEBUG_FLAGS "-O3")
