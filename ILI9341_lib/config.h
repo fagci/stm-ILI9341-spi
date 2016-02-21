@@ -5,7 +5,6 @@
 
 // <editor-fold desc="Defaults">
 
-// TODO: set to 1 after generic SPI mode testing
 #define SPI_DMA_MODE 1
 
 #define TFT_LED_PIN     GPIO_Pin_0

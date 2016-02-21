@@ -62,7 +62,7 @@ void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
 
     LCD_setSpi8();
 #else
-    LCD_setAddressWindow(x1, y1, (u16) (x1 + w - 1), (u16) (x1 + h - 1));
+    LCD_setAddressWindow(x1, y1, (u16) (x1 + w - 1), (u16) (y1 + h - 1));
 
     LCD_setSpi16();
     for (u32 n = LCD_PIXEL_COUNT; n--;) {
