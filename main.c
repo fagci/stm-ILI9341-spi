@@ -71,17 +71,16 @@ void dmaSend16(u16 *data, u32 n) {
 }
 
 void dmaWait() {
-    while(dmaWorking);
+    while (dmaWorking);
 }
 
 // TX
 void DMA1_Channel3_IRQHandler(void) {
     if (DMA_GetITStatus(DMA1_IT_TC3)) {
-        dmaWorking = 0;
         TFT_CS_SET;
-        usartSend("DMA_TX\r\n");
         DMA_ClearITPendingBit(DMA1_IT_TC3);
         DMA_Cmd(DMA1_Channel3, DISABLE);
+        dmaWorking = 0;
     }
 }
 
@@ -103,6 +102,34 @@ void dmaSendData16(u16 *data, u32 n) {
     dmaWait();
 }
 
+void LCD_dmaSetAddrWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
+    dmaSendCmd(ILI9341_COLUMN_ADDR);
+    u8 pointData1[] = {(u8) (y1 >> 8), (u8) (y1 & 0xFF), (u8) (y2 >> 8), (u8) (y2 & 0xFF)};
+    dmaSendData8(pointData1, 4);
+
+    dmaSendCmd(ILI9341_PAGE_ADDR);
+    u8 pointData2[] = {(u8) (x1 >> 8), (u8) (x1 & 0xFF), (u8) (x2 >> 8), (u8) (x2 & 0xFF)};
+    dmaSendData8(pointData2, 4);
+
+    dmaSendCmd(ILI9341_GRAM);
+}
+
+void LCD_dmaFillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
+    LCD_dmaSetAddrWindow(x1, y1, x1 + w, x1 + h);
+
+    LCD_setSpi16();
+
+    u32 count = (u32) (w * h);
+    u16 colorData[count];
+
+    for (u32 i = 0; i < count; i++) {
+        colorData[i] = color;
+    }
+
+    dmaSendData16(colorData, count);
+    LCD_setSpi8();
+}
+
 int main(void) {
     usartInit();
     usartSendString("Start\r\n");
@@ -114,28 +141,7 @@ int main(void) {
     usartSendString("Filled.\r\n");
 
     usartSendString("Filling with dma...\r\n");
-
-
-    u8 x1 = 10, y1 = 10, x2 = 100, y2 = 100;
-
-    dmaSendCmd(ILI9341_COLUMN_ADDR);
-    u8 pointData1[] = {y1 >> 8, (u8) (y1 & 0xFF), y2 >> 8, (u8) (y2 & 0xFF)};
-    dmaSendData8(pointData1, 4);
-
-    dmaSendCmd(ILI9341_PAGE_ADDR);
-    u8 pointData2[] = {x1 >> 8, (u8) (x1 & 0xFF), x2 >> 8, (u8) (x2 & 0xFF)};
-    dmaSendData8(pointData2, 4);
-
-    dmaSendCmd(ILI9341_GRAM);
-
-    LCD_setSpi16();
-    u32 count = (x2-x1) * (y2-y1);
-    u16 colorData[count];
-    for (u32 i = count; i < count; i++) {
-        colorData[i] = BLACK;
-    }
-    dmaSendData16(colorData, count);
-    LCD_setSpi8();
+    LCD_dmaFillRect(0, 0, 64, 64, RED);
 
     usartSendString("Ready?\r\n");
 

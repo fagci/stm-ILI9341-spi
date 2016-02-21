@@ -16,14 +16,18 @@ void LCD_setAddrWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
     LCD_sendCommand8(ILI9341_GRAM);
 }
 
-void LCD_fillScreen(u16 color) {
-    LCD_setAddrWindow(0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1);
+void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
+    LCD_setAddrWindow(x1, y1, (u16) (x1 + w - 1), (u16) (x1 + h - 1));
 
     LCD_setSpi16();
     for (u32 n = LCD_PIXEL_COUNT; n--;) {
         if (SPI1->SR | SPI_SR_TXE) LCD_sendData16(color);
     }
     LCD_setSpi8();
+}
+
+void LCD_fillScreen(u16 color) {
+    LCD_fillRect(0, 0, LCD_WIDTH, LCD_HEIGHT, color);
 }
 
 void LCD_setOrientation(u8 o) {

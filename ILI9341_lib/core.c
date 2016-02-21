@@ -98,10 +98,7 @@ void LCD_pinsInit() {
     SPI_InitStructure.SPI_NSS               = SPI_NSS_Soft;
     SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;
     SPI_InitStructure.SPI_FirstBit          = SPI_FirstBit_MSB;
-    SPI_InitStructure.SPI_CRCPolynomial     = 7;
     SPI_Init(SPI_MASTER, &SPI_InitStructure);
-
-    SPI_CalculateCRC(SPI_MASTER, DISABLE);
 
     SPI_SSOutputCmd(SPI_MASTER, ENABLE);
     SPI_Cmd(SPI_MASTER, ENABLE);
