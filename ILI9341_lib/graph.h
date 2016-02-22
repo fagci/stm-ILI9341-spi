@@ -38,5 +38,11 @@ void LCD_drawRect(int16_t x, int16_t y, int16_t w, int16_t h, u16 color);
 
 void LCD_drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size);
 void LCD_write(unsigned char c);
+void LCD_writeString(unsigned char *s);
+
+void LCD_setCursor(int16_t x, int16_t y);
+void LCD_setTextSize(u8 size);
+void LCD_setTextColor(u16 color);
+void LCD_setTextBgColor(u16 color);
 
 #endif //TEST1_ILI9341_H

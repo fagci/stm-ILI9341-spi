@@ -79,7 +79,7 @@ void LCD_fillScreen(u16 color) {
 void LCD_setOrientation(u8 o) {
 #if SPI_DMA_MODE
     dmaSendCmd(ILI9341_MAC);
-    dmaSendData8( &o, 1);
+    dmaSendData8(&o, 1);
 #else
     LCD_sendCommand8(ILI9341_MAC);
     LCD_sendData8(o);
@@ -225,26 +225,34 @@ void LCD_drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_
 
     if (!_cp437 && (c >= 176)) c++; // Handle 'classic' charset behavior
 
-    for (int8_t i = 0; i < 6; i++) {
-        uint8_t line;
-        if (i < 5) line = pgm_read_byte(font + (c * 5) + i);
-        else line = 0x0;
-        for (int8_t j = 0; j < 8; j++, line >>= 1) {
-            if (line & 0x1) {
-                if (size == 1) LCD_putPixel(x + i, y + j, color);
-                else LCD_fillRect(x + (i * size), y + (j * size), size, size, color);
-            } else if (bg != color) {
-                if (size == 1) LCD_putPixel(x + i, y + j, bg);
-                else LCD_fillRect(x + i * size, y + j * size, size, size, bg);
+    int8_t i, j;
+
+    u8  line;
+    u16 charPixels[48];
+
+    if (size == 1) {
+        LCD_setAddressWindow(x, y, x + 6 - 1, y + 8 - 1);
+        for (i = 0; i < 6; i++) {
+            line   = (u8) (i < 5 ? pgm_read_byte(font + (c * 5) + i) : 0x0);
+            for (j = 0; j < 8; j++, line >>= 1) {
+                charPixels[j * 6 + i] = line & 0x1 ? color : bg;
+            }
+        }
+        LCD_setSpi16();
+        dmaSendData16(charPixels, 48);
+        LCD_setSpi8();
+    } else {
+        for (i = 0; i < 6; i++) {
+            line   = (u8) (i < 5 ? pgm_read_byte(font + (c * 5) + i) : 0x0);
+            for (j = 0; j < 8; j++, line >>= 1) {
+                LCD_fillRect(x + (i * size), y + (j * size), size, size, line & 0x1 ? color : bg);
             }
         }
     }
-
 }
 
-
-int16_t cursor_x = 100, cursor_y = 100;
-u8      textsize = 1, wrap = 0;
+int16_t cursor_x = 0, cursor_y = 0;
+u8      textsize = 1, wrap = 1;
 
 u16 textcolor = RED, textbgcolor = WHITE;
 
@@ -264,5 +272,23 @@ void LCD_write(unsigned char c) {
     }
 }
 
+void LCD_writeString(unsigned char *s) {
+    while (*(s)) LCD_write(*s++);
+}
 
+void LCD_setCursor(int16_t x, int16_t y) {
+    cursor_x = x;
+    cursor_y = y;
+}
 
+void LCD_setTextSize(u8 size) {
+    textsize = size;
+}
+
+void LCD_setTextColor(u16 color) {
+    textcolor = color;
+}
+
+void LCD_setTextBgColor(u16 color) {
+    textbgcolor = color;
+}

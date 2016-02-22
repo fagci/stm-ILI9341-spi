@@ -35,7 +35,7 @@ SET(STARTUP ${STARTUP}
 SET(DEBUG_FLAGS "-O0 -g")
 
 SET(MCU_FLAGS "-march=armv7-m -mcpu=cortex-m3 -mthumb")
-SET(CMAKE_C_FLAGS "${MCU_FLAGS} -fno-common -fno-builtin -nostdlib -ffreestanding -Wall ${DEBUG_FLAGS}")
+SET(CMAKE_C_FLAGS "${MCU_FLAGS} -fno-common -fno-builtin -ffreestanding -Wall ${DEBUG_FLAGS}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 add_definitions(-DHSE_VALUE=8000000 -DSTM32F103C8 -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER)
 SET(CMAKE_EXE_LINKER_FLAGS "${DEBUG_FLAGS} -nostartfiles -T${LINK_SCRIPT}")
