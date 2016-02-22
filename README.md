@@ -4,6 +4,8 @@ YouTube video:
 
 [![STM32 ILI9341 spi](http://img.youtube.com/vi/-2-tuqgc90k/0.jpg)](http://www.youtube.com/watch?v=-2-tuqgc90k "STM32 ILI9341 spi")
 
+[![STM32 ILI9341 spi](http://img.youtube.com/vi/VElKhOf8idg/0.jpg)](http://www.youtube.com/watch?v=VElKhOf8idg "Large characters fast drawing")
+
 Библиотека для работы с дисплеем ILI9341 по SPI с использованием прямого доступа к памяти.
 Рисование примитивов + текста портировано с ардуиновской библиотеки от Adafruit с применением некоторй оптимизации.
 
