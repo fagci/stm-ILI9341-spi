@@ -6,6 +6,9 @@
 u16 colorData[DMA_MAX_LENGTH];
 #endif
 
+u16 screen_width = LCD_WIDTH;
+u16 screen_height = LCD_HEIGHT;
+
 void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
 #if SPI_DMA_MODE
     u8 pointData[4];
@@ -73,10 +76,14 @@ void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
 }
 
 void LCD_fillScreen(u16 color) {
-    LCD_fillRect(0, 0, LCD_WIDTH, LCD_HEIGHT, color);
+    LCD_fillRect(0, 0, screen_width, screen_height, color);
 }
 
 void LCD_setOrientation(u8 o) {
+    if(o == ORIENTATION_LANDSCAPE || o == ORIENTATION_LANDSCAPE_MIRROR) {
+        screen_height = LCD_WIDTH;
+        screen_width = LCD_HEIGHT;
+    }
 #if SPI_DMA_MODE
     dmaSendCmd(ILI9341_MAC);
     dmaSendData8(&o, 1);
@@ -217,8 +224,8 @@ u8 _cp437 = 0;
 // Draw a character
 void LCD_drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size) {
 
-    if ((x >= LCD_WIDTH) || // Clip right
-        (y >= LCD_HEIGHT) || // Clip bottom
+    if ((x >= screen_width) || // Clip right
+        (y >= screen_height) || // Clip bottom
         ((x + 6 * size - 1) < 0) || // Clip left
         ((y + 8 * size - 1) < 0))   // Clip top
         return;
@@ -263,7 +270,7 @@ void LCD_write(unsigned char c) {
     } else if (c == '\r') {
         // skip em
     } else {
-        if (wrap && ((cursor_x + textsize * 6) >= LCD_WIDTH)) { // Heading off edge?
+        if (wrap && ((cursor_x + textsize * 6) >= screen_width)) { // Heading off edge?
             cursor_x = 0;            // Reset x to zero
             cursor_y += textsize * 8; // Advance y one line
         }
