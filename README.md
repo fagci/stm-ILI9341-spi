@@ -1,5 +1,7 @@
 # STM32 ILI9341 spi
 
+YouTube video:
+
 [![STM32 ILI9341 spi](http://img.youtube.com/vi/-2-tuqgc90k/0.jpg)](http://www.youtube.com/watch?v=-2-tuqgc90k "STM32 ILI9341 spi")
 
 Библиотека для работы с дисплеем ILI9341 по SPI с использованием прямого доступа к памяти.
