@@ -9,11 +9,16 @@ int main(void) {
     LCD_fillScreen(BLACK);
 
     u16 colors[] = {RED, CYAN, MAGENTA, YELLOW, GREEN, DGRAY, DGREEN, WHITE};
-    LCD_setTextSize(15);
+    LCD_setTextSize(14);
+    LCD_setTextColor(CYAN);
+    LCD_setTextBgColor(BLACK);
     unsigned char buf[8];
-    for (u16 i = 0; i < 1000; i++) {
+
+    u8 i = 0;
+    for (;;i++) {
+        i = i % 100;
         LCD_setCursor(0, 0);
-        itoa(i,buf,10);
+        itoa(i, buf, 10);
         LCD_writeString(buf);
     }
     while (1);

@@ -6,7 +6,7 @@
 u16 colorData[DMA_MAX_LENGTH];
 #endif
 
-u16 screen_width = LCD_WIDTH;
+u16 screen_width  = LCD_WIDTH;
 u16 screen_height = LCD_HEIGHT;
 
 void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
@@ -80,9 +80,9 @@ void LCD_fillScreen(u16 color) {
 }
 
 void LCD_setOrientation(u8 o) {
-    if(o == ORIENTATION_LANDSCAPE || o == ORIENTATION_LANDSCAPE_MIRROR) {
+    if (o == ORIENTATION_LANDSCAPE || o == ORIENTATION_LANDSCAPE_MIRROR) {
         screen_height = LCD_WIDTH;
-        screen_width = LCD_HEIGHT;
+        screen_width  = LCD_HEIGHT;
     }
 #if SPI_DMA_MODE
     dmaSendCmd(ILI9341_MAC);
@@ -235,10 +235,11 @@ void LCD_drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_
     int8_t i, j;
 
     u8  line;
-    u16 charPixels[48];
+    u16 ds = size * size;
+    u16 charPixels[48 * ds];
 
     if (size == 1) {
-        LCD_setAddressWindow(x, y, x + 6 - 1, y + 8 - 1);
+        LCD_setAddressWindow(x, y, x + 5, y + 7);
         for (i = 0; i < 6; i++) {
             line   = (u8) (i < 5 ? pgm_read_byte(font + (c * 5) + i) : 0x0);
             for (j = 0; j < 8; j++, line >>= 1) {
@@ -249,12 +250,32 @@ void LCD_drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_
         dmaSendData16(charPixels, 48);
         LCD_setSpi8();
     } else {
+        // TODO: make chunks to send large amount of data over DMA
+        u16 sw = size*6;
+        LCD_setAddressWindow(x, y, x + sw - 1, y + 8 * size - 1);
         for (i = 0; i < 6; i++) {
             line   = (u8) (i < 5 ? pgm_read_byte(font + (c * 5) + i) : 0x0);
             for (j = 0; j < 8; j++, line >>= 1) {
-                LCD_fillRect(x + (i * size), y + (j * size), size, size, line & 0x1 ? color : bg);
+                u16 mx = j * 6 * ds, my = i * size;
+                u16 colorCurrent = line & 0x1 ? color : bg;
+                for (int sx = 0; sx < size; ++sx) {
+                    for (int sy = 0; sy < size; ++sy) {
+                        charPixels[mx + my + sy * sw + sx] = colorCurrent;
+                    }
+                }
             }
         }
+        LCD_setSpi16();
+        dmaSendData16(charPixels, 48 * size * size);
+        LCD_setSpi8();
+
+
+//        for (i = 0; i < 6; i++) {
+//            line   = (u8) (i < 5 ? pgm_read_byte(font + (c * 5) + i) : 0x0);
+//            for (j = 0; j < 8; j++, line >>= 1) {
+//                LCD_fillRect(x + (i * size), y + (j * size), size, size, line & 0x1 ? color : bg);
+//            }
+//        }
     }
 }
 
