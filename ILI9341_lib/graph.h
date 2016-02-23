@@ -10,11 +10,6 @@
 #ifndef TEST1_ILI9341_H
 #define TEST1_ILI9341_H
 
-#define pgm_read_word(addr) (*(const unsigned short *)(addr))
-#define pgm_read_byte(addr) (*(const unsigned char *)(addr))
-#define pgm_read_pointer(addr) ((void *)pgm_read_word(addr))
-
-
 #ifndef _swap_int16_t
 #define _swap_int16_t(a, b) { int16_t t = a; a = b; b = t; }
 #endif
@@ -34,20 +29,14 @@ void LCD_putPixel(u16 x, u16 y, u16 color);
 void LCD_drawFastHLine(u16 x0, u16 y0, u16 w, u16 color);
 void LCD_drawFastVLine(u16 x0, u16 y0, u16 h, u16 color);
 
-void LCD_drawCircle(int16_t x0, int16_t y0, int16_t r, u16 color);
-void LCD_fillCircle(int16_t x0, int16_t y0, int16_t r, u16 color);
-void LCD_fillCircleHelper(int16_t x0, int16_t y0, int16_t r, u8 cornername, int16_t delta, u16 color);
+void LCD_drawCircle(u16 x0, u16 y0, u16 r, u16 color);
+void LCD_fillCircle(u16 x0, u16 y0, u16 r, u16 color);
+void LCD_fillCircleHelper(u16 x0, u16 y0, u16 r, u8 cornername, s16 delta, u16 color);
 
-void LCD_drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, u16 color);
-void LCD_drawRect(int16_t x, int16_t y, int16_t w, int16_t h, u16 color);
+void LCD_drawLine(u16 x0, u16 y0, u16 x1, u16 y1, u16 color);
+void LCD_drawRect(u16 x, u16 y, u16 w, u16 h, u16 color);
 
-void LCD_drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size);
-void LCD_write(unsigned char c);
-void LCD_writeString(unsigned char *s);
-
-void LCD_setCursor(int16_t x, int16_t y);
-void LCD_setTextSize(u8 size);
-void LCD_setTextColor(u16 color);
-void LCD_setTextBgColor(u16 color);
+u16 LCD_getWidth();
+u16 LCD_getHeight();
 
 #endif //TEST1_ILI9341_H

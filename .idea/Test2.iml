@@ -6,11 +6,13 @@
       <sourceFolder url="file://$MODULE_DIR$/startup_stm32f10x.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/main.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/delay.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/graph.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/delay.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/text.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/dma.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/core.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/delay.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/text.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/dma.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/core.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/graph.c" isTestSource="false" />

@@ -28,6 +28,7 @@ SET(STARTUP ${STARTUP}
         ILI9341_lib/core.c
         ILI9341_lib/dma.c
         ILI9341_lib/graph.c
+        ILI9341_lib/text.c
 #        USART_lib/usart.c
         )
 

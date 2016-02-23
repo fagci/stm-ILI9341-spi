@@ -1,7 +1,5 @@
 #include "graph.h"
 
-#include "fonts/glcdfont.h"
-
 #if SPI_DMA_MODE
 u16 colorData[DMA_MAX_LENGTH];
 #endif
@@ -113,12 +111,12 @@ void LCD_drawFastVLine(u16 x0, u16 y0, u16 h, u16 color) {
     LCD_fillRect(x0, y0, 1, h, color);
 }
 
-void LCD_drawCircle(int16_t x0, int16_t y0, int16_t r, u16 color) {
-    int16_t  f     = 1 - r;
-    int16_t  ddF_x = 1;
-    int16_t  ddF_y = -2 * r;
-    int16_t  x     = 0;
-    uint16_t y     = r;
+void LCD_drawCircle(u16 x0, u16 y0, u16 r, u16 color) {
+    s16 f     = (s16) (1 - r);
+    s16 ddF_x = 1;
+    s16 ddF_y = (s16) (-2 * r);
+    s16 x     = 0;
+    u16 y     = r;
 
     LCD_putPixel(x0, y0 + r, color);
     LCD_putPixel(x0, y0 - r, color);
@@ -146,19 +144,19 @@ void LCD_drawCircle(int16_t x0, int16_t y0, int16_t r, u16 color) {
     }
 }
 
-void LCD_fillCircle(int16_t x0, int16_t y0, int16_t r, u16 color) {
-    LCD_drawFastVLine(x0, y0 - r, 2 * r + 1, color);
+void LCD_fillCircle(u16 x0, u16 y0, u16 r, u16 color) {
+    LCD_drawFastVLine(x0, y0 - r, (u16) (2 * r + 1), color);
     LCD_fillCircleHelper(x0, y0, r, 3, 0, color);
 }
 
 // Used to do circles and roundrects
-void LCD_fillCircleHelper(int16_t x0, int16_t y0, int16_t r, u8 cornername, int16_t delta, u16 color) {
+void LCD_fillCircleHelper(u16 x0, u16 y0, u16 r, u8 cornername, s16 delta, u16 color) {
 
-    int16_t f     = 1 - r;
-    int16_t ddF_x = 1;
-    int16_t ddF_y = -2 * r;
-    int16_t x     = 0;
-    int16_t y     = r;
+    s16 f     = (s16) (1 - r);
+    s16 ddF_x = 1;
+    s16 ddF_y = (s16) (-2 * r);
+    s16 x     = 0;
+    s16 y     = r;
 
     while (x < y) {
         if (f >= 0) {
@@ -171,18 +169,18 @@ void LCD_fillCircleHelper(int16_t x0, int16_t y0, int16_t r, u8 cornername, int1
         f += ddF_x;
 
         if (cornername & 0x1) {
-            LCD_drawFastVLine(x0 + x, y0 - y, 2 * y + 1 + delta, color);
-            LCD_drawFastVLine(x0 + y, y0 - x, 2 * x + 1 + delta, color);
+            LCD_drawFastVLine(x0 + x, y0 - y, (u16) (2 * y + 1 + delta), color);
+            LCD_drawFastVLine(x0 + y, y0 - x, (u16) (2 * x + 1 + delta), color);
         }
         if (cornername & 0x2) {
-            LCD_drawFastVLine(x0 - x, y0 - y, 2 * y + 1 + delta, color);
-            LCD_drawFastVLine(x0 - y, y0 - x, 2 * x + 1 + delta, color);
+            LCD_drawFastVLine(x0 - x, y0 - y, (u16) (2 * y + 1 + delta), color);
+            LCD_drawFastVLine(x0 - y, y0 - x, (u16) (2 * x + 1 + delta), color);
         }
     }
 }
 
-void LCD_drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, u16 color) {
-    int16_t steep = abs(y1 - y0) > abs(x1 - x0);
+void LCD_drawLine(u16 x0, u16 y0, u16 x1, u16 y1, u16 color) {
+    s16 steep = abs(y1 - y0) > abs(x1 - x0);
     if (steep) {
         _swap_int16_t(x0, y0);
         _swap_int16_t(x1, y1);
@@ -193,12 +191,12 @@ void LCD_drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, u16 color) {
         _swap_int16_t(y0, y1);
     }
 
-    int16_t dx, dy;
+    s16 dx, dy;
     dx = x1 - x0;
-    dy = abs(y1 - y0);
+    dy = (s16) abs(y1 - y0);
 
-    int16_t err = dx / 2;
-    int16_t ystep;
+    s16 err = (s16) (dx / 2);
+    s16 ystep;
 
     if (y0 < y1) {
         ystep = 1;
@@ -220,111 +218,17 @@ void LCD_drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, u16 color) {
     }
 }
 
-void LCD_drawRect(int16_t x, int16_t y, int16_t w, int16_t h, u16 color) {
+void LCD_drawRect(u16 x, u16 y, u16 w, u16 h, u16 color) {
     LCD_drawFastHLine(x, y, w, color);
-    LCD_drawFastHLine(x, y + h - 1, w, color);
+    LCD_drawFastHLine(x, (u16) (y + h - 1), w, color);
     LCD_drawFastVLine(x, y, h, color);
-    LCD_drawFastVLine(x + w - 1, y, h, color);
+    LCD_drawFastVLine((u16) (x + w - 1), y, h, color);
 }
 
-u8 _cp437 = 0;
-
-// Draw a character
-void LCD_drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size) {
-
-    if ((x >= screen_width) || // Clip right
-        (y >= screen_height) || // Clip bottom
-        ((x + 6 * size - 1) < 0) || // Clip left
-        ((y + 8 * size - 1) < 0))   // Clip top
-        return;
-
-    if (!_cp437 && (c >= 176)) c++; // Handle 'classic' charset behavior
-
-    int8_t i, j;
-
-    u8  line;
-    u16 ds = size * size;
-    u16 charPixels[48 * ds];
-
-    if (size == 1) {
-        LCD_setAddressWindow(x, y, x + 5, y + 7);
-        for (i = 0; i < 6; i++) {
-            line   = (u8) (i < 5 ? pgm_read_byte(font + (c * 5) + i) : 0x0);
-            for (j = 0; j < 8; j++, line >>= 1) {
-                charPixels[j * 6 + i] = line & 0x1 ? color : bg;
-            }
-        }
-        LCD_setSpi16();
-        dmaSendData16(charPixels, 48);
-        LCD_setSpi8();
-    } else {
-        // TODO: make chunks to send large amount of data over DMA
-        u16 sw = size * 6;
-        LCD_setAddressWindow(x, y, x + sw - 1, y + 8 * size - 1);
-        for (i = 0; i < 6; i++) {
-            line   = (u8) (i < 5 ? pgm_read_byte(font + (c * 5) + i) : 0x0);
-            for (j = 0; j < 8; j++, line >>= 1) {
-                u16      mx           = j * 6 * ds, my = i * size;
-                u16      colorCurrent = line & 0x1 ? color : bg;
-                for (int sx           = 0; sx < size; ++sx) {
-                    for (int sy = 0; sy < size; ++sy) {
-                        charPixels[mx + my + sy * sw + sx] = colorCurrent;
-                    }
-                }
-            }
-        }
-        LCD_setSpi16();
-        dmaSendData16(charPixels, 48 * size * size);
-        LCD_setSpi8();
-
-
-//        for (i = 0; i < 6; i++) {
-//            line   = (u8) (i < 5 ? pgm_read_byte(font + (c * 5) + i) : 0x0);
-//            for (j = 0; j < 8; j++, line >>= 1) {
-//                LCD_fillRect(x + (i * size), y + (j * size), size, size, line & 0x1 ? color : bg);
-//            }
-//        }
-    }
+u16 LCD_getWidth() {
+    return screen_width;
 }
 
-int16_t cursor_x = 0, cursor_y = 0;
-u8      textsize = 1, wrap = 1;
-
-u16 textcolor = RED, textbgcolor = WHITE;
-
-void LCD_write(unsigned char c) {
-    if (c == '\n') {
-        cursor_y += textsize * 8;
-        cursor_x = 0;
-    } else if (c == '\r') {
-        // skip em
-    } else {
-        if (wrap && ((cursor_x + textsize * 6) >= screen_width)) { // Heading off edge?
-            cursor_x = 0;            // Reset x to zero
-            cursor_y += textsize * 8; // Advance y one line
-        }
-        LCD_drawChar(cursor_x, cursor_y, c, textcolor, textbgcolor, textsize);
-        cursor_x += textsize * 6;
-    }
-}
-
-void LCD_writeString(unsigned char *s) {
-    while (*(s)) LCD_write(*s++);
-}
-
-void LCD_setCursor(int16_t x, int16_t y) {
-    cursor_x = x;
-    cursor_y = y;
-}
-
-void LCD_setTextSize(u8 size) {
-    textsize = size;
-}
-
-void LCD_setTextColor(u16 color) {
-    textcolor = color;
-}
-
-void LCD_setTextBgColor(u16 color) {
-    textbgcolor = color;
+u16 LCD_getHeight() {
+    return screen_height;
 }
