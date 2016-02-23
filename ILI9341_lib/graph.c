@@ -4,42 +4,42 @@
 u16 colorData[DMA_MAX_LENGTH];
 #endif
 
-u16 screen_width  = LCD_WIDTH;
-u16 screen_height = LCD_HEIGHT;
+u16 screen_width  = LCD_PIXEL_WIDTH;
+u16 screen_height = LCD_PIXEL_HEIGHT;
 
 void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
 #if SPI_DMA_MODE
-    u8 pointData[4];
+    u16 pointData[2];
 
-    dmaSendCmd(ILI9341_COLUMN_ADDR);
-    pointData[0] = (u8) (x1 >> 8);
-    pointData[1] = (u8) (x1 & 0xFF);
-    pointData[2] = (u8) (x2 >> 8);
-    pointData[3] = (u8) (x2 & 0xFF);
-    dmaSendData8(pointData, 4);
+    dmaSendCmd(LCD_COLUMN_ADDR);
+    pointData[0] = x1;
+    pointData[1] = x2;
+    LCD_setSpi16();
+    dmaSendData16(pointData, 2);
+    LCD_setSpi8();
 
-    dmaSendCmd(ILI9341_PAGE_ADDR);
-    pointData[0] = (u8) (y1 >> 8);
-    pointData[1] = (u8) (y1 & 0xFF);
-    pointData[2] = (u8) (y2 >> 8);
-    pointData[3] = (u8) (y2 & 0xFF);
-    dmaSendData8(pointData, 4);
+    dmaSendCmd(LCD_PAGE_ADDR);
+    pointData[0] = y1;
+    pointData[1] = y2;
+    LCD_setSpi16();
+    dmaSendData16(pointData, 4);
+    LCD_setSpi8();
 
-    dmaSendCmd(ILI9341_GRAM);
+    dmaSendCmd(LCD_GRAM);
 #else
-    LCD_sendCommand8(ILI9341_COLUMN_ADDR);
+    LCD_sendCommand8(LCD_COLUMN_ADDR);
     LCD_sendData8((u8) (x1 >> 8));
     LCD_sendData8((u8) (x1 & 0xFF));
     LCD_sendData8((u8) (x2 >> 8));
     LCD_sendData8((u8) (x2 & 0xFF));
 
-    LCD_sendCommand8(ILI9341_PAGE_ADDR);
+    LCD_sendCommand8(LCD_PAGE_ADDR);
     LCD_sendData8((u8) (y1 >> 8));
     LCD_sendData8((u8) (y1 & 0xFF));
     LCD_sendData8((u8) (y2 >> 8));
     LCD_sendData8((u8) (y2 & 0xFF));
 
-    LCD_sendCommand8(ILI9341_GRAM);
+    LCD_sendCommand8(LCD_GRAM);
 #endif
 }
 
@@ -49,6 +49,10 @@ void LCD_fillRect2(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
     LCD_setSpi16();
     dmaFill16(color, count);
     LCD_setSpi8();
+}
+
+void LCD_fillScreen2(u16 color) {
+    LCD_fillRect2(0, 0, screen_width, screen_height, color);
 }
 
 void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
@@ -87,14 +91,14 @@ void LCD_fillScreen(u16 color) {
 
 void LCD_setOrientation(u8 o) {
     if (o == ORIENTATION_LANDSCAPE || o == ORIENTATION_LANDSCAPE_MIRROR) {
-        screen_height = LCD_WIDTH;
-        screen_width  = LCD_HEIGHT;
+        screen_height = LCD_PIXEL_WIDTH;
+        screen_width  = LCD_PIXEL_HEIGHT;
     }
 #if SPI_DMA_MODE
-    dmaSendCmd(ILI9341_MAC);
+    dmaSendCmd(LCD_MAC);
     dmaSendData8(&o, 1);
 #else
-    LCD_sendCommand8(ILI9341_MAC);
+    LCD_sendCommand8(LCD_MAC);
     LCD_sendData8(o);
 #endif
 }

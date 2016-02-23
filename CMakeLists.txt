@@ -22,6 +22,7 @@ SET(STARTUP ${STARTUP}
         ${PERIPH_LIB_SRC}/stm32f10x_rcc.c
         ${PERIPH_LIB_SRC}/stm32f10x_gpio.c
         ${PERIPH_LIB_SRC}/stm32f10x_dma.c
+        ${PERIPH_LIB_SRC}/stm32f10x_tim.c
         ${PERIPH_LIB_SRC}/stm32f10x_usart.c
         ${PERIPH_LIB_SRC}/misc.c
         ILI9341_lib/delay.c

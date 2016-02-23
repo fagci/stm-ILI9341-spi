@@ -32,6 +32,9 @@
     <content url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_spi.c">
       <sourceFolder url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_spi.c" isTestSource="false" />
     </content>
+    <content url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_tim.c">
+      <sourceFolder url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_tim.c" isTestSource="false" />
+    </content>
     <content url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c">
       <sourceFolder url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c" isTestSource="false" />
     </content>

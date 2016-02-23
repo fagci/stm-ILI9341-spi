@@ -10,24 +10,24 @@ SPI_InitTypeDef SPI_InitStructure;
 
 static const uint8_t init_commands[] = {
         4, 0xEF, 0x03, 0x80, 0x02,
-        4, ILI9341_POWERB, 0x00, 0XC1, 0X30,
-        5, ILI9341_POWER_SEQ, 0x64, 0x03, 0X12, 0X81,
-        4, ILI9341_DTCA, 0x85, 0x00, 0x78,
-        6, ILI9341_POWERA, 0x39, 0x2C, 0x00, 0x34, 0x02,
-        2, ILI9341_PRC, 0x20,
-        3, ILI9341_DTCB, 0x00, 0x00,
-        2, ILI9341_POWER1, 0x23, // Power control
-        2, ILI9341_POWER2, 0x10, // Power control
-        3, ILI9341_VCOM1, 0x3e, 0x28, // VCM control
-        2, ILI9341_VCOM2, 0x86, // VCM control2
-        2, ILI9341_MAC, 0x48, // Memory Access Control
-        2, ILI9341_PIXEL_FORMAT, 0x55,
-        3, ILI9341_FRC, 0x00, 0x18,
-        4, ILI9341_DFC, 0x08, 0x82, 0x27, // Display Function Control
-        2, ILI9341_3GAMMA_EN, 0x00, // Gamma Function Disable
-        2, ILI9341_GAMMA, 0x01, // Gamma curve selected
-        16, ILI9341_PGAMMA, 0x0F, 0x31, 0x2B, 0x0C, 0x0E, 0x08, 0x4E, 0xF1, 0x37, 0x07, 0x10, 0x03, 0x0E, 0x09, 0x00,
-        16, ILI9341_NGAMMA, 0x00, 0x0E, 0x14, 0x03, 0x11, 0x07, 0x31, 0xC1, 0x48, 0x08, 0x0F, 0x0C, 0x31, 0x36, 0x0F,
+        4, LCD_POWERB, 0x00, 0XC1, 0X30,
+        5, LCD_POWER_SEQ, 0x64, 0x03, 0X12, 0X81,
+        4, LCD_DTCA, 0x85, 0x00, 0x78,
+        6, LCD_POWERA, 0x39, 0x2C, 0x00, 0x34, 0x02,
+        2, LCD_PRC, 0x20,
+        3, LCD_DTCB, 0x00, 0x00,
+        2, LCD_POWER1, 0x23, // Power control
+        2, LCD_POWER2, 0x10, // Power control
+        3, LCD_VCOM1, 0x3e, 0x28, // VCM control
+        2, LCD_VCOM2, 0x86, // VCM control2
+        2, LCD_MAC, 0x48, // Memory Access Control
+        2, LCD_PIXEL_FORMAT, 0x55,
+        3, LCD_FRMCTR1, 0x00, 0x18,
+        4, LCD_DFC, 0x08, 0x82, 0x27, // Display Function Control
+        2, LCD_3GAMMA_EN, 0x00, // Gamma Function Disable
+        2, LCD_GAMMA, 0x01, // Gamma curve selected
+        16, LCD_PGAMMA, 0x0F, 0x31, 0x2B, 0x0C, 0x0E, 0x08, 0x4E, 0xF1, 0x37, 0x07, 0x10, 0x03, 0x0E, 0x09, 0x00,
+        16, LCD_NGAMMA, 0x00, 0x0E, 0x14, 0x03, 0x11, 0x07, 0x31, 0xC1, 0x48, 0x08, 0x0F, 0x0C, 0x31, 0x36, 0x0F,
         0
 };
 
@@ -107,10 +107,10 @@ void LCD_pinsInit() {
 void LCD_configure() {
 #if SPI_DMA_MODE
     TFT_RST_SET;
-    dmaSendCmd(ILI9341_RESET);
+    dmaSendCmd(LCD_SWRESET);
     delay_ms(100);
 
-    const uint8_t *address = init_commands;
+    u8 *address = (u8 *) init_commands;
     while (1) {
         u8 count = *(address++);
         if (count-- == 0) break;
@@ -119,10 +119,10 @@ void LCD_configure() {
         address+=count;
     }
 
-    dmaSendCmd(ILI9341_SLEEP_OUT);
+    dmaSendCmd(LCD_SLEEP_OUT);
     delay_ms(100);
-    dmaSendCmd(ILI9341_DISPLAY_ON);
-    dmaSendCmd(ILI9341_GRAM);
+    dmaSendCmd(LCD_DISPLAY_ON);
+    dmaSendCmd(LCD_GRAM);
     TFT_LED_SET;
 #else
     TFT_RST_SET;
