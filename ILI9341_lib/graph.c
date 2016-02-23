@@ -45,6 +45,14 @@ void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
 #endif
 }
 
+void LCD_fillRect2(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
+    u32 count = w * h;
+    LCD_setAddressWindow(x1, y1, (u16) (x1 + w - 1), (u16) (y1 + h - 1));
+    LCD_setSpi16();
+    dmaFill16(color, count);
+    LCD_setSpi8();
+}
+
 void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
 #if SPI_DMA_MODE
     u32 count = w * h;
@@ -251,14 +259,14 @@ void LCD_drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_
         LCD_setSpi8();
     } else {
         // TODO: make chunks to send large amount of data over DMA
-        u16 sw = size*6;
+        u16 sw = size * 6;
         LCD_setAddressWindow(x, y, x + sw - 1, y + 8 * size - 1);
         for (i = 0; i < 6; i++) {
             line   = (u8) (i < 5 ? pgm_read_byte(font + (c * 5) + i) : 0x0);
             for (j = 0; j < 8; j++, line >>= 1) {
-                u16 mx = j * 6 * ds, my = i * size;
-                u16 colorCurrent = line & 0x1 ? color : bg;
-                for (int sx = 0; sx < size; ++sx) {
+                u16      mx           = j * 6 * ds, my = i * size;
+                u16      colorCurrent = line & 0x1 ? color : bg;
+                for (int sx           = 0; sx < size; ++sx) {
                     for (int sy = 0; sy < size; ++sy) {
                         charPixels[mx + my + sy * sw + sx] = colorCurrent;
                     }
