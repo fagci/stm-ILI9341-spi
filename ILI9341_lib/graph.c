@@ -23,6 +23,13 @@ void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
     dmaSendCmd(LCD_GRAM);
 }
 
+void LCD_getRect(u8 *data, u16 x1, u16 y1, u16 w, u16 h) {
+    u32 count = w * h;
+    LCD_setAddressWindow(x1, y1, (u16) (x1 + w - 1), (u16) (y1 + h - 1));
+    dmaSendCmd(LCD_RAMRD);
+    dmaRecv(data, count);
+}
+
 void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
     u32 count = w * h;
     LCD_setAddressWindow(x1, y1, (u16) (x1 + w - 1), (u16) (y1 + h - 1));

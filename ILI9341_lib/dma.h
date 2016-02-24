@@ -6,6 +6,9 @@
 #define TEST1_DMA_H
 
 void dmaInit(void);
+
+void dmaRecv(u8 *data, u32 n);
+
 void dmaSendCmd(u8 cmd);
 void dmaSendData8(u8 *data, u32 n);
 void dmaSendData16(u16 *data, u32 n);

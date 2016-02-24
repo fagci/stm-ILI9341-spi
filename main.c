@@ -12,11 +12,7 @@ void TIM2_IRQHandler(void) {
     fps = 0;
 }
 
-int main(void) {
-    LCD_init();
-    LCD_setOrientation(ORIENTATION_LANDSCAPE_MIRROR);
-    LCD_fillScreen(BLACK);
-
+void initFpsTimer() {
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
     NVIC_EnableIRQ(TIM2_IRQn);
@@ -28,32 +24,38 @@ int main(void) {
     TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
     TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
     TIM_Cmd(TIM2, ENABLE);
+}
 
-//    LCD_setTextSize(3);
-//    char b[15];
-//    u32 cnt = LCD_PIXEL_COUNT;
-//    itoa(UINT16_MAX & cnt,b,10);
-//    LCD_writeString(b);
-//    LCD_writeString("\n");
-//
-//    cnt -= cnt & UINT16_MAX;
-//
-//    itoa(UINT16_MAX & cnt,b,10);
-//    LCD_writeString(b);
-//    while(1);
+int main(void) {
+    LCD_init();
+    LCD_setOrientation(ORIENTATION_LANDSCAPE_MIRROR);
+    LCD_fillScreen(BLACK);
 
-    u8 i = 30;
 
-    while (i--) {
-        LCD_setCursor(0, 0);
-        LCD_fillScreen(RED);
-        LCD_writeString(text);
-        fps++;
-        LCD_setCursor(0, 0);
-        LCD_fillScreen(GREEN);
-        LCD_writeString(text);
-        fps++;
+    LCD_setCursor(0, 0);
+    LCD_write('5');
+
+    LCD_writeString("Init array\n");
+
+    u16      cnt = 6 * 8 * 3;
+    u8       pixelComponents[cnt];
+    for (int i   = 0; i < cnt; ++i) {
+        pixelComponents[i] = 0;
     }
+    LCD_writeString("GetRect\n");
+
+    LCD_getRect(pixelComponents, 0, 0, 6, 8);
+
+    LCD_setCursor(0, 50);
+    for (int i = 0; i < cnt; ++i) {
+        char buf[15];
+        itoa(pixelComponents[i], buf, 16);
+        LCD_writeString(buf);
+        LCD_writeString(",");
+    }
+
+    LCD_writeString("Ready\n");
+
 
     while (1);
 }

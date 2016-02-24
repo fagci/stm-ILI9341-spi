@@ -15,6 +15,8 @@ void LCD_init();
 void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2);
 void LCD_setOrientation(u8 o);
 
+void LCD_getRect(u8 *data, u16 x1, u16 y1, u16 w, u16 h);
+
 void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color);
 void LCD_fillScreen(u16 color);
 
