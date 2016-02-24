@@ -148,11 +148,6 @@ void LCD_drawCircle(u16 x0, u16 y0, u16 r, u16 color) {
     }
 }
 
-void LCD_fillCircle(u16 x0, u16 y0, u16 r, u16 color) {
-    LCD_drawFastVLine(x0, y0 - r, (u16) (2 * r + 1), color);
-    LCD_fillCircleHelper(x0, y0, r, 3, 0, color);
-}
-
 // Used to do circles and roundrects
 void LCD_fillCircleHelper(u16 x0, u16 y0, u16 r, u8 cornername, s16 delta, u16 color) {
 
@@ -181,6 +176,11 @@ void LCD_fillCircleHelper(u16 x0, u16 y0, u16 r, u8 cornername, s16 delta, u16 c
             LCD_drawFastVLine(x0 - y, y0 - x, (u16) (2 * x + 1 + delta), color);
         }
     }
+}
+
+void LCD_fillCircle(u16 x0, u16 y0, u16 r, u16 color) {
+    LCD_drawFastVLine(x0, y0 - r, (u16) (2 * r + 1), color);
+    LCD_fillCircleHelper(x0, y0, r, 3, 0, color);
 }
 
 void LCD_drawLine(u16 x0, u16 y0, u16 x1, u16 y1, u16 color) {

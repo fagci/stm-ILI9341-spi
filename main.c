@@ -18,15 +18,8 @@ int main(void) {
     LCD_fillScreen(BLACK);
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
-
-    NVIC_InitTypeDef NVIC_InitStructure;
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-
-    NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
+    NVIC_EnableIRQ(TIM2_IRQn);
 
     TIM_TimeBaseStructure.TIM_Prescaler = (72000 / 2) - 1; //обновляем FPS раз в секунду
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -39,11 +32,11 @@ int main(void) {
     LCD_setTextSize(3);
     while(1) {
         LCD_setCursor(0,0);
-        LCD_fillScreen(RED);
+        LCD_fillScreen2(RED);
         LCD_writeString(text);
         fps++;
         LCD_setCursor(0,0);
-        LCD_fillScreen(GREEN);
+        LCD_fillScreen2(GREEN);
         LCD_writeString(text);
         fps++;
     }
