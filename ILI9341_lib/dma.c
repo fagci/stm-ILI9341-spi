@@ -32,23 +32,24 @@ void dmaInit(void) {
     DMA_ITConfig(DMA1_Channel3, DMA_IT_TC, ENABLE);
     SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Tx, ENABLE);
 }
-u8 repeats = 0;
-void dmaFill16(u16 color, u32 n) {
 
+void dmaFill16(u16 color, u32 n) {
     // DMA 16bit
     DMA_StructInit(&dma16);
     dma16.DMA_PeripheralBaseAddr = (u32) &(SPI1->DR);
     dma16.DMA_DIR                = DMA_DIR_PeripheralDST;
     dma16.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
     dma16.DMA_MemoryDataSize     = DMA_MemoryDataSize_HalfWord;
-    dma16.DMA_Priority           = DMA_Priority_High;
+    dma16.DMA_Priority           = DMA_Priority_Medium;
     dma16.DMA_Mode               = DMA_Mode_Circular;
 
-    repeats = 7;
-    dmaSendData16(&color, n);
+    while (n != 0) {
+        u16 ts = (u16) (n > UINT16_MAX ? UINT16_MAX : n);
+        dmaSendData16(&color, ts);
+        n -= ts;
+    }
     dmaInit();
 }
-
 
 void dmaSend(u8 *data, u32 n) {
     dma8.DMA_MemoryBaseAddr = (u32) data;
@@ -83,14 +84,11 @@ void dmaSendData16(u16 *data, u32 n) {
 
 // TX
 void DMA1_Channel3_IRQHandler(void) {
-    if (DMA_GetITStatus(DMA1_IT_TC3)) {
-        DMA_ClearITPendingBit(DMA1_IT_TC3);
-        if (repeats > 0)repeats--;
-        if (repeats == 0) {
-            DMA_Cmd(DMA1_Channel3, DISABLE);
-            TFT_CS_SET;
-            dmaWorking = 0;
-        }
+    if (DMA_GetITStatus(DMA1_FLAG_TC3) != RESET) {
+        DMA_ClearITPendingBit(DMA1_FLAG_TC3);
+        DMA_Cmd(DMA1_Channel3, DISABLE);
+        TFT_CS_SET;
+        dmaWorking = 0;
     }
 }
 

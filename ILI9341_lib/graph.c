@@ -1,14 +1,9 @@
 #include "graph.h"
 
-#if SPI_DMA_MODE
-u16 colorData[DMA_MAX_LENGTH];
-#endif
-
 u16 screen_width  = LCD_PIXEL_WIDTH;
 u16 screen_height = LCD_PIXEL_HEIGHT;
 
 void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
-#if SPI_DMA_MODE
     u16 pointData[2];
 
     dmaSendCmd(LCD_COLUMN_ADDR);
@@ -26,65 +21,15 @@ void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
     LCD_setSpi8();
 
     dmaSendCmd(LCD_GRAM);
-#else
-    LCD_sendCommand8(LCD_COLUMN_ADDR);
-    LCD_sendData8((u8) (x1 >> 8));
-    LCD_sendData8((u8) (x1 & 0xFF));
-    LCD_sendData8((u8) (x2 >> 8));
-    LCD_sendData8((u8) (x2 & 0xFF));
-
-    LCD_sendCommand8(LCD_PAGE_ADDR);
-    LCD_sendData8((u8) (y1 >> 8));
-    LCD_sendData8((u8) (y1 & 0xFF));
-    LCD_sendData8((u8) (y2 >> 8));
-    LCD_sendData8((u8) (y2 & 0xFF));
-
-    LCD_sendCommand8(LCD_GRAM);
-#endif
 }
 
-void LCD_fillRect2(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
+void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
     u32 count = w * h;
     LCD_setAddressWindow(x1, y1, (u16) (x1 + w - 1), (u16) (y1 + h - 1));
     LCD_setSpi16();
     dmaFill16(color, count);
     LCD_setSpi8();
 }
-
-void LCD_fillScreen2(u16 color) {
-    LCD_fillRect2(0, 0, screen_width, screen_height, color);
-}
-
-void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
-#if SPI_DMA_MODE
-    u32 count = w * h;
-
-    LCD_setAddressWindow(x1, y1, (u16) (x1 + w - 1), (u16) (y1 + h - 1));
-    LCD_setSpi16();
-
-    u16 i = 0;
-
-    while (count > DMA_MAX_LENGTH) {
-        for (i = 0; i < DMA_MAX_LENGTH; i++) colorData[i] = color;
-        dmaSendData16(colorData, DMA_MAX_LENGTH);
-        count -= DMA_MAX_LENGTH;
-    }
-
-    for (i = 0; i < count; i++) colorData[i] = color;
-    dmaSendData16(colorData, (u16) count);
-
-    LCD_setSpi8();
-#else
-    LCD_setAddressWindow(x1, y1, (u16) (x1 + w - 1), (u16) (y1 + h - 1));
-
-    LCD_setSpi16();
-    for (u32 n = LCD_PIXEL_COUNT; n--;) {
-        if (SPI1->SR | SPI_SR_TXE) LCD_sendData16(color);
-    }
-    LCD_setSpi8();
-#endif
-}
-
 void LCD_fillScreen(u16 color) {
     LCD_fillRect(0, 0, screen_width, screen_height, color);
 }
@@ -94,13 +39,8 @@ void LCD_setOrientation(u8 o) {
         screen_height = LCD_PIXEL_WIDTH;
         screen_width  = LCD_PIXEL_HEIGHT;
     }
-#if SPI_DMA_MODE
     dmaSendCmd(LCD_MAC);
     dmaSendData8(&o, 1);
-#else
-    LCD_sendCommand8(LCD_MAC);
-    LCD_sendData8(o);
-#endif
 }
 
 void LCD_putPixel(u16 x, u16 y, u16 color) {

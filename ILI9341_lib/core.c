@@ -1,8 +1,5 @@
 #include "core.h"
-
-#if SPI_DMA_MODE
 #include "dma.h"
-#endif
 
 SPI_InitTypeDef SPI_InitStructure;
 
@@ -34,27 +31,6 @@ static const uint8_t init_commands[] = {
 //</editor-fold>
 
 //<editor-fold desc="Generic SPI operations">
-
-void LCD_sendCommand8(u8 cmd) {
-    TFT_DC_RESET;
-    TFT_CS_RESET;
-    SPI1->DR = cmd;
-    TFT_CS_SET;
-}
-
-void LCD_sendData8(u8 data) {
-    TFT_DC_SET;
-    TFT_CS_RESET;
-    SPI1->DR = data;
-    TFT_CS_SET;
-}
-
-void LCD_sendData16(u16 data) {
-    TFT_DC_SET;
-    TFT_CS_RESET;
-    SPI1->DR = data;
-    TFT_CS_SET;
-}
 
 void LCD_setSpi8(void) {
     SPI1->CR1 &= ~SPI_CR1_SPE; // DISABLE SPI
@@ -105,7 +81,6 @@ void LCD_pinsInit() {
 }
 
 void LCD_configure() {
-#if SPI_DMA_MODE
     TFT_RST_SET;
     dmaSendCmd(LCD_SWRESET);
     delay_ms(100);
@@ -116,7 +91,7 @@ void LCD_configure() {
         if (count-- == 0) break;
         dmaSendCmd(*(address++));
         dmaSendData8(address, count);
-        address+=count;
+        address += count;
     }
 
     dmaSendCmd(LCD_SLEEP_OUT);
@@ -124,31 +99,10 @@ void LCD_configure() {
     dmaSendCmd(LCD_DISPLAY_ON);
     dmaSendCmd(LCD_GRAM);
     TFT_LED_SET;
-#else
-    TFT_RST_SET;
-    LCD_sendCommand8(ILI9341_RESET);
-    delay_ms(100);
-
-    const uint8_t *address = init_commands;
-    while (1) {
-        u8 count = *(address++);
-        if (count-- == 0) break;
-        LCD_sendCommand8(*(address++));
-        while (count--) LCD_sendData8(*(address++));
-    }
-
-    LCD_sendCommand8(ILI9341_SLEEP_OUT);
-    delay_ms(100);
-    LCD_sendCommand8(ILI9341_DISPLAY_ON);
-    LCD_sendCommand8(ILI9341_GRAM);
-    TFT_LED_SET;
-#endif
 }
 
 void LCD_init() {
     LCD_pinsInit();
-#if SPI_DMA_MODE
     dmaInit();
-#endif
     LCD_configure();
 }

@@ -1,11 +1,5 @@
 #include "core.h"
-
-
-#if SPI_DMA_MODE
-
 #include "dma.h"
-
-#endif
 
 #ifndef TEST1_ILI9341_H
 #define TEST1_ILI9341_H
@@ -23,8 +17,6 @@ void LCD_setOrientation(u8 o);
 
 void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color);
 void LCD_fillScreen(u16 color);
-void LCD_fillRect2(u16 x1, u16 y1, u16 w, u16 h, u16 color);
-void LCD_fillScreen2(u16 color);
 
 void LCD_drawRect(u16 x, u16 y, u16 w, u16 h, u16 color);
 

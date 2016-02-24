@@ -1,11 +1,7 @@
 #ifndef TEST1_CONFIG_H
 #define TEST1_CONFIG_H
 
-#define DMA_MAX_LENGTH 8192
-
 // <editor-fold desc="Defaults">
-
-#define SPI_DMA_MODE 1
 
 #define TFT_LED_PIN     GPIO_Pin_0
 #define TFT_RESET_PIN   GPIO_Pin_2
@@ -22,7 +18,6 @@
 #define SPI_MASTER_PIN_MOSI          GPIO_Pin_7
 
 // </editor-fold>
-
 
 // <editor-fold desc="Colors">
 
