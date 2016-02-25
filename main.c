@@ -31,30 +31,34 @@ int main(void) {
     LCD_setOrientation(ORIENTATION_LANDSCAPE_MIRROR);
     LCD_fillScreen(BLACK);
 
+    initFpsTimer();
 
-    LCD_setCursor(0, 0);
-    LCD_write('5');
-
-    LCD_writeString("Init array\n");
-
-    u16      cnt = 6 * 8 * 3;
-    u8       pixelComponents[cnt];
-    for (int i   = 0; i < cnt; ++i) {
-        pixelComponents[i] = 0;
-    }
-    LCD_writeString("GetRect\n");
-
-    LCD_getRect(pixelComponents, 0, 0, 6, 8);
-
-    LCD_setCursor(0, 50);
-    for (int i = 0; i < cnt; ++i) {
-        char buf[15];
-        itoa(pixelComponents[i], buf, 16);
-        LCD_writeString(buf);
-        LCD_writeString(",");
+    for (u8 i = 0; i < 30; i++) {
+        LCD_setCursor(0, 0);
+        LCD_fillScreen(RED);
+        fps++;
+        LCD_writeString(text);
+        LCD_setCursor(0, 0);
+        LCD_fillScreen(GREEN);
+        fps++;
+        LCD_writeString(text);
     }
 
-    LCD_writeString("Ready\n");
+//    LCD_setCursor(0, 0);
+//    LCD_write('5');
+//
+//    LCD_writeString("Init array\n");
+//
+//    u16      cnt = 6 * 8 * 3;
+//    u8       pixelComponents[cnt];
+//    for (int i   = 0; i < cnt; ++i) {
+//        pixelComponents[i] = 0;
+//    }
+//    LCD_writeString("GetRect\n");
+//
+//    LCD_getRect(pixelComponents, 0, 0, 1, 1);
+//
+//    LCD_writeString("Ready\n");
 
 
     while (1);

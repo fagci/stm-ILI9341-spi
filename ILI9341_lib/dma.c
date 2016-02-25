@@ -15,9 +15,6 @@ void dmaInit(void) {
     dmaTx8.DMA_PeripheralBaseAddr = (u32) &(SPI1->DR);
     dmaTx8.DMA_DIR                = DMA_DIR_PeripheralDST;
     dmaTx8.DMA_MemoryInc          = DMA_MemoryInc_Enable;
-    dmaTx8.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-    dmaTx8.DMA_MemoryDataSize     = DMA_MemoryDataSize_Byte;
-    dmaTx8.DMA_Priority           = DMA_Priority_High;
 
     // DMA 16bit
     DMA_StructInit(&dmaTx16);
@@ -26,16 +23,12 @@ void dmaInit(void) {
     dmaTx16.DMA_MemoryInc          = DMA_MemoryInc_Enable;
     dmaTx16.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
     dmaTx16.DMA_MemoryDataSize     = DMA_MemoryDataSize_HalfWord;
-    dmaTx16.DMA_Priority           = DMA_Priority_High;
 
     // RX
     // DMA 8bit
     DMA_StructInit(&dmaRx8);
     dmaRx8.DMA_PeripheralBaseAddr = (u32) &(SPI1->DR);
-    dmaRx8.DMA_DIR                = DMA_DIR_PeripheralSRC;
     dmaRx8.DMA_MemoryInc          = DMA_MemoryInc_Enable;
-    dmaRx8.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-    dmaRx8.DMA_MemoryDataSize     = DMA_MemoryDataSize_Byte;
     dmaRx8.DMA_Priority           = DMA_Priority_High;
 
     // IRQs
@@ -57,7 +50,6 @@ void dmaFill16(u16 color, u32 n) {
     dmaTx16.DMA_DIR                = DMA_DIR_PeripheralDST;
     dmaTx16.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
     dmaTx16.DMA_MemoryDataSize     = DMA_MemoryDataSize_HalfWord;
-    dmaTx16.DMA_Priority           = DMA_Priority_Medium;
     dmaTx16.DMA_Mode               = DMA_Mode_Circular;
 
     while (n != 0) {
@@ -78,6 +70,7 @@ void dmaSend(u8 *data, u32 n) {
 }
 
 void dmaRecv(u8 *data, u32 n) {
+
     TFT_DC_SET;
     dmaRx8.DMA_MemoryBaseAddr = (u32) data;
     dmaRx8.DMA_BufferSize     = n;
@@ -98,7 +91,6 @@ void dmaSend16(u16 *data, u32 n) {
     TFT_CS_RESET;
     DMA_Cmd(DMA1_Channel3, ENABLE);
 }
-
 
 void dmaSendData8(u8 *data, u32 n) {
     TFT_DC_SET;
