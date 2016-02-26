@@ -1,5 +1,7 @@
 #include "graph.h"
 
+#define abs(a) ((a)<0?-(a):a)
+
 u16 screen_width  = LCD_PIXEL_WIDTH;
 u16 screen_height = LCD_PIXEL_HEIGHT;
 

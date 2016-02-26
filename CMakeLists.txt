@@ -31,6 +31,8 @@ SET(STARTUP ${STARTUP}
         ILI9341_lib/graph.c
         ILI9341_lib/text.c
 #        USART_lib/usart.c
+        test_suite/fps_counter.c
+        test_suite/fill.c
         )
 
 #SET(DEBUG_FLAGS "-O3")

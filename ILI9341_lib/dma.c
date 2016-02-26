@@ -1,37 +1,19 @@
 #include <stm32f10x_dma.h>
+#include <sys/cdefs.h>
 #include "core.h"
 #include "dma.h"
 
 u8 dmaWorking = 0;
 #define dmaWait() while(dmaWorking);
-DMA_InitTypeDef dmaTx8, dmaTx16, dmaRx8;
+DMA_InitTypeDef dmaStructure;
 
 void dmaInit(void) {
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
-    // TX
-    // DMA 8bit
-    DMA_StructInit(&dmaTx8);
-    dmaTx8.DMA_PeripheralBaseAddr = (u32) &(SPI1->DR);
-    dmaTx8.DMA_DIR                = DMA_DIR_PeripheralDST;
-    dmaTx8.DMA_MemoryInc          = DMA_MemoryInc_Enable;
+    DMA_StructInit(&dmaStructure);
+    dmaStructure.DMA_PeripheralBaseAddr = (u32) &(SPI1->DR);
+    dmaStructure.DMA_Priority           = DMA_Priority_High;
 
-    // DMA 16bit
-    DMA_StructInit(&dmaTx16);
-    dmaTx16.DMA_PeripheralBaseAddr = (u32) &(SPI1->DR);
-    dmaTx16.DMA_DIR                = DMA_DIR_PeripheralDST;
-    dmaTx16.DMA_MemoryInc          = DMA_MemoryInc_Enable;
-    dmaTx16.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
-    dmaTx16.DMA_MemoryDataSize     = DMA_MemoryDataSize_HalfWord;
-
-    // RX
-    // DMA 8bit
-    DMA_StructInit(&dmaRx8);
-    dmaRx8.DMA_PeripheralBaseAddr = (u32) &(SPI1->DR);
-    dmaRx8.DMA_MemoryInc          = DMA_MemoryInc_Enable;
-    dmaRx8.DMA_Priority           = DMA_Priority_High;
-
-    // IRQs
     // TX
     NVIC_EnableIRQ(DMA1_Channel3_IRQn);
     DMA_ITConfig(DMA1_Channel3, DMA_IT_TC, ENABLE);
@@ -43,58 +25,71 @@ void dmaInit(void) {
     SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Tx | SPI_I2S_DMAReq_Rx, ENABLE);
 }
 
-void dmaFill16(u16 color, u32 n) {
-    // DMA 16bit
-    DMA_StructInit(&dmaTx16);
-    dmaTx16.DMA_PeripheralBaseAddr = (u32) &(SPI1->DR);
-    dmaTx16.DMA_DIR                = DMA_DIR_PeripheralDST;
-    dmaTx16.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
-    dmaTx16.DMA_MemoryDataSize     = DMA_MemoryDataSize_HalfWord;
-    dmaTx16.DMA_Mode               = DMA_Mode_Circular;
-
-    while (n != 0) {
-        u16 ts = (u16) (n > UINT16_MAX ? UINT16_MAX : n);
-        dmaSendData16(&color, ts);
-        n -= ts;
-    }
-    dmaInit();
-}
-
-void dmaSend(u8 *data, u32 n) {
-    dmaTx8.DMA_MemoryBaseAddr = (u32) data;
-    dmaTx8.DMA_BufferSize     = n;
-    DMA_Init(DMA1_Channel3, &dmaTx8);
-    dmaWorking = 1;
-    TFT_CS_RESET;
-    DMA_Cmd(DMA1_Channel3, ENABLE);
-}
-
 void dmaRecv(u8 *data, u32 n) {
 
     TFT_DC_SET;
-    dmaRx8.DMA_MemoryBaseAddr = (u32) data;
-    dmaRx8.DMA_BufferSize     = n;
-    DMA_Init(DMA1_Channel2, &dmaRx8);
+    dmaStructure.DMA_MemoryBaseAddr = (u32) data;
+    dmaStructure.DMA_BufferSize     = n;
+    DMA_Init(DMA1_Channel2, &dmaStructure);
     dmaWorking = 1;
     TFT_CS_RESET;
     DMA_Cmd(DMA1_Channel2, ENABLE);
     dmaWait();
 }
 
-
-
-void dmaSend16(u16 *data, u32 n) {
-    dmaTx16.DMA_MemoryBaseAddr = (u32) data;
-    dmaTx16.DMA_BufferSize     = n;
-    DMA_Init(DMA1_Channel3, &dmaTx16);
+__always_inline static void dmaStartTx() {
+    DMA_Init(DMA1_Channel3, &dmaStructure);
     dmaWorking = 1;
     TFT_CS_RESET;
     DMA_Cmd(DMA1_Channel3, ENABLE);
 }
 
+__always_inline static void dmaSend8(u8 *data, u32 n) {
+    dmaStructure.DMA_MemoryBaseAddr = (u32) data;
+    dmaStructure.DMA_BufferSize     = n;
+
+    dmaStructure.DMA_Mode               = DMA_Mode_Normal;
+    dmaStructure.DMA_MemoryInc          = DMA_MemoryInc_Enable;
+    dmaStructure.DMA_DIR                = DMA_DIR_PeripheralDST;
+    dmaStructure.DMA_MemoryDataSize     = DMA_MemoryDataSize_Byte;
+    dmaStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+    dmaStartTx();
+}
+
+__always_inline static void dmaSendCircular16(u16 *data, u32 n) {
+    dmaStructure.DMA_MemoryBaseAddr = (u32) data;
+    dmaStructure.DMA_BufferSize     = n;
+
+    dmaStructure.DMA_Mode               = DMA_Mode_Circular;
+    dmaStructure.DMA_MemoryInc          = DMA_MemoryInc_Disable;
+    dmaStructure.DMA_DIR                = DMA_DIR_PeripheralDST;
+    dmaStructure.DMA_MemoryDataSize     = DMA_MemoryDataSize_HalfWord;
+    dmaStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+    dmaStartTx();
+}
+
+__always_inline static void dmaSend16(u16 *data, u32 n) {
+    dmaStructure.DMA_MemoryBaseAddr = (u32) data;
+    dmaStructure.DMA_BufferSize     = n;
+
+    dmaStructure.DMA_Mode               = DMA_Mode_Normal;
+    dmaStructure.DMA_MemoryInc          = DMA_MemoryInc_Enable;
+    dmaStructure.DMA_DIR                = DMA_DIR_PeripheralDST;
+    dmaStructure.DMA_MemoryDataSize     = DMA_MemoryDataSize_HalfWord;
+    dmaStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+
+    dmaStartTx();
+}
+
+void dmaSendCmd(u8 cmd) {
+    TFT_DC_RESET;
+    dmaSend8(&cmd, 1);
+    dmaWait();
+}
+
 void dmaSendData8(u8 *data, u32 n) {
     TFT_DC_SET;
-    dmaSend(data, n);
+    dmaSend8(data, n);
     dmaWait();
 }
 
@@ -102,6 +97,20 @@ void dmaSendData16(u16 *data, u32 n) {
     TFT_DC_SET;
     dmaSend16(data, n);
     dmaWait();
+}
+
+void dmaSendDataCircular16(u16 *data, u32 n) {
+    TFT_DC_SET;
+    dmaSendCircular16(data, n);
+    dmaWait();
+}
+
+void dmaFill16(u16 color, u32 n) {
+    while (n != 0) {
+        u16 ts = (u16) (n > UINT16_MAX ? UINT16_MAX : n);
+        dmaSendDataCircular16(&color, ts);
+        n -= ts;
+    }
 }
 
 // TX
@@ -123,12 +132,3 @@ void DMA1_Channel2_IRQHandler(void) {
         dmaWorking = 0;
     }
 }
-
-void dmaSendCmd(u8 cmd) {
-    TFT_DC_RESET;
-    dmaSend(&cmd, 1);
-    dmaWait();
-}
-
-
-

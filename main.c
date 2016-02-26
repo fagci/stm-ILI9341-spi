@@ -1,48 +1,13 @@
 #include <stm32f10x_dma.h>
-#include <stdlib.h>
 #include "ILI9341_lib/graph.h"
-#include "ILI9341_lib/text.h"
-
-u16  fps = 0;
-char text[15];
-
-void TIM2_IRQHandler(void) {
-    TIM2->SR &= ~TIM_SR_UIF;
-    itoa(fps, text, 10); //переводим FPS в стринг и кладем в массив
-    fps = 0;
-}
-
-void initFpsTimer() {
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
-    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-    NVIC_EnableIRQ(TIM2_IRQn);
-
-    TIM_TimeBaseStructure.TIM_Prescaler     = (72000 / 2) - 1; //обновляем FPS раз в секунду
-    TIM_TimeBaseStructure.TIM_CounterMode   = TIM_CounterMode_Up;
-    TIM_TimeBaseStructure.TIM_Period        = 1000 * 2;
-    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-    TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
-    TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
-    TIM_Cmd(TIM2, ENABLE);
-}
+#include "test_suite/fill.h"
 
 int main(void) {
     LCD_init();
     LCD_setOrientation(ORIENTATION_LANDSCAPE_MIRROR);
     LCD_fillScreen(BLACK);
 
-    initFpsTimer();
-
-    for (u8 i = 0; i < 30; i++) {
-        LCD_setCursor(0, 0);
-        LCD_fillScreen(RED);
-        fps++;
-        LCD_writeString(text);
-        LCD_setCursor(0, 0);
-        LCD_fillScreen(GREEN);
-        fps++;
-        LCD_writeString(text);
-    }
+    TEST_fill();
 
 //    LCD_setCursor(0, 0);
 //    LCD_write('5');

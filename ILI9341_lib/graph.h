@@ -8,8 +8,6 @@
 #define _swap_int16_t(a, b) { int16_t t = a; a = b; b = t; }
 #endif
 
-#define abs(a) ((a)<0?-(a):a)
-
 void LCD_init();
 
 void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2);
