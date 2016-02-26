@@ -29,7 +29,7 @@ void LCD_getRect(u8 *data, u16 x1, u16 y1, u16 w, u16 h) {
     u32 count = w * h;
     LCD_setAddressWindow(x1, y1, (u16) (x1 + w - 1), (u16) (y1 + h - 1));
     dmaSendCmd(LCD_RAMRD);
-    dmaRecvData8(data, count * 4);
+    dmaReceiveData8(data, count * 4);
 }
 
 void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
@@ -39,6 +39,7 @@ void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
     dmaFill16(color, count);
     LCD_setSpi8();
 }
+
 void LCD_fillScreen(u16 color) {
     LCD_fillRect(0, 0, screen_width, screen_height, color);
 }
@@ -47,6 +48,9 @@ void LCD_setOrientation(u8 o) {
     if (o == ORIENTATION_LANDSCAPE || o == ORIENTATION_LANDSCAPE_MIRROR) {
         screen_height = LCD_PIXEL_WIDTH;
         screen_width  = LCD_PIXEL_HEIGHT;
+    } else {
+        screen_height = LCD_PIXEL_HEIGHT;
+        screen_width  = LCD_PIXEL_WIDTH;
     }
     dmaSendCmd(LCD_MAC);
     dmaSendData8(&o, 1);
@@ -65,11 +69,12 @@ void LCD_drawFastVLine(u16 x0, u16 y0, u16 h, u16 color) {
 }
 
 void LCD_drawCircle(u16 x0, u16 y0, u16 r, u16 color) {
-    s16 f     = (s16) (1 - r);
-    s16 ddF_x = 1;
-    s16 ddF_y = (s16) (-2 * r);
-    s16 x     = 0;
-    u16 y     = r;
+    s16 f  = (s16) (1 - r),
+        dx = 1,
+        dy = (s16) (-2 * r),
+        x  = 0;
+
+    u16 y = r;
 
     LCD_putPixel(x0, y0 + r, color);
     LCD_putPixel(x0, y0 - r, color);
@@ -79,12 +84,12 @@ void LCD_drawCircle(u16 x0, u16 y0, u16 r, u16 color) {
     while (x < y) {
         if (f >= 0) {
             y--;
-            ddF_y += 2;
-            f += ddF_y;
+            dy += 2;
+            f += dy;
         }
         x++;
-        ddF_x += 2;
-        f += ddF_x;
+        dx += 2;
+        f += dx;
 
         LCD_putPixel(x0 + x, y0 + y, color);
         LCD_putPixel(x0 - x, y0 + y, color);
@@ -99,22 +104,22 @@ void LCD_drawCircle(u16 x0, u16 y0, u16 r, u16 color) {
 
 // Used to do circles and roundrects
 void LCD_fillCircleHelper(u16 x0, u16 y0, u16 r, u8 cornername, s16 delta, u16 color) {
+    s16 f  = (s16) (1 - r),
+        dx = 1,
+        dy = (s16) (-2 * r),
+        x  = 0;
 
-    s16 f     = (s16) (1 - r);
-    s16 ddF_x = 1;
-    s16 ddF_y = (s16) (-2 * r);
-    s16 x     = 0;
-    s16 y     = r;
+    u16 y = r;
 
     while (x < y) {
         if (f >= 0) {
             y--;
-            ddF_y += 2;
-            f += ddF_y;
+            dy += 2;
+            f += dy;
         }
         x++;
-        ddF_x += 2;
-        f += ddF_x;
+        dx += 2;
+        f += dx;
 
         if (cornername & 0x1) {
             LCD_drawFastVLine(x0 + x, y0 - y, (u16) (2 * y + 1 + delta), color);
@@ -134,6 +139,8 @@ void LCD_fillCircle(u16 x0, u16 y0, u16 r, u16 color) {
 
 void LCD_drawLine(u16 x0, u16 y0, u16 x1, u16 y1, u16 color) {
     s16 steep = abs(y1 - y0) > abs(x1 - x0);
+    s16 dx, dy, err, yStep;
+
     if (steep) {
         _swap_int16_t(x0, y0);
         _swap_int16_t(x1, y1);
@@ -144,17 +151,15 @@ void LCD_drawLine(u16 x0, u16 y0, u16 x1, u16 y1, u16 color) {
         _swap_int16_t(y0, y1);
     }
 
-    s16 dx, dy;
     dx = x1 - x0;
     dy = (s16) abs(y1 - y0);
 
-    s16 err = (s16) (dx / 2);
-    s16 ystep;
+    err = (s16) (dx / 2);
 
     if (y0 < y1) {
-        ystep = 1;
+        yStep = 1;
     } else {
-        ystep = -1;
+        yStep = -1;
     }
 
     for (; x0 <= x1; x0++) {
@@ -165,7 +170,7 @@ void LCD_drawLine(u16 x0, u16 y0, u16 x1, u16 y1, u16 color) {
         }
         err -= dy;
         if (err < 0) {
-            y0 += ystep;
+            y0 += yStep;
             err += dx;
         }
     }

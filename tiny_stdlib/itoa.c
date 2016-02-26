@@ -1,27 +1,19 @@
 #include "itoa.h"
 
 unsigned long itoa(int value, char *sp, int radix) {
-    char tmp[16];
-    char *tp = tmp;
-    int  i;
-    int  v;
+    unsigned long len;
+    char          tmp[16], *tp = tmp;
+    int           i, v, sign   = radix == 10 && value < 0;
 
-    int sign = (radix == 10 && value < 0);
-    if (sign)
-        v = -value;
-    else
-        v = (unsigned) value;
+    v = sign ? -value : (unsigned) value;
 
     while (v || tp == tmp) {
         i = v % radix;
         v /= radix;
-        if (i < 10)
-            *tp++ = (char) (i + '0');
-        else
-            *tp++ = (char) (i + 'a' - 10);
+        *tp++ = i < 10 ? (char) (i + '0') : (char) (i + 'a' - 10);
     }
 
-    unsigned long len = tp - tmp;
+    len = tp - tmp;
 
     if (sign) {
         *sp++ = '-';

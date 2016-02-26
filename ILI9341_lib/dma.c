@@ -38,7 +38,7 @@ static void dmaStartTx() {
     DMA_Cmd(DMA1_Channel3, ENABLE);
 }
 
-static void dmaRecv8(u8 *data, u32 n) {
+static void dmaReceive8(u8 *data, u32 n) {
     dmaStructure.DMA_MemoryBaseAddr = (u32) data;
     dmaStructure.DMA_BufferSize     = n;
 
@@ -96,9 +96,9 @@ void dmaSendCmd(u8 cmd) {
     dmaWait();
 }
 
-void dmaRecvData8(u8 *data, u32 n) {
+void dmaReceiveData8(u8 *data, u32 n) {
     TFT_DC_SET;
-    dmaRecv8(data, n);
+    dmaReceive8(data, n);
     dmaWait();
 }
 

@@ -1,8 +1,6 @@
 #include "core.h"
 #include "dma.h"
 
-SPI_InitTypeDef spiStruct;
-
 //<editor-fold desc="Init commands">
 
 static const uint8_t init_commands[] = {
@@ -48,42 +46,44 @@ void LCD_setSpi16(void) {
 // </editor-fold>
 
 void LCD_pinsInit() {
+    SPI_InitTypeDef spiStructure;
+    GPIO_InitTypeDef gpioStructure;
+
     RCC_PCLK2Config(RCC_HCLK_Div2);
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
     RCC_APB2PeriphClockCmd(SPI_MASTER_GPIO_CLK | SPI_MASTER_CLK, ENABLE);
 
-    GPIO_InitTypeDef gpioStruct;
-
     // GPIO for CS/DC/LED/RESET
-    gpioStruct.GPIO_Pin   = TFT_CS_PIN | TFT_DC_PIN | TFT_RESET_PIN | TFT_LED_PIN;
-    gpioStruct.GPIO_Mode  = GPIO_Mode_Out_PP;
-    gpioStruct.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOA, &gpioStruct);
+    gpioStructure.GPIO_Pin   = TFT_CS_PIN | TFT_DC_PIN | TFT_RESET_PIN | TFT_LED_PIN;
+    gpioStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
+    gpioStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &gpioStructure);
 
     // GPIO for SPI
-    gpioStruct.GPIO_Pin   = SPI_MASTER_PIN_NSS | SPI_MASTER_PIN_SCK | SPI_MASTER_PIN_MOSI;
-    gpioStruct.GPIO_Mode  = GPIO_Mode_AF_PP;
-    gpioStruct.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(SPI_MASTER_GPIO, &gpioStruct);
+    gpioStructure.GPIO_Pin   = SPI_MASTER_PIN_NSS | SPI_MASTER_PIN_SCK | SPI_MASTER_PIN_MOSI;
+    gpioStructure.GPIO_Mode  = GPIO_Mode_AF_PP;
+    gpioStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(SPI_MASTER_GPIO, &gpioStructure);
 
-    SPI_StructInit(&spiStruct);
-    spiStruct.SPI_Mode              = SPI_Mode_Master;
-    spiStruct.SPI_NSS               = SPI_NSS_Soft;
-    SPI_Init(SPI_MASTER, &spiStruct);
+    SPI_StructInit(&spiStructure);
+    spiStructure.SPI_Mode = SPI_Mode_Master;
+    spiStructure.SPI_NSS  = SPI_NSS_Soft;
+    SPI_Init(SPI_MASTER, &spiStructure);
 
     SPI_SSOutputCmd(SPI_MASTER, ENABLE);
     SPI_Cmd(SPI_MASTER, ENABLE);
 }
 
 void LCD_configure() {
+    u8 count,
+       *address = (u8 *) init_commands;
+
     TFT_RST_SET;
     dmaSendCmd(LCD_SWRESET);
     delay_ms(100);
 
-    u8 *address = (u8 *) init_commands;
     while (1) {
-        u8 count = *(address++);
+        count = *(address++);
         if (count-- == 0) break;
         dmaSendCmd(*(address++));
         dmaSendData8(address, count);
@@ -92,12 +92,11 @@ void LCD_configure() {
 
     dmaSendCmd(LCD_SLEEP_OUT);
     dmaSendCmd(LCD_DISPLAY_ON);
-//    dmaSendCmd(LCD_GRAM);
-    TFT_LED_SET;
 }
 
 void LCD_init() {
     LCD_pinsInit();
     dmaInit();
     LCD_configure();
+    TFT_LED_SET;
 }
