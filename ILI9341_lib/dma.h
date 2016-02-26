@@ -7,9 +7,8 @@
 
 void dmaInit(void);
 
-void dmaRecv(u8 *data, u32 n);
-
 void dmaSendCmd(u8 cmd);
+void dmaRecvData8(u8 *data, u32 n);
 void dmaSendData8(u8 *data, u32 n);
 void dmaSendData16(u16 *data, u32 n);
 void dmaFill16(u16 color, u32 n);

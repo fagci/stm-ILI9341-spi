@@ -1,5 +1,4 @@
 #include <stm32f10x_dma.h>
-#include <sys/cdefs.h>
 #include "core.h"
 #include "dma.h"
 
@@ -25,26 +24,34 @@ void dmaInit(void) {
     SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Tx | SPI_I2S_DMAReq_Rx, ENABLE);
 }
 
-void dmaRecv(u8 *data, u32 n) {
-
-    TFT_DC_SET;
-    dmaStructure.DMA_MemoryBaseAddr = (u32) data;
-    dmaStructure.DMA_BufferSize     = n;
-    DMA_Init(DMA1_Channel2, &dmaStructure);
-    dmaWorking = 1;
-    TFT_CS_RESET;
-    DMA_Cmd(DMA1_Channel2, ENABLE);
-    dmaWait();
-}
-
-__always_inline static void dmaStartTx() {
+static void dmaStartRx() {
     DMA_Init(DMA1_Channel3, &dmaStructure);
     dmaWorking = 1;
     TFT_CS_RESET;
     DMA_Cmd(DMA1_Channel3, ENABLE);
 }
 
-__always_inline static void dmaSend8(u8 *data, u32 n) {
+static void dmaStartTx() {
+    DMA_Init(DMA1_Channel3, &dmaStructure);
+    dmaWorking = 1;
+    TFT_CS_RESET;
+    DMA_Cmd(DMA1_Channel3, ENABLE);
+}
+
+static void dmaRecv8(u8 *data, u32 n) {
+    dmaStructure.DMA_MemoryBaseAddr = (u32) data;
+    dmaStructure.DMA_BufferSize     = n;
+
+    dmaStructure.DMA_Mode               = DMA_Mode_Normal;
+    dmaStructure.DMA_MemoryInc          = DMA_MemoryInc_Enable;
+    dmaStructure.DMA_DIR                = DMA_DIR_PeripheralSRC;
+    dmaStructure.DMA_MemoryDataSize     = DMA_MemoryDataSize_Byte;
+    dmaStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+
+    dmaStartRx();
+}
+
+static void dmaSend8(u8 *data, u32 n) {
     dmaStructure.DMA_MemoryBaseAddr = (u32) data;
     dmaStructure.DMA_BufferSize     = n;
 
@@ -53,10 +60,11 @@ __always_inline static void dmaSend8(u8 *data, u32 n) {
     dmaStructure.DMA_DIR                = DMA_DIR_PeripheralDST;
     dmaStructure.DMA_MemoryDataSize     = DMA_MemoryDataSize_Byte;
     dmaStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+
     dmaStartTx();
 }
 
-__always_inline static void dmaSendCircular16(u16 *data, u32 n) {
+static void dmaSendCircular16(u16 *data, u32 n) {
     dmaStructure.DMA_MemoryBaseAddr = (u32) data;
     dmaStructure.DMA_BufferSize     = n;
 
@@ -65,10 +73,11 @@ __always_inline static void dmaSendCircular16(u16 *data, u32 n) {
     dmaStructure.DMA_DIR                = DMA_DIR_PeripheralDST;
     dmaStructure.DMA_MemoryDataSize     = DMA_MemoryDataSize_HalfWord;
     dmaStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+
     dmaStartTx();
 }
 
-__always_inline static void dmaSend16(u16 *data, u32 n) {
+static void dmaSend16(u16 *data, u32 n) {
     dmaStructure.DMA_MemoryBaseAddr = (u32) data;
     dmaStructure.DMA_BufferSize     = n;
 
@@ -84,6 +93,12 @@ __always_inline static void dmaSend16(u16 *data, u32 n) {
 void dmaSendCmd(u8 cmd) {
     TFT_DC_RESET;
     dmaSend8(&cmd, 1);
+    dmaWait();
+}
+
+void dmaRecvData8(u8 *data, u32 n) {
+    TFT_DC_SET;
+    dmaRecv8(data, n);
     dmaWait();
 }
 
@@ -115,8 +130,8 @@ void dmaFill16(u16 color, u32 n) {
 
 // TX
 void DMA1_Channel3_IRQHandler(void) {
-    if (DMA_GetITStatus(DMA1_FLAG_TC3) != RESET) {
-        DMA_ClearITPendingBit(DMA1_FLAG_TC3);
+    if (DMA_GetITStatus(DMA1_IT_TC3)) {
+        DMA_ClearITPendingBit(DMA1_IT_TC3);
         DMA_Cmd(DMA1_Channel3, DISABLE);
         TFT_CS_SET;
         dmaWorking = 0;
@@ -125,8 +140,8 @@ void DMA1_Channel3_IRQHandler(void) {
 
 // RX
 void DMA1_Channel2_IRQHandler(void) {
-    if (DMA_GetITStatus(DMA1_FLAG_TC2) != RESET) {
-        DMA_ClearITPendingBit(DMA1_FLAG_TC2);
+    if (DMA_GetITStatus(DMA1_IT_TC2)) {
+        DMA_ClearITPendingBit(DMA1_IT_TC2);
         DMA_Cmd(DMA1_Channel2, DISABLE);
         TFT_CS_SET;
         dmaWorking = 0;

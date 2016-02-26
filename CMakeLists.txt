@@ -25,21 +25,22 @@ SET(STARTUP ${STARTUP}
         ${PERIPH_LIB_SRC}/stm32f10x_tim.c
         ${PERIPH_LIB_SRC}/stm32f10x_usart.c
         ${PERIPH_LIB_SRC}/misc.c
+#        tiny_stdlib/itoa.c
         ILI9341_lib/delay.c
         ILI9341_lib/core.c
         ILI9341_lib/dma.c
         ILI9341_lib/graph.c
         ILI9341_lib/text.c
 #        USART_lib/usart.c
-        test_suite/fps_counter.c
-        test_suite/fill.c
+#        test_suite/fps_counter.c
+#        test_suite/fill.c
         )
 
 #SET(DEBUG_FLAGS "-O3")
 SET(DEBUG_FLAGS "-O0 -g")
 
 SET(MCU_FLAGS "-march=armv7-m -mcpu=cortex-m3 -mthumb")
-SET(CMAKE_C_FLAGS "${MCU_FLAGS} -fno-common -fno-builtin -ffreestanding -Wall ${DEBUG_FLAGS}")
+SET(CMAKE_C_FLAGS "${MCU_FLAGS} -fno-common -fno-builtin -nostdlib -ffreestanding -Wall ${DEBUG_FLAGS}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 add_definitions(-DHSE_VALUE=8000000 -DSTM32F103C8 -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER)
 SET(CMAKE_EXE_LINKER_FLAGS "${DEBUG_FLAGS} -nostartfiles -T${LINK_SCRIPT}")

@@ -1,5 +1,5 @@
 #include <stm32f10x.h>
-#include <stdlib.h>
+#include "../tiny_stdlib/itoa.h"
 
 #ifndef TEST1_FPS_COUNTER_H
 #define TEST1_FPS_COUNTER_H

@@ -5,7 +5,7 @@ char text[15];
 
 void TIM2_IRQHandler(void) {
     TIM2->SR &= ~TIM_SR_UIF;
-    itoa(fps, text, 10); //переводим FPS в стринг и кладем в массив
+    itoa(fps, text, 10);
     fps = 0;
 }
 
@@ -14,7 +14,7 @@ void initFpsTimer() {
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
     NVIC_EnableIRQ(TIM2_IRQn);
 
-    TIM_TimeBaseStructure.TIM_Prescaler     = (72000 / 2) - 1; //обновляем FPS раз в секунду
+    TIM_TimeBaseStructure.TIM_Prescaler     = (72000 / 2) - 1;
     TIM_TimeBaseStructure.TIM_CounterMode   = TIM_CounterMode_Up;
     TIM_TimeBaseStructure.TIM_Period        = 1000 * 2;
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
