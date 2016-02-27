@@ -14,7 +14,6 @@ void usartInit(void) {
     GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     GPIO_InitStruct.GPIO_Pin   = GPIO_Pin_11;
-    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStruct.GPIO_Mode  = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOB, &GPIO_InitStruct);
 
@@ -34,8 +33,10 @@ void usartInit(void) {
 }
 
 void usartSend(char chr) {
-    while (!(USART3->SR & USART_FLAG_TXE));
-    USART3->DR = (uint16_t) (chr & 0xFF);
+    while (USART_GetFlagStatus(USART3, USART_FLAG_TC) == RESET);
+    USART_SendData(USART3, (chr & 0xFF));
+//    while (!(USART3->SR & USART_FLAG_TXE));
+//    USART3->DR = (uint16_t) (chr & 0xFF);
 }
 
 void usartSendString(char *str) {

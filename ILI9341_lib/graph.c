@@ -2,46 +2,29 @@
 
 #define abs(a) ((a)<0?-(a):a)
 
-u16 screen_width  = LCD_PIXEL_WIDTH;
-u16 screen_height = LCD_PIXEL_HEIGHT;
+void LCD_readPixels(u16 x1, u16 y1, u16 x2, u16 y2, u16 *buf) {
+    u8  red, green, blue;
+    u32 count = (u32) ((x2 - x1 + 1) * (y2 - y1 + 1));
 
-void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
-    u16 pointData[2];
+    LCD_setAddressWindow(x1, y1, x2, y2);
 
-    dmaSendCmd(LCD_COLUMN_ADDR);
-    pointData[0] = x1;
-    pointData[1] = x2;
-    LCD_setSpi16();
-    dmaSendData16(pointData, 2);
-    LCD_setSpi8();
-
-    dmaSendCmd(LCD_PAGE_ADDR);
-    pointData[0] = y1;
-    pointData[1] = y2;
-    LCD_setSpi16();
-    dmaSendData16(pointData, 4);
-    LCD_setSpi8();
-
-    dmaSendCmd(LCD_GRAM);
-}
-
-void LCD_getRect(u8 *data, u16 x1, u16 y1, u16 w, u16 h) {
-    u32 count = w * h;
-    LCD_setAddressWindow(x1, y1, (u16) (x1 + w - 1), (u16) (y1 + h - 1));
     dmaSendCmd(LCD_RAMRD);
-    dmaReceiveData8(data, count * 4);
-}
+    dmaReceiveData8(&red); // empty
 
-ili9341_color_t LCD_readPixel(void) {
-    u8 red, green, blue;
-    dmaSendCmd(LCD_RAMRD);
-    /* No interesting data in the first byte, hence read and discard */
-    dmaReceiveData8(&red, 1);
-    dmaReceiveData8(&red, 1);
-    dmaReceiveData8(&green, 1);
-    dmaReceiveData8(&blue, 1);
-    //deselectChip here?
-    return (ili9341_color_t) ILI9341_COLOR(red, green, blue);
+    for (int i = 0; i < count; ++i) {
+        dmaReceiveData8(&red);
+        dmaReceiveData8(&green);
+        dmaReceiveData8(&blue);
+        buf[i] = (u16) ILI9341_COLOR(red, green, blue);
+    }
+
+    // TODO: it is ugliest hack to make spi reusable
+
+    GPIO_InitTypeDef gpioStructure;
+    gpioStructure.GPIO_Pin   = TFT_CS_PIN;
+    gpioStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
+    gpioStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &gpioStructure);
 }
 
 void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
@@ -53,19 +36,7 @@ void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
 }
 
 void LCD_fillScreen(u16 color) {
-    LCD_fillRect(0, 0, screen_width, screen_height, color);
-}
-
-void LCD_setOrientation(u8 o) {
-    if (o == ORIENTATION_LANDSCAPE || o == ORIENTATION_LANDSCAPE_MIRROR) {
-        screen_height = LCD_PIXEL_WIDTH;
-        screen_width  = LCD_PIXEL_HEIGHT;
-    } else {
-        screen_height = LCD_PIXEL_HEIGHT;
-        screen_width  = LCD_PIXEL_WIDTH;
-    }
-    dmaSendCmd(LCD_MAC);
-    dmaSendData8(&o, 1);
+    LCD_fillRect(0, 0, LCD_getWidth(), LCD_getHeight(), color);
 }
 
 void LCD_drawFastHLine(u16 x0, u16 y0, u16 w, u16 color) {
@@ -81,6 +52,10 @@ void LCD_drawFastVLine(u16 x0, u16 y0, u16 h, u16 color) {
 }
 
 void LCD_drawCircle(u16 x0, u16 y0, u16 r, u16 color) {
+    if (r == 0) {
+        LCD_putPixel(x0, y0, color);
+    }
+
     s16 f  = (s16) (1 - r),
         dx = 1,
         dy = (s16) (-2 * r),
@@ -195,10 +170,3 @@ void LCD_drawRect(u16 x, u16 y, u16 w, u16 h, u16 color) {
     LCD_drawFastVLine((u16) (x + w - 1), y, h, color);
 }
 
-u16 LCD_getWidth() {
-    return screen_width;
-}
-
-u16 LCD_getHeight() {
-    return screen_height;
-}

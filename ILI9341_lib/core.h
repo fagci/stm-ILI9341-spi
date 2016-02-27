@@ -135,4 +135,13 @@ void LCD_sendData16(u16 data);
 void LCD_setSpi8(void);
 void LCD_setSpi16(void);
 
+u16 LCD_getWidth();
+u16 LCD_getHeight();
+
+void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2);
+
+void LCD_setOrientation(u8 o);
+
+void debug();
+
 #endif //TEST1_ILI9341_CORE_H

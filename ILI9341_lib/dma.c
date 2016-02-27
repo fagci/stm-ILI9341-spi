@@ -11,7 +11,7 @@ void dmaInit(void) {
 
     DMA_StructInit(&dmaStructure);
     dmaStructure.DMA_PeripheralBaseAddr = (u32) &(SPI1->DR);
-    dmaStructure.DMA_Priority           = DMA_Priority_High;
+    dmaStructure.DMA_Priority           = DMA_Priority_Medium;
 
     // TX
     NVIC_EnableIRQ(DMA1_Channel3_IRQn);
@@ -21,14 +21,15 @@ void dmaInit(void) {
     NVIC_EnableIRQ(DMA1_Channel2_IRQn);
     DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, ENABLE);
 
-    SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Tx | SPI_I2S_DMAReq_Rx, ENABLE);
+    SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Tx, ENABLE);
+    SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx, ENABLE);
 }
 
 static void dmaStartRx() {
-    DMA_Init(DMA1_Channel3, &dmaStructure);
+    DMA_Init(DMA1_Channel2, &dmaStructure);
     dmaWorking = 1;
     TFT_CS_RESET;
-    DMA_Cmd(DMA1_Channel3, ENABLE);
+    DMA_Cmd(DMA1_Channel2, ENABLE);
 }
 
 static void dmaStartTx() {
@@ -96,9 +97,11 @@ void dmaSendCmd(u8 cmd) {
     dmaWait();
 }
 
-void dmaReceiveData8(u8 *data, u32 n) {
+void dmaReceiveData8(u8 *data) {
+    u8 dummy = 0xFF;
+    dmaSend8(&dummy,1);
     TFT_DC_SET;
-    dmaReceive8(data, n);
+    dmaReceive8(data, 1);
     dmaWait();
 }
 
@@ -128,21 +131,19 @@ void dmaFill16(u16 color, u32 n) {
     }
 }
 
-// TX
-void DMA1_Channel3_IRQHandler(void) {
-    if (DMA_GetITStatus(DMA1_IT_TC3)) {
-        DMA_ClearITPendingBit(DMA1_IT_TC3);
-        DMA_Cmd(DMA1_Channel3, DISABLE);
+void DMA1_Channel2_IRQHandler(void) {
+    if (DMA_GetITStatus(DMA1_IT_TC2)) {
+        DMA_ClearFlag(DMA1_FLAG_TC2);
+        DMA_Cmd(DMA1_Channel2, DISABLE);
         TFT_CS_SET;
         dmaWorking = 0;
     }
 }
 
-// RX
-void DMA1_Channel2_IRQHandler(void) {
-    if (DMA_GetITStatus(DMA1_IT_TC2)) {
-        DMA_ClearITPendingBit(DMA1_IT_TC2);
-        DMA_Cmd(DMA1_Channel2, DISABLE);
+void DMA1_Channel3_IRQHandler(void) {
+    if (DMA_GetITStatus(DMA1_IT_TC3)) {
+        DMA_ClearFlag(DMA1_FLAG_TC3);
+        DMA_Cmd(DMA1_Channel3, DISABLE);
         TFT_CS_SET;
         dmaWorking = 0;
     }

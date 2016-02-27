@@ -25,13 +25,13 @@ set(STARTUP ${STARTUP}
         ${PERIPH_LIB_SRC}/stm32f10x_tim.c
         ${PERIPH_LIB_SRC}/stm32f10x_usart.c
         ${PERIPH_LIB_SRC}/misc.c
-        #        tiny_stdlib/itoa.c
+                tiny_stdlib/itoa.c
         ILI9341_lib/delay.c
         ILI9341_lib/core.c
         ILI9341_lib/dma.c
         ILI9341_lib/graph.c
         ILI9341_lib/text.c
-        #        USART_lib/usart.c
+                USART_lib/usart.c
         #        test_suite/fps_counter.c
         #        test_suite/fill.c
                 test_suite/primitives.c

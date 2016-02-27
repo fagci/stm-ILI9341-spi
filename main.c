@@ -1,43 +1,27 @@
 #include <stm32f10x_dma.h>
+#include "USART_lib/usart.h"
 #include "ILI9341_lib/text.h"
 #include "test_suite/primitives.h"
 
+#include "tiny_stdlib/itoa.h"
+
 int main(void) {
     LCD_init();
+    usartInit();
     LCD_setOrientation(ORIENTATION_LANDSCAPE_MIRROR);
 
-    u16 steps[7]        = {2, 5, 10, 20, 40, 80, 160};
-    u8  orientations[4] = {
-            ORIENTATION_PORTRAIT,
-            ORIENTATION_LANDSCAPE,
-            ORIENTATION_PORTRAIT_MIRROR,
-            ORIENTATION_LANDSCAPE_MIRROR
-    };
+    u16 testColor = 0xACE0;
+    LCD_fillScreen(testColor);
 
-    for (int orient = 0; orient < 4; ++orient) {
-        LCD_setOrientation(orientations[orient]);
-        for (int i = 0; i < 7; ++i) {
-            TEST_fillPrimitives(steps[i]);
-            delay_ms(1000);
-        }
+    u16 px[81];
+
+    LCD_fillCircle(3, 3, 3, RED);
+
+    LCD_readPixels(0, 0, 8, 8, px);
+
+    for (int i = 0; i < 81; ++i) {
+        LCD_putPixel(9 + i % 9, 9 + i / 9, px[i]);
     }
-//    LCD_fillScreen(BLACK);
-//
-//    LCD_setCursor(0, 0);
-//    LCD_write('5');
-//
-//    LCD_writeString("Init array\n");
-//
-//    u16 cnt = 4;
-//    u8  pixelComponents[cnt];
-//
-//    for (int i = 0; i < cnt; ++i) {
-//        pixelComponents[i] = 0;
-//    }
-//
-//    LCD_writeString("GetRect\n");
-//    ili9341_color_t color = LCD_readPixel();
-//    LCD_writeString("Ready\n");
 
     while (1);
 }
