@@ -32,6 +32,18 @@ void LCD_getRect(u8 *data, u16 x1, u16 y1, u16 w, u16 h) {
     dmaReceiveData8(data, count * 4);
 }
 
+ili9341_color_t LCD_readPixel(void) {
+    u8 red, green, blue;
+    dmaSendCmd(LCD_RAMRD);
+    /* No interesting data in the first byte, hence read and discard */
+    dmaReceiveData8(&red, 1);
+    dmaReceiveData8(&red, 1);
+    dmaReceiveData8(&green, 1);
+    dmaReceiveData8(&blue, 1);
+    //deselectChip here?
+    return (ili9341_color_t) ILI9341_COLOR(red, green, blue);
+}
+
 void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
     u32 count = w * h;
     LCD_setAddressWindow(x1, y1, (u16) (x1 + w - 1), (u16) (y1 + h - 1));
@@ -56,12 +68,12 @@ void LCD_setOrientation(u8 o) {
     dmaSendData8(&o, 1);
 }
 
-void LCD_putPixel(u16 x, u16 y, u16 color) {
-    LCD_fillRect(x, y, 1, 1, color);
-}
-
 void LCD_drawFastHLine(u16 x0, u16 y0, u16 w, u16 color) {
     LCD_fillRect(x0, y0, w, 1, color);
+}
+
+void LCD_putPixel(u16 x, u16 y, u16 color) {
+    LCD_fillRect(x, y, 1, 1, color);
 }
 
 void LCD_drawFastVLine(u16 x0, u16 y0, u16 h, u16 color) {
@@ -142,13 +154,13 @@ void LCD_drawLine(u16 x0, u16 y0, u16 x1, u16 y1, u16 color) {
     s16 dx, dy, err, yStep;
 
     if (steep) {
-        _swap_int16_t(x0, y0);
-        _swap_int16_t(x1, y1);
+        _int16_swap(x0, y0);
+        _int16_swap(x1, y1);
     }
 
     if (x0 > x1) {
-        _swap_int16_t(x0, x1);
-        _swap_int16_t(y0, y1);
+        _int16_swap(x0, x1);
+        _int16_swap(y0, y1);
     }
 
     dx = x1 - x0;

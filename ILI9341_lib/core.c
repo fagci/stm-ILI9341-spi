@@ -46,7 +46,7 @@ void LCD_setSpi16(void) {
 // </editor-fold>
 
 void LCD_pinsInit() {
-    SPI_InitTypeDef spiStructure;
+    SPI_InitTypeDef  spiStructure;
     GPIO_InitTypeDef gpioStructure;
 
     RCC_PCLK2Config(RCC_HCLK_Div2);
@@ -74,13 +74,24 @@ void LCD_pinsInit() {
     SPI_Cmd(SPI_MASTER, ENABLE);
 }
 
-void LCD_configure() {
-    u8 count,
-       *address = (u8 *) init_commands;
-
+void LCD_reset() {
     TFT_RST_SET;
-    dmaSendCmd(LCD_SWRESET);
-    delay_ms(100);
+    delay_ms(10);
+    TFT_RST_RESET;
+    delay_ms(10);
+    TFT_RST_SET;
+    delay_ms(150);
+}
+
+void LCD_exitStandby(){
+    dmaSendCmd(LCD_SLEEP_OUT);
+    delay_ms(150);
+    dmaSendCmd(LCD_DISPLAY_ON);
+}
+
+void LCD_configure() {
+    u8 count;
+    u8 *address = (u8 *) init_commands;
 
     while (1) {
         count = *(address++);
@@ -89,14 +100,15 @@ void LCD_configure() {
         dmaSendData8(address, count);
         address += count;
     }
-
-    dmaSendCmd(LCD_SLEEP_OUT);
-    dmaSendCmd(LCD_DISPLAY_ON);
 }
 
 void LCD_init() {
     LCD_pinsInit();
     dmaInit();
+
+    LCD_reset();
+    LCD_exitStandby();
     LCD_configure();
+
     TFT_LED_SET;
 }

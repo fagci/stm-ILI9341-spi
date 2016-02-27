@@ -1,7 +1,7 @@
 #include "text.h"
 
 u8  _cp437   = 0;
-u16 cursor_x = 0, cursor_y = 0;
+u16 cursorX  = 0, cursorY = 0;
 u8  textSize = 1, wrap = 1;
 
 u16 textColor = RED, textBgColor = WHITE;
@@ -67,17 +67,17 @@ void LCD_drawChar(u16 x, u16 y, unsigned char c, u16 color, u16 bg, uint8_t size
 
 void LCD_write(unsigned char c) {
     if (c == '\n') {
-        cursor_y += textSize * 8;
-        cursor_x = 0;
+        cursorY += textSize * 8;
+        cursorX = 0;
     } else if (c == '\r') {
-        cursor_x = 0;
+        cursorX = 0;
     } else {
-        if (wrap && ((cursor_x + textSize * 6) >= LCD_getWidth())) { // Heading off edge?
-            cursor_x = 0;            // Reset x to zero
-            cursor_y += textSize * 8; // Advance y one line
+        if (wrap && ((cursorX + textSize * 6) >= LCD_getWidth())) { // Heading off edge?
+            cursorX = 0;            // Reset x to zero
+            cursorY += textSize * 8; // Advance y one line
         }
-        LCD_drawChar(cursor_x, cursor_y, c, textColor, textBgColor, textSize);
-        cursor_x += textSize * 6;
+        LCD_drawChar(cursorX, cursorY, c, textColor, textBgColor, textSize);
+        cursorX += textSize * 6;
     }
 }
 
@@ -86,8 +86,8 @@ void LCD_writeString(unsigned char *s) {
 }
 
 void LCD_setCursor(u16 x, u16 y) {
-    cursor_x = x;
-    cursor_y = y;
+    cursorX = x;
+    cursorY = y;
 }
 
 void LCD_setTextSize(u8 size) {
