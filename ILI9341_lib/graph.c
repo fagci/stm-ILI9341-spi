@@ -35,6 +35,9 @@ void LCD_readPixels(u16 x1, u16 y1, u16 x2, u16 y2, u16 *buf) {
 void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
     u32 count = w * h;
     LCD_setAddressWindow(x1, y1, (u16) (x1 + w - 1), (u16) (y1 + h - 1));
+#if __DEBUG_LEVEL > 0
+    usartSendString("\r\n[fill rect]\r\n");
+#endif
     LCD_setSpi16();
     dmaFill16(color, count);
     LCD_setSpi8();

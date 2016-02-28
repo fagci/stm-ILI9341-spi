@@ -118,10 +118,10 @@
 #define TFT_RST_SET     GPIO_SetBits(GPIOA, TFT_RESET_PIN); usartSendString("RST+ ");
 #define TFT_RST_RESET   GPIO_ResetBits(GPIOA, TFT_RESET_PIN); usartSendString("RST- ");
 
-#define TOUCH_CS_SET      GPIO_SetBits(GPIOA, TOUCH_CS_PIN); usartSendString("\r\nCS+\r\n");
+#define TOUCH_CS_SET      GPIO_SetBits(GPIOA, TOUCH_CS_PIN); usartSendString("CS+\r\n");
 #define TOUCH_CS_RESET      GPIO_ResetBits(GPIOA, TOUCH_CS_PIN); usartSendString("CS-\r\n");
 
-#define TFT_CS_SET      GPIO_SetBits(GPIOA, TFT_CS_PIN); usartSendString("\r\nCS+\r\n");
+#define TFT_CS_SET      GPIO_SetBits(GPIOA, TFT_CS_PIN); usartSendString("CS+\r\n");
 #define TFT_CS_RESET    GPIO_ResetBits(GPIOA, TFT_CS_PIN); usartSendString("CS-\r\n");
 #else
 #define TFT_DC_SET      GPIO_SetBits(GPIOA, TFT_DC_PIN);

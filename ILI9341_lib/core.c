@@ -180,7 +180,6 @@ void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
     dmaSendDataCont16(pointData, 2);
     LCD_setSpi8();
     TFT_CS_SET;
-    dmaSendCmd(LCD_GRAM);
 }
 
 void LCD_configure() {

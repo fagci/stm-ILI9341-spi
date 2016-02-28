@@ -5,11 +5,11 @@
 u8 dmaWorking = 0;
 DMA_InitTypeDef dmaStructure;
 
-#if __DEBUG_LEVEL > 2
-#define dmaWait() usartSendString("(wait) "); while(dmaWorking);
-#else
+//#if __DEBUG_LEVEL > 2
+//#define dmaWait() usartSendString("(wait) "); while(dmaWorking);
+//#else
 #define dmaWait() while(dmaWorking);
-#endif
+//#endif
 
 void dmaInit(void) {
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
@@ -104,9 +104,9 @@ void dmaSendCmd(u8 cmd) {
     TFT_DC_RESET;
     TFT_CS_RESET;
 #if __DEBUG_LEVEL > 3
-    usartSendString("$ 0x");
+    usartSendString("<0x");
     usartWrite(cmd, 16);
-    usartSendString(" $ ");
+    usartSendString("> ");
 #endif
     dmaSend8(&cmd, 1);
     dmaWait();
@@ -116,9 +116,9 @@ void dmaSendCmd(u8 cmd) {
 void dmaSendCmdCont(u8 cmd) {
     TFT_DC_RESET;
 #if __DEBUG_LEVEL > 3
-    usartSendString("$ 0x");
+    usartSendString("<0x");
     usartWrite(cmd, 16);
-    usartSendString(" $ ");
+    usartSendString("> ");
 #endif
     dmaSend8(&cmd, 1);
     dmaWait();
@@ -126,9 +126,9 @@ void dmaSendCmdCont(u8 cmd) {
 
 void dmaSendSomeCont(u8 cmd) {
 #if __DEBUG_LEVEL > 3
-    usartSendString("$ 0x");
+    usartSendString("<0x");
     usartWrite(cmd, 16);
-    usartSendString(" $ ");
+    usartSendString("> ");
 #endif
     dmaSend8(&cmd, 1);
     dmaWait();
@@ -138,6 +138,9 @@ void dmaSendSomeCont(u8 cmd) {
 void dmaReceiveData8(u8 *data) {
     u8 dummy = 0xFF;
     dmaSend8(&dummy, 1);
+#if __DEBUG_LEVEL > 3
+    usartSendString("<D rx> ");
+#endif
     dmaReceive8(data, 1);
     dmaWait();
 }
@@ -152,13 +155,19 @@ void dmaSendData8(u8 *data, u32 n) {
 
 void dmaSendDataCont8(u8 *data, u32 n) {
     TFT_DC_SET;
+#if __DEBUG_LEVEL > 3
+    usartSendString("<D8 tx> ");
+#endif
     dmaSend8(data, n);
     dmaWait();
 }
 
 void dmaSendData16(u16 *data, u32 n) {
-    TFT_DC_SET;
     TFT_CS_RESET;
+    TFT_DC_SET;
+#if __DEBUG_LEVEL > 3
+    usartSendString("<D16 tx> ");
+#endif
     dmaSend16(data, n);
     dmaWait();
     TFT_CS_SET;
@@ -166,18 +175,25 @@ void dmaSendData16(u16 *data, u32 n) {
 
 void dmaSendDataCont16(u16 *data, u32 n) {
     TFT_DC_SET;
+#if __DEBUG_LEVEL > 3
+    usartSendString("<D16 tx> ");
+#endif
     dmaSend16(data, n);
     dmaWait();
 }
 
 void dmaSendDataCircular16(u16 *data, u32 n) {
     TFT_DC_SET;
+#if __DEBUG_LEVEL > 3
+    usartSendString("<D16 circular tx> ");
+#endif
     dmaSendCircular16(data, n);
     dmaWait();
 }
 
 void dmaFill16(u16 color, u32 n) {
     TFT_CS_RESET;
+    dmaSendCmdCont(LCD_GRAM);
     while (n != 0) {
         u16 ts = (u16) (n > UINT16_MAX ? UINT16_MAX : n);
         dmaSendDataCircular16(&color, ts);
