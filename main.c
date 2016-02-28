@@ -11,23 +11,15 @@ int main(void) {
     LCD_setOrientation(ORIENTATION_LANDSCAPE_MIRROR);
 
     u16 testColor = 0xACE0;
-    LCD_fillScreen(testColor);
 
-    u16 px[81];
+    LCD_fillScreen(BLACK);
 
-    LCD_fillCircle(3, 3, 3, RED);
+    u16 px[1];
 
-    LCD_readPixels(0, 0, 8, 8, px);
+    LCD_putPixel(50, 50, testColor);
+    LCD_readPixels(50, 50, 50, 50, px);
 
-    for (int i = 0; i < 81; ++i) {
-        LCD_putPixel(9 + i % 9, i / 9, px[i]);
-    }
-
-    LCD_readPixels(9, 0, 17, 8, px);
-
-    for (int i = 0; i < 81; ++i) {
-        LCD_putPixel(17 + i % 9, i / 9, px[i]);
-    }
+    LCD_fillRect(100, 100, 3, 3, GREEN);
 
     //TEST_fillPrimitives(20);
 

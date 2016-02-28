@@ -3,8 +3,13 @@
 #include "dma.h"
 
 u8 dmaWorking = 0;
-#define dmaWait() while(dmaWorking);
 DMA_InitTypeDef dmaStructure;
+
+#if __DEBUG_LEVEL > 2
+#define dmaWait() usartSendString("(wait) "); while(dmaWorking);
+#else
+#define dmaWait() while(dmaWorking);
+#endif
 
 void dmaInit(void) {
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
@@ -98,6 +103,11 @@ static void dmaSend16(u16 *data, u32 n) {
 void dmaSendCmd(u8 cmd) {
     TFT_DC_RESET;
     TFT_CS_RESET;
+#if __DEBUG_LEVEL > 3
+    usartSendString("$ 0x");
+    usartWrite(cmd, 16);
+    usartSendString(" $ ");
+#endif
     dmaSend8(&cmd, 1);
     dmaWait();
     TFT_CS_SET;
@@ -105,11 +115,21 @@ void dmaSendCmd(u8 cmd) {
 
 void dmaSendCmdCont(u8 cmd) {
     TFT_DC_RESET;
+#if __DEBUG_LEVEL > 3
+    usartSendString("$ 0x");
+    usartWrite(cmd, 16);
+    usartSendString(" $ ");
+#endif
     dmaSend8(&cmd, 1);
     dmaWait();
 }
 
 void dmaSendSomeCont(u8 cmd) {
+#if __DEBUG_LEVEL > 3
+    usartSendString("$ 0x");
+    usartWrite(cmd, 16);
+    usartSendString(" $ ");
+#endif
     dmaSend8(&cmd, 1);
     dmaWait();
 }
@@ -170,7 +190,9 @@ void DMA1_Channel2_IRQHandler(void) {
     if (DMA_GetITStatus(DMA1_IT_TC2) != RESET) {
         DMA_ClearFlag(DMA1_FLAG_TC2);
         DMA_Cmd(DMA1_Channel2, DISABLE);
-        usartSendString("R_IRQ\r\n");
+#if __DEBUG_LEVEL > 2
+        usartSendString("{R_IRQ}\r\n");
+#endif
         dmaWorking = 0;
     }
 }
@@ -179,7 +201,9 @@ void DMA1_Channel3_IRQHandler(void) {
     if (DMA_GetITStatus(DMA1_IT_TC3) != RESET) {
         DMA_ClearFlag(DMA1_FLAG_TC3);
         DMA_Cmd(DMA1_Channel3, DISABLE);
-        usartSendString("T_IRQ\r\n");
+#if __DEBUG_LEVEL > 2
+        usartSendString("{T_IRQ}\r\n");
+#endif
         dmaWorking = 0;
     }
 }

@@ -1,7 +1,15 @@
 #ifndef TEST1_CONFIG_H
 #define TEST1_CONFIG_H
 
-
+/**
+ * Debug level is verbosity
+ *
+ * 1 - whats drawing
+ * 2 - pins state
+ * 3 - IRQ
+ * 4 - cmds, data
+ */
+#define __DEBUG_LEVEL 4
 
 // <editor-fold desc="Defaults">
 

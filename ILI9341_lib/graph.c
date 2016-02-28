@@ -7,11 +7,10 @@ void LCD_readPixels(u16 x1, u16 y1, u16 x2, u16 y2, u16 *buf) {
     u32 count = (u32) ((x2 - x1 + 1) * (y2 - y1 + 1));
 
     LCD_setAddressWindow(x1, y1, x2, y2);
-    usartSendString("\r\n\r\n=== READ ===\r\n");
+    usartSendString("\r\n[pixels read]\r\n");
     TFT_CS_SET;
     TFT_DC_RESET;
     TFT_CS_RESET;
-    usartSendString("RAMRD\r\n");
     dmaSendSomeCont(LCD_RAMRD);
     usartSendString("RECV dummy\r\n");
     dmaReceiveData8(&red); // empty
@@ -24,7 +23,6 @@ void LCD_readPixels(u16 x1, u16 y1, u16 x2, u16 y2, u16 *buf) {
         buf[i] = (u16) ILI9341_COLOR(red, green, blue);
     }
     TFT_CS_SET;
-    usartSendString("\r\n\r\n=== END READ ===\r\n");
     // TODO: it is ugliest hack to make spi reusable
 
 //    GPIO_InitTypeDef gpioStructure;

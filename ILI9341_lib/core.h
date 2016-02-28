@@ -111,21 +111,34 @@
 //</editor-fold>
 
 // <editor-fold desc="Functions">
-
+#if __DEBUG_LEVEL > 1
 #define TFT_DC_SET      GPIO_SetBits(GPIOA, TFT_DC_PIN); usartSendString("DC+ ");
 #define TFT_DC_RESET    GPIO_ResetBits(GPIOA, TFT_DC_PIN); usartSendString("DC- ");
 
 #define TFT_RST_SET     GPIO_SetBits(GPIOA, TFT_RESET_PIN); usartSendString("RST+ ");
 #define TFT_RST_RESET   GPIO_ResetBits(GPIOA, TFT_RESET_PIN); usartSendString("RST- ");
 
-#define TOUCH_CS_SET      GPIO_SetBits(GPIOA, TOUCH_CS_PIN); usartSendString("CS+ ");
-#define TOUCH_CS_RESET      GPIO_ResetBits(GPIOA, TOUCH_CS_PIN); usartSendString("CS- ");
+#define TOUCH_CS_SET      GPIO_SetBits(GPIOA, TOUCH_CS_PIN); usartSendString("\r\nCS+\r\n");
+#define TOUCH_CS_RESET      GPIO_ResetBits(GPIOA, TOUCH_CS_PIN); usartSendString("CS-\r\n");
+
+#define TFT_CS_SET      GPIO_SetBits(GPIOA, TFT_CS_PIN); usartSendString("\r\nCS+\r\n");
+#define TFT_CS_RESET    GPIO_ResetBits(GPIOA, TFT_CS_PIN); usartSendString("CS-\r\n");
+#else
+#define TFT_DC_SET      GPIO_SetBits(GPIOA, TFT_DC_PIN);
+#define TFT_DC_RESET    GPIO_ResetBits(GPIOA, TFT_DC_PIN);
+
+#define TFT_RST_SET     GPIO_SetBits(GPIOA, TFT_RESET_PIN);
+#define TFT_RST_RESET   GPIO_ResetBits(GPIOA, TFT_RESET_PIN);
+
+#define TOUCH_CS_SET      GPIO_SetBits(GPIOA, TOUCH_CS_PIN);
+#define TOUCH_CS_RESET      GPIO_ResetBits(GPIOA, TOUCH_CS_PIN);
+
+#define TFT_CS_SET      GPIO_SetBits(GPIOA, TFT_CS_PIN);
+#define TFT_CS_RESET    GPIO_ResetBits(GPIOA, TFT_CS_PIN);
+#endif
 
 #define TOUCH_GET_X_AXIS() GetAxis(0b10010000)
 #define TOUCH_GET_Y_AXIS() GetAxis(0b11010000)
-
-#define TFT_CS_SET      GPIO_SetBits(GPIOA, TFT_CS_PIN); usartSendString("CS+ ");
-#define TFT_CS_RESET    GPIO_ResetBits(GPIOA, TFT_CS_PIN); usartSendString("CS- ");
 
 #define TFT_LED_SET      GPIO_SetBits(GPIOA, TFT_LED_PIN);
 #define TFT_LED_RESET    GPIO_ResetBits(GPIOA, TFT_LED_PIN);

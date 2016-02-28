@@ -100,20 +100,24 @@ void LCD_pinsInit() {
 
     // GPIO for SPI
     gpioStructure.GPIO_Pin  = SPI_MASTER_PIN_MISO;
-    gpioStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    gpioStructure.GPIO_Mode = GPIO_Mode_IPD; //CHANGED!
     GPIO_Init(SPI_MASTER_GPIO, &gpioStructure);
 
     SPI_StructInit(&spiStructure);
-    spiStructure.SPI_Mode = SPI_Mode_Master;
-    spiStructure.SPI_NSS  = SPI_NSS_Soft;
+    spiStructure.SPI_Mode              = SPI_Mode_Master;
+    spiStructure.SPI_NSS               = SPI_NSS_Soft;
+    spiStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_16;
     SPI_Init(SPI_MASTER, &spiStructure);
 
     SPI_SSOutputCmd(SPI_MASTER, ENABLE);
     SPI_Cmd(SPI_MASTER, ENABLE);
-    SPI_NSSInternalSoftwareConfig(SPI1, SPI_NSSInternalSoft_Set); //!!!!
+//    SPI_NSSInternalSoftwareConfig(SPI1, SPI_NSSInternalSoft_Set); //!!!!
 }
 
 void LCD_reset() {
+#if __DEBUG_LEVEL > 0
+    usartSendString("[TFT hw reset]\r\n");
+#endif
     TFT_RST_SET;
     delay_ms(10);
     TFT_RST_RESET;
@@ -137,6 +141,10 @@ u16 LCD_getHeight() {
 }
 
 void LCD_setOrientation(u8 o) {
+#if __DEBUG_LEVEL > 0
+    usartSendString("\r\n[orientation]\r\n");
+#endif
+
     if (o == ORIENTATION_LANDSCAPE || o == ORIENTATION_LANDSCAPE_MIRROR) {
         screen_height = LCD_PIXEL_WIDTH;
         screen_width  = LCD_PIXEL_HEIGHT;
@@ -144,27 +152,34 @@ void LCD_setOrientation(u8 o) {
         screen_height = LCD_PIXEL_HEIGHT;
         screen_width  = LCD_PIXEL_WIDTH;
     }
-    dmaSendCmd(LCD_MAC);
-    dmaSendData8(&o, 1);
+    TFT_CS_RESET;
+    dmaSendCmdCont(LCD_MAC);
+    dmaSendDataCont8(&o, 1);
+    TFT_CS_SET;
 }
 
 void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
+#if __DEBUG_LEVEL > 0
+    usartSendString("\r\n[window]\r\n");
+#endif
+
     u16 pointData[2];
 
-    dmaSendCmd(LCD_COLUMN_ADDR);
+    TFT_CS_RESET;
+    dmaSendCmdCont(LCD_COLUMN_ADDR);
     pointData[0] = x1;
     pointData[1] = x2;
     LCD_setSpi16();
-    dmaSendData16(pointData, 2);
+    dmaSendDataCont16(pointData, 2);
     LCD_setSpi8();
 
-    dmaSendCmd(LCD_PAGE_ADDR);
+    dmaSendCmdCont(LCD_PAGE_ADDR);
     pointData[0] = y1;
     pointData[1] = y2;
     LCD_setSpi16();
-    dmaSendData16(pointData, 2);
+    dmaSendDataCont16(pointData, 2);
     LCD_setSpi8();
-
+    TFT_CS_SET;
     dmaSendCmd(LCD_GRAM);
 }
 
@@ -172,13 +187,20 @@ void LCD_configure() {
     u8 count;
     u8 *address = (u8 *) init_commands;
 
+#if __DEBUG_LEVEL > 0
+    usartSendString("\r\n[TFT init]\r\n");
+#endif
+
+    TFT_CS_RESET;
     while (1) {
         count = *(address++);
         if (count-- == 0) break;
-        dmaSendCmd(*(address++));
-        dmaSendData8(address, count);
+        dmaSendCmdCont(*(address++));
+        dmaSendDataCont8(address, count);
         address += count;
     }
+    TFT_CS_SET;
+
     LCD_setOrientation(0);
     LCD_setAddressWindow(0, 0, screen_width, screen_height);
 }
@@ -209,22 +231,22 @@ void LCD_init() {
     //TOUCH_extiInit();
 }
 
-uint16_t GetAxis(uint8_t control){
+uint16_t GetAxis(uint8_t control) {
     uint16_t ret;
-if(!SPI_I2S_GetITStatus(SPI1, SPI_I2S_IT_TXE))return 0;
+    if (!SPI_I2S_GetITStatus(SPI1, SPI_I2S_IT_TXE))return 0;
     TOUCH_CS_RESET;
-    while(!SPI_I2S_GetITStatus(SPI1, SPI_I2S_IT_TXE));
+    while (!SPI_I2S_GetITStatus(SPI1, SPI_I2S_IT_TXE));
 
     SPI_I2S_SendData(SPI1, control);
-    while(!SPI_I2S_GetITStatus(SPI1, SPI_I2S_IT_TXE));
+    while (!SPI_I2S_GetITStatus(SPI1, SPI_I2S_IT_TXE));
 
     SPI_I2S_ReceiveData(SPI1);
     SPI_I2S_SendData(SPI1, 0);
-    while(!SPI_I2S_GetITStatus(SPI1, SPI_I2S_IT_TXE));
+    while (!SPI_I2S_GetITStatus(SPI1, SPI_I2S_IT_TXE));
 
     SPI_I2S_ReceiveData(SPI1);
     SPI_I2S_SendData(SPI1, 0);
-    while(!SPI_I2S_GetITStatus(SPI1, SPI_I2S_IT_TXE));
+    while (!SPI_I2S_GetITStatus(SPI1, SPI_I2S_IT_TXE));
 
     ret = SPI_I2S_ReceiveData(SPI1);
     TOUCH_CS_SET;
