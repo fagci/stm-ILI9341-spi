@@ -28,14 +28,12 @@ void dmaInit(void) {
 static void dmaStartRx() {
     DMA_Init(DMA1_Channel2, &dmaStructure);
     dmaWorking = 1;
-    TFT_CS_RESET;
     DMA_Cmd(DMA1_Channel2, ENABLE);
 }
 
 static void dmaStartTx() {
     DMA_Init(DMA1_Channel3, &dmaStructure);
     dmaWorking = 1;
-    TFT_CS_RESET;
     DMA_Cmd(DMA1_Channel3, ENABLE);
 }
 
@@ -93,25 +91,54 @@ static void dmaSend16(u16 *data, u32 n) {
 
 void dmaSendCmd(u8 cmd) {
     TFT_DC_RESET;
+    TFT_CS_RESET;
+    dmaSend8(&cmd, 1);
+    dmaWait();
+    TFT_CS_SET;
+}
+
+void dmaSendCmdCont(u8 cmd) {
+    TFT_DC_RESET;
     dmaSend8(&cmd, 1);
     dmaWait();
 }
 
+void dmaSendSomeCont(u8 cmd) {
+    dmaSend8(&cmd, 1);
+    dmaWait();
+}
+
+
 void dmaReceiveData8(u8 *data) {
     u8 dummy = 0xFF;
     dmaSend8(&dummy,1);
-    TFT_DC_SET;
     dmaReceive8(data, 1);
     dmaWait();
 }
 
 void dmaSendData8(u8 *data, u32 n) {
     TFT_DC_SET;
+    TFT_CS_RESET;
+    dmaSend8(data, n);
+    dmaWait();
+    TFT_CS_SET;
+}
+
+void dmaSendDataCont8(u8 *data, u32 n) {
+    TFT_DC_SET;
     dmaSend8(data, n);
     dmaWait();
 }
 
 void dmaSendData16(u16 *data, u32 n) {
+    TFT_DC_SET;
+    TFT_CS_RESET;
+    dmaSend16(data, n);
+    dmaWait();
+    TFT_CS_SET;
+}
+
+void dmaSendDataCont16(u16 *data, u32 n) {
     TFT_DC_SET;
     dmaSend16(data, n);
     dmaWait();
@@ -124,18 +151,20 @@ void dmaSendDataCircular16(u16 *data, u32 n) {
 }
 
 void dmaFill16(u16 color, u32 n) {
+    TFT_CS_RESET;
     while (n != 0) {
         u16 ts = (u16) (n > UINT16_MAX ? UINT16_MAX : n);
         dmaSendDataCircular16(&color, ts);
         n -= ts;
     }
+    TFT_CS_SET;
 }
 
 void DMA1_Channel2_IRQHandler(void) {
     if (DMA_GetITStatus(DMA1_IT_TC2)) {
         DMA_ClearFlag(DMA1_FLAG_TC2);
         DMA_Cmd(DMA1_Channel2, DISABLE);
-        TFT_CS_SET;
+        usartSendString("R_IRQ\r\n");
         dmaWorking = 0;
     }
 }
@@ -144,7 +173,7 @@ void DMA1_Channel3_IRQHandler(void) {
     if (DMA_GetITStatus(DMA1_IT_TC3)) {
         DMA_ClearFlag(DMA1_FLAG_TC3);
         DMA_Cmd(DMA1_Channel3, DISABLE);
-        TFT_CS_SET;
+        usartSendString("T_IRQ\r\n");
         dmaWorking = 0;
     }
 }

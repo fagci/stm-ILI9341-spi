@@ -2,6 +2,9 @@
 #include "core.h"
 #include "dma.h"
 
+
+#include "../USART_lib/usart.h"
+
 //<editor-fold desc="Init commands">
 
 static const uint8_t init_commands[] = {
@@ -75,11 +78,18 @@ void LCD_pinsInit() {
 
     RCC_PCLK2Config(RCC_HCLK_Div2);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2ENR_AFIOEN, ENABLE);
     RCC_APB2PeriphClockCmd(SPI_MASTER_GPIO_CLK | SPI_MASTER_CLK, ENABLE);
 
     // GPIO for CS/DC/LED/RESET
-    gpioStructure.GPIO_Pin   = TFT_CS_PIN | TFT_DC_PIN | TFT_RESET_PIN | TFT_LED_PIN;
+    gpioStructure.GPIO_Pin   = TFT_CS_PIN | TFT_DC_PIN | TFT_RESET_PIN | TFT_LED_PIN | TOUCH_CS_PIN;
     gpioStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
+    gpioStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &gpioStructure);
+
+    // GPIO for TOUCH IRQ
+    gpioStructure.GPIO_Pin   = TOUCH_IRQ_PIN;
+    gpioStructure.GPIO_Mode  = GPIO_Mode_IPU;
     gpioStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &gpioStructure);
 
@@ -172,6 +182,20 @@ void LCD_configure() {
     LCD_setAddressWindow(0, 0, screen_width, screen_height);
 }
 
+void TOUCH_extiInit(void) {
+    EXTI_InitTypeDef EXTI_InitStructure;
+
+    GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource10);
+    EXTI_InitStructure.EXTI_Line    = EXTI_Line10;
+    EXTI_InitStructure.EXTI_Mode    = EXTI_Mode_Interrupt;
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;  //EXTI_Trigger_Falling
+    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+    EXTI_Init(&EXTI_InitStructure);
+
+    NVIC_SetPriority(EXTI15_10_IRQn, 4);
+    NVIC_EnableIRQ(EXTI15_10_IRQn);
+}
+
 void LCD_init() {
     LCD_pinsInit();
     dmaInit();
@@ -181,9 +205,41 @@ void LCD_init() {
     LCD_configure();
 
     TFT_LED_SET;
+    //TOUCH_extiInit();
 }
 
-void debug() {
+uint16_t GetAxis(uint8_t control){
+    uint16_t ret;
+if(!SPI_I2S_GetITStatus(SPI1, SPI_I2S_IT_TXE))return 0;
+    TOUCH_CS_RESET;
+    while(!SPI_I2S_GetITStatus(SPI1, SPI_I2S_IT_TXE));
 
-    //TFT_CS_SET;
+    SPI_I2S_SendData(SPI1, control);
+    while(!SPI_I2S_GetITStatus(SPI1, SPI_I2S_IT_TXE));
+
+    SPI_I2S_ReceiveData(SPI1);
+    SPI_I2S_SendData(SPI1, 0);
+    while(!SPI_I2S_GetITStatus(SPI1, SPI_I2S_IT_TXE));
+
+    SPI_I2S_ReceiveData(SPI1);
+    SPI_I2S_SendData(SPI1, 0);
+    while(!SPI_I2S_GetITStatus(SPI1, SPI_I2S_IT_TXE));
+
+    ret = SPI_I2S_ReceiveData(SPI1);
+    TOUCH_CS_SET;
+
+    return ret;
+}
+
+void EXTI15_10_IRQHandler() {
+    if (EXTI_GetITStatus(EXTI_Line10) != RESET) {
+        EXTI_ClearFlag(EXTI_Line10);
+        EXTI_ClearITPendingBit(EXTI_Line10);
+        usartSendString("\r\n\r\nTOUCH\r\n");
+        usartSendString("Coord: ");
+        usartWrite(TOUCH_GET_X_AXIS(), 10);
+        usartSendString(", ");
+        usartWrite(TOUCH_GET_Y_AXIS(), 10);
+        usartSendString("\r\n");
+    }
 }

@@ -7,24 +7,32 @@ void LCD_readPixels(u16 x1, u16 y1, u16 x2, u16 y2, u16 *buf) {
     u32 count = (u32) ((x2 - x1 + 1) * (y2 - y1 + 1));
 
     LCD_setAddressWindow(x1, y1, x2, y2);
-
-    dmaSendCmd(LCD_RAMRD);
+    usartSendString("\r\n\r\n=== READ ===\r\n");
+    TFT_CS_SET;
+    TFT_DC_RESET;
+    TFT_CS_RESET;
+    usartSendString("RAMRD\r\n");
+    dmaSendSomeCont(LCD_RAMRD);
+    usartSendString("RECV dummy\r\n");
     dmaReceiveData8(&red); // empty
 
+    usartSendString("RECV dR dG dB\r\n");
     for (int i = 0; i < count; ++i) {
         dmaReceiveData8(&red);
         dmaReceiveData8(&green);
         dmaReceiveData8(&blue);
         buf[i] = (u16) ILI9341_COLOR(red, green, blue);
     }
-
+//    TFT_CS_SET;
+    usartSendString("\r\n\r\n=== END READ ===\r\n");
+    dmaSendCmd(LCD_GRAM);
     // TODO: it is ugliest hack to make spi reusable
 
-    GPIO_InitTypeDef gpioStructure;
-    gpioStructure.GPIO_Pin   = TFT_CS_PIN;
-    gpioStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
-    gpioStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOA, &gpioStructure);
+//    GPIO_InitTypeDef gpioStructure;
+//    gpioStructure.GPIO_Pin   = TFT_CS_PIN;
+//    gpioStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
+//    gpioStructure.GPIO_Speed = GPIO_Speed_50MHz;
+//    GPIO_Init(GPIOA, &gpioStructure);
 }
 
 void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color) {

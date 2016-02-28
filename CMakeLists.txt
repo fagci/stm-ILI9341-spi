@@ -18,11 +18,12 @@ set(LINK_SCRIPT /home/fagci/ClionProjects/Test2/stm32f10x.ld)
 
 set(STARTUP system_stm32f10x.c startup_stm32f10x.c)
 set(STARTUP ${STARTUP}
-        ${PERIPH_LIB_SRC}/stm32f10x_spi.c
         ${PERIPH_LIB_SRC}/stm32f10x_rcc.c
-        ${PERIPH_LIB_SRC}/stm32f10x_gpio.c
-        ${PERIPH_LIB_SRC}/stm32f10x_dma.c
         ${PERIPH_LIB_SRC}/stm32f10x_tim.c
+        ${PERIPH_LIB_SRC}/stm32f10x_gpio.c
+        ${PERIPH_LIB_SRC}/stm32f10x_exti.c
+        ${PERIPH_LIB_SRC}/stm32f10x_spi.c
+        ${PERIPH_LIB_SRC}/stm32f10x_dma.c
         ${PERIPH_LIB_SRC}/stm32f10x_usart.c
         ${PERIPH_LIB_SRC}/misc.c
                 tiny_stdlib/itoa.c
@@ -60,4 +61,4 @@ add_custom_command(DEPENDS ${PROJECT_NAME}.elf OUTPUT ${PROJECT_NAME}.bin COMMAN
 add_custom_target(generate_bin ALL DEPENDS ${PROJECT_NAME}.bin)
 add_custom_target(generate_hex ALL DEPENDS ${PROJECT_NAME}.hex)
 
-add_custom_target(write stm32flash -w ${PROJECT_NAME}.bin -v -g 0x0 /dev/ttyUSB1 DEPENDS ${PROJECT_NAME}.bin)
+add_custom_target(write stm32flash -w ${PROJECT_NAME}.bin -v -g 0x0 /dev/ttyUSB2 DEPENDS ${PROJECT_NAME}.bin)

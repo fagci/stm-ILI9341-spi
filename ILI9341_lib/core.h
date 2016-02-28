@@ -3,6 +3,8 @@
 #include <stm32f10x_spi.h>
 #include "delay.h"
 
+#include "../USART_lib/usart.h"
+
 #ifndef TEST1_ILI9341_CORE_H
 #define TEST1_ILI9341_CORE_H
 
@@ -110,14 +112,20 @@
 
 // <editor-fold desc="Functions">
 
-#define TFT_DC_SET      GPIO_SetBits(GPIOA, TFT_DC_PIN);
-#define TFT_DC_RESET    GPIO_ResetBits(GPIOA, TFT_DC_PIN);
+#define TFT_DC_SET      GPIO_SetBits(GPIOA, TFT_DC_PIN); usartSendString("DC+ ");
+#define TFT_DC_RESET    GPIO_ResetBits(GPIOA, TFT_DC_PIN); usartSendString("DC- ");
 
-#define TFT_RST_SET     GPIO_SetBits(GPIOA, TFT_RESET_PIN);
-#define TFT_RST_RESET   GPIO_ResetBits(GPIOA, TFT_RESET_PIN);
+#define TFT_RST_SET     GPIO_SetBits(GPIOA, TFT_RESET_PIN); usartSendString("RST+ ");
+#define TFT_RST_RESET   GPIO_ResetBits(GPIOA, TFT_RESET_PIN); usartSendString("RST- ");
 
-#define TFT_CS_SET      GPIO_SetBits(GPIOA, TFT_CS_PIN);
-#define TFT_CS_RESET    GPIO_ResetBits(GPIOA, TFT_CS_PIN);
+#define TOUCH_CS_SET      GPIO_SetBits(GPIOA, TOUCH_CS_PIN); usartSendString("CS+ ");
+#define TOUCH_CS_RESET      GPIO_ResetBits(GPIOA, TOUCH_CS_PIN); usartSendString("CS- ");
+
+#define TOUCH_GET_X_AXIS() GetAxis(0b10010000)
+#define TOUCH_GET_Y_AXIS() GetAxis(0b11010000)
+
+#define TFT_CS_SET      GPIO_SetBits(GPIOA, TFT_CS_PIN); usartSendString("CS+ ");
+#define TFT_CS_RESET    GPIO_ResetBits(GPIOA, TFT_CS_PIN); usartSendString("CS- ");
 
 #define TFT_LED_SET      GPIO_SetBits(GPIOA, TFT_LED_PIN);
 #define TFT_LED_RESET    GPIO_ResetBits(GPIOA, TFT_LED_PIN);

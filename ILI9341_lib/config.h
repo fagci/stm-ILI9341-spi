@@ -1,12 +1,17 @@
 #ifndef TEST1_CONFIG_H
 #define TEST1_CONFIG_H
 
+
+
 // <editor-fold desc="Defaults">
 
 #define TFT_LED_PIN     GPIO_Pin_0
 #define TFT_RESET_PIN   GPIO_Pin_2
 #define TFT_DC_PIN      GPIO_Pin_3
 #define TFT_CS_PIN      GPIO_Pin_4
+
+#define TOUCH_IRQ_PIN   GPIO_Pin_10
+#define TOUCH_CS_PIN    GPIO_Pin_9
 
 #define SPI_MASTER                   SPI1
 #define SPI_MASTER_CLK               RCC_APB2Periph_SPI1

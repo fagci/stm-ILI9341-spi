@@ -1,4 +1,4 @@
-#include <stm32f10x_usart.h>
+#include "usart.h"
 
 void usartInit(void) {
     GPIO_InitTypeDef  GPIO_InitStruct;
@@ -13,8 +13,8 @@ void usartInit(void) {
     GPIO_InitStruct.GPIO_Mode  = GPIO_Mode_AF_PP;
     GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    GPIO_InitStruct.GPIO_Pin   = GPIO_Pin_11;
-    GPIO_InitStruct.GPIO_Mode  = GPIO_Mode_IN_FLOATING;
+    GPIO_InitStruct.GPIO_Pin  = GPIO_Pin_11;
+    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     USART_DeInit(USART3);
@@ -43,6 +43,12 @@ void usartSendString(char *str) {
     int i = 0;
     while (str[i])
         usartSend(str[i++]);
+}
+
+void usartWrite(int val, u8 base) {
+    char buf[16];
+    itoa(val, buf, base);
+    usartSendString(buf);
 }
 
 //void USART3_IRQHandler(void) {

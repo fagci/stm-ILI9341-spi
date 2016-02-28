@@ -6,8 +6,8 @@
 #include "tiny_stdlib/itoa.h"
 
 int main(void) {
-    LCD_init();
     usartInit();
+    LCD_init();
     LCD_setOrientation(ORIENTATION_LANDSCAPE_MIRROR);
 
     u16 testColor = 0xACE0;
@@ -20,8 +20,16 @@ int main(void) {
     LCD_readPixels(0, 0, 8, 8, px);
 
     for (int i = 0; i < 81; ++i) {
-        LCD_putPixel(9 + i % 9, 9 + i / 9, px[i]);
+        LCD_putPixel(9 + i % 9, i / 9, px[i]);
     }
+
+    LCD_readPixels(9, 0, 17, 8, px);
+
+    for (int i = 0; i < 81; ++i) {
+        LCD_putPixel(17 + i % 9, i / 9, px[i]);
+    }
+
+    TEST_fillPrimitives(20);
 
     while (1);
 }
