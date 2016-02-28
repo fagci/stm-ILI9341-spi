@@ -110,6 +110,7 @@ void LCD_pinsInit() {
 
     SPI_SSOutputCmd(SPI_MASTER, ENABLE);
     SPI_Cmd(SPI_MASTER, ENABLE);
+    SPI_NSSInternalSoftwareConfig(SPI1, SPI_NSSInternalSoft_Set); //!!!!
 }
 
 void LCD_reset() {

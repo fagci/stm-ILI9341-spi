@@ -29,7 +29,7 @@ int main(void) {
         LCD_putPixel(17 + i % 9, i / 9, px[i]);
     }
 
-    TEST_fillPrimitives(20);
+    //TEST_fillPrimitives(20);
 
     while (1);
 }

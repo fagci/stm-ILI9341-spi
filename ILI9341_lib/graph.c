@@ -23,9 +23,8 @@ void LCD_readPixels(u16 x1, u16 y1, u16 x2, u16 y2, u16 *buf) {
         dmaReceiveData8(&blue);
         buf[i] = (u16) ILI9341_COLOR(red, green, blue);
     }
-//    TFT_CS_SET;
+    TFT_CS_SET;
     usartSendString("\r\n\r\n=== END READ ===\r\n");
-    dmaSendCmd(LCD_GRAM);
     // TODO: it is ugliest hack to make spi reusable
 
 //    GPIO_InitTypeDef gpioStructure;

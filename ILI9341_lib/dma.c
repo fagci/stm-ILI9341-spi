@@ -25,6 +25,8 @@ void dmaInit(void) {
     SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx, ENABLE);
 }
 
+#define always_read(x) asm(""::"r"(x))
+
 static void dmaStartRx() {
     DMA_Init(DMA1_Channel2, &dmaStructure);
     dmaWorking = 1;
@@ -32,6 +34,10 @@ static void dmaStartRx() {
 }
 
 static void dmaStartTx() {
+    while (!(SPI1->SR & SPI_SR_TXE)); // Wait for bus free
+    while (SPI1->SR & SPI_SR_BSY);
+    always_read(SPI1->DR); // Clear RX flags
+    always_read(SPI1->SR);
     DMA_Init(DMA1_Channel3, &dmaStructure);
     dmaWorking = 1;
     DMA_Cmd(DMA1_Channel3, ENABLE);
@@ -111,7 +117,7 @@ void dmaSendSomeCont(u8 cmd) {
 
 void dmaReceiveData8(u8 *data) {
     u8 dummy = 0xFF;
-    dmaSend8(&dummy,1);
+    dmaSend8(&dummy, 1);
     dmaReceive8(data, 1);
     dmaWait();
 }
@@ -161,7 +167,7 @@ void dmaFill16(u16 color, u32 n) {
 }
 
 void DMA1_Channel2_IRQHandler(void) {
-    if (DMA_GetITStatus(DMA1_IT_TC2)) {
+    if (DMA_GetITStatus(DMA1_IT_TC2) != RESET) {
         DMA_ClearFlag(DMA1_FLAG_TC2);
         DMA_Cmd(DMA1_Channel2, DISABLE);
         usartSendString("R_IRQ\r\n");
@@ -170,7 +176,7 @@ void DMA1_Channel2_IRQHandler(void) {
 }
 
 void DMA1_Channel3_IRQHandler(void) {
-    if (DMA_GetITStatus(DMA1_IT_TC3)) {
+    if (DMA_GetITStatus(DMA1_IT_TC3) != RESET) {
         DMA_ClearFlag(DMA1_FLAG_TC3);
         DMA_Cmd(DMA1_Channel3, DISABLE);
         usartSendString("T_IRQ\r\n");
