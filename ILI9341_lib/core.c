@@ -31,32 +31,21 @@ static const uint8_t init_commands[] = {
         0
 };
 
-
-//static const uint8_t init_commands[] = {
-//        6, LCD_POWERA, 0x39, 0x2C, 0x00, 0x34, 0x02,
-//        4, LCD_POWERB, 0x00, 0xAA, 0xB0,
-//        2, LCD_PRC, 0x30,
-//
-//        2, LCD_MAC, 0x48,
-//
-//        2, LCD_POWER1, 0x25,
-//        2, LCD_POWER2, 0x11,
-//        3, LCD_VCOM1, 0x5C, 0x4C,
-//        2, LCD_VCOM2, 0x94,
-//
-//        4, LCD_DTCA, 0x85, 0x01, 0x78,
-//        3, LCD_DTCB, 0x00, 0x00,
-//        2, LCD_PIXEL_FORMAT, 0x05,
-//        0
-//};
-
-
 //</editor-fold>
 
 //<editor-fold desc="Generic SPI operations">
 
 u16 screen_width  = LCD_PIXEL_WIDTH;
 u16 screen_height = LCD_PIXEL_HEIGHT;
+
+u8 spiRW(__IO u8 nData) {
+    uint8_t k = 0;
+    SPI_I2S_SendData(SPI1, nData); //Передать байт
+    while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_TXE) == RESET); //Готов к передаче
+    while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_BSY) == SET);   //Освободился передатчик
+    if (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == SET) k = SPI_I2S_ReceiveData(SPI1); //Читаем принятые данные
+    return k;
+}
 
 void LCD_setSpi8(void) {
     SPI1->CR1 &= ~SPI_CR1_SPE; // DISABLE SPI
@@ -106,7 +95,9 @@ void LCD_pinsInit() {
     SPI_StructInit(&spiStructure);
     spiStructure.SPI_Mode              = SPI_Mode_Master;
     spiStructure.SPI_NSS               = SPI_NSS_Soft;
-    spiStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_16;
+    spiStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;
+    spiStructure.SPI_CPOL              = SPI_CPOL_High;
+    spiStructure.SPI_CPHA              = SPI_CPHA_2Edge;
     SPI_Init(SPI_MASTER, &spiStructure);
 
     SPI_SSOutputCmd(SPI_MASTER, ENABLE);

@@ -1,3 +1,4 @@
+#include <stm32f10x.h>
 #include "graph.h"
 
 #define abs(a) ((a)<0?-(a):a)
@@ -11,25 +12,18 @@ void LCD_readPixels(u16 x1, u16 y1, u16 x2, u16 y2, u16 *buf) {
     TFT_CS_SET;
     TFT_DC_RESET;
     TFT_CS_RESET;
-    dmaSendSomeCont(LCD_RAMRD);
+    spiRW(LCD_RAMRD);
     usartSendString("RECV dummy\r\n");
-    dmaReceiveData8(&red); // empty
+    spiRW(0xFF); // empty
 
     usartSendString("RECV dR dG dB\r\n");
     for (int i = 0; i < count; ++i) {
-        dmaReceiveData8(&red);
-        dmaReceiveData8(&green);
-        dmaReceiveData8(&blue);
+        red=spiRW(0xFF);
+        green=spiRW(0xFF);
+        blue=spiRW(0xFF);
         buf[i] = (u16) ILI9341_COLOR(red, green, blue);
     }
     TFT_CS_SET;
-    // TODO: it is ugliest hack to make spi reusable
-
-//    GPIO_InitTypeDef gpioStructure;
-//    gpioStructure.GPIO_Pin   = TFT_CS_PIN;
-//    gpioStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
-//    gpioStructure.GPIO_Speed = GPIO_Speed_50MHz;
-//    GPIO_Init(GPIOA, &gpioStructure);
 }
 
 void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color) {

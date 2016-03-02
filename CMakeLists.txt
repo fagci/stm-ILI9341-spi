@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.4)
-project(Test1)
+project(Test2)
 
 set(PERIPH_LIB /home/fagci/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/)
 include_directories(
@@ -38,21 +38,15 @@ set(STARTUP ${STARTUP}
                 test_suite/primitives.c
         )
 
-#SET(DEBUG_FLAGS "-O3")
 set(DEBUG_FLAGS "-O0 -g")
 
 set(MCU_FLAGS "-march=armv7-m -mcpu=cortex-m3 -mthumb")
 set(CMAKE_C_FLAGS "${MCU_FLAGS} -fno-common -fno-builtin -nostdlib -ffreestanding -Wall ${DEBUG_FLAGS}")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-add_definitions(-DHSE_VALUE=8000000 -DSTM32F103C8 -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER)
-set(CMAKE_EXE_LINKER_FLAGS "${DEBUG_FLAGS} -nostartfiles -T${LINK_SCRIPT}")
+add_definitions(-DSTM32F103C8 -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER)
+set(CMAKE_EXE_LINKER_FLAGS "${DEBUG_FLAGS} -T${LINK_SCRIPT}")
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
 
-set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM BOTH)
-set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-
-cmake_policy(SET CMP0015 OLD)
 add_executable(${PROJECT_NAME}.elf main.c ${STARTUP})
 
 add_custom_command(DEPENDS ${PROJECT_NAME}.elf OUTPUT ${PROJECT_NAME}.hex COMMAND ${CMAKE_OBJCOPY} -Oihex ${PROJECT_NAME}.elf ${PROJECT_NAME}.hex)
@@ -61,4 +55,4 @@ add_custom_command(DEPENDS ${PROJECT_NAME}.elf OUTPUT ${PROJECT_NAME}.bin COMMAN
 add_custom_target(generate_bin ALL DEPENDS ${PROJECT_NAME}.bin)
 add_custom_target(generate_hex ALL DEPENDS ${PROJECT_NAME}.hex)
 
-add_custom_target(write stm32flash -w ${PROJECT_NAME}.bin -v -g 0x0 /dev/ttyUSB2 DEPENDS ${PROJECT_NAME}.bin)
+add_custom_target(write stm32flash -w ${PROJECT_NAME}.bin -g 0x0 /dev/ttyUSB1 DEPENDS ${PROJECT_NAME}.bin)

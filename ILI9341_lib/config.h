@@ -9,7 +9,7 @@
  * 3 - IRQ
  * 4 - cmds, data
  */
-#define __DEBUG_LEVEL 4
+#define __DEBUG_LEVEL 0
 
 // <editor-fold desc="Defaults">
 

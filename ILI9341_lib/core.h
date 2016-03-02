@@ -149,10 +149,7 @@
 #define LCD_PIXEL_HEIGHT      320
 #define LCD_PIXEL_COUNT    LCD_PIXEL_WIDTH * LCD_PIXEL_HEIGHT
 
-void LCD_sendCommand8(u8 cmd);
-void LCD_sendData8(u8 data);
-void LCD_sendData16(u16 data);
-
+u8 spiRW(__IO u8 nData);
 void LCD_setSpi8(void);
 void LCD_setSpi16(void);
 
