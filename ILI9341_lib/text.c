@@ -24,7 +24,7 @@ void LCD_drawChar(u16 x, u16 y, unsigned char c, u16 color, u16 bg, uint8_t size
     u16 charPixels[48 * ds];
 
     if (size == 1) {
-        LCD_setAddressWindow(x, y, (u16) (x + 5), (u16) (y + 7));
+        LCD_setAddressWindowToWrite(x, y, (u16) (x + 5), (u16) (y + 7));
         for (i = 0; i < 6; i++) {
             line   = (u8) (i < 5 ? pgm_read_byte(font + (c * 5) + i) : 0x0);
             for (j = 0; j < 8; j++, line >>= 1) {
@@ -37,7 +37,7 @@ void LCD_drawChar(u16 x, u16 y, unsigned char c, u16 color, u16 bg, uint8_t size
     } else {
         // TODO: make chunks to send large amount of data over DMA
         u16 sw = size * 6;
-        LCD_setAddressWindow(x, y, x + sw - 1, y + 8 * size - 1);
+        LCD_setAddressWindowToWrite(x, y, x + sw - 1, y + 8 * size - 1);
         for (i = 0; i < 6; i++) {
             line   = (u8) (i < 5 ? pgm_read_byte(font + (c * 5) + i) : 0x0);
             for (j = 0; j < 8; j++, line >>= 1) {

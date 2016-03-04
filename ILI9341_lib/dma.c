@@ -1,22 +1,16 @@
-#include <stm32f10x_dma.h>
-#include "core.h"
 #include "dma.h"
 
-u8 dmaWorking = 0;
+u8              dmaWorking = 0;
 DMA_InitTypeDef dmaStructure;
 
-//#if __DEBUG_LEVEL > 2
-//#define dmaWait() usartSendString("(wait) "); while(dmaWorking);
-//#else
 #define dmaWait() while(dmaWorking);
-//#endif
+
+#define dmaStart(channel) DMA_Init(channel, &dmaStructure); \
+    dmaWorking = 1; \
+    DMA_Cmd(channel, ENABLE);
 
 void dmaInit(void) {
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-
-    DMA_StructInit(&dmaStructure);
-    dmaStructure.DMA_PeripheralBaseAddr = (u32) &(SPI1->DR);
-    dmaStructure.DMA_Priority           = DMA_Priority_Medium;
 
     // TX
     NVIC_EnableIRQ(DMA1_Channel3_IRQn);
@@ -26,27 +20,19 @@ void dmaInit(void) {
     NVIC_EnableIRQ(DMA1_Channel2_IRQn);
     DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, ENABLE);
 
-    SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Tx, ENABLE);
-    SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx, ENABLE);
+    SPI_I2S_DMACmd(SPI_MASTER, SPI_I2S_DMAReq_Tx, ENABLE);
+    SPI_I2S_DMACmd(SPI_MASTER, SPI_I2S_DMAReq_Rx, ENABLE);
 }
 
-#define always_read(x) asm(""::"r"(x))
-
 static void dmaStartRx() {
-    DMA_Init(DMA1_Channel2, &dmaStructure);
-    dmaWorking = 1;
-    DMA_Cmd(DMA1_Channel2, ENABLE);
+    dmaStart(DMA1_Channel2);
 }
 
 static void dmaStartTx() {
-    while (!(SPI1->SR & SPI_SR_TXE)); // Wait for bus free
-    while (SPI1->SR & SPI_SR_BSY);
-    always_read(SPI1->DR); // Clear RX flags
-    always_read(SPI1->SR);
-    DMA_Init(DMA1_Channel3, &dmaStructure);
-    dmaWorking = 1;
-    DMA_Cmd(DMA1_Channel3, ENABLE);
+    dmaStart(DMA1_Channel3);
 }
+
+//<editor-fold desc="Dma init options and start">
 
 static void dmaReceive8(u8 *data, u32 n) {
     dmaStructure.DMA_MemoryBaseAddr = (u32) data;
@@ -62,6 +48,10 @@ static void dmaReceive8(u8 *data, u32 n) {
 }
 
 static void dmaSend8(u8 *data, u32 n) {
+    DMA_StructInit(&dmaStructure);
+    dmaStructure.DMA_PeripheralBaseAddr = (u32) &(SPI_MASTER->DR);
+    dmaStructure.DMA_Priority           = DMA_Priority_Medium;
+
     dmaStructure.DMA_MemoryBaseAddr = (u32) data;
     dmaStructure.DMA_BufferSize     = n;
 
@@ -75,6 +65,10 @@ static void dmaSend8(u8 *data, u32 n) {
 }
 
 static void dmaSendCircular16(u16 *data, u32 n) {
+    DMA_StructInit(&dmaStructure);
+    dmaStructure.DMA_PeripheralBaseAddr = (u32) &(SPI_MASTER->DR);
+    dmaStructure.DMA_Priority           = DMA_Priority_Medium;
+
     dmaStructure.DMA_MemoryBaseAddr = (u32) data;
     dmaStructure.DMA_BufferSize     = n;
 
@@ -88,6 +82,10 @@ static void dmaSendCircular16(u16 *data, u32 n) {
 }
 
 static void dmaSend16(u16 *data, u32 n) {
+    DMA_StructInit(&dmaStructure);
+    dmaStructure.DMA_PeripheralBaseAddr = (u32) &(SPI_MASTER->DR);
+    dmaStructure.DMA_Priority           = DMA_Priority_Medium;
+
     dmaStructure.DMA_MemoryBaseAddr = (u32) data;
     dmaStructure.DMA_BufferSize     = n;
 
@@ -100,14 +98,11 @@ static void dmaSend16(u16 *data, u32 n) {
     dmaStartTx();
 }
 
+//</editor-fold>
+
 void dmaSendCmd(u8 cmd) {
-    TFT_DC_RESET;
     TFT_CS_RESET;
-#if __DEBUG_LEVEL > 3
-    usartSendString("<0x");
-    usartWrite(cmd, 16);
-    usartSendString("> ");
-#endif
+    TFT_DC_RESET;
     dmaSend8(&cmd, 1);
     dmaWait();
     TFT_CS_SET;
@@ -115,21 +110,11 @@ void dmaSendCmd(u8 cmd) {
 
 void dmaSendCmdCont(u8 cmd) {
     TFT_DC_RESET;
-#if __DEBUG_LEVEL > 3
-    usartSendString("<0x");
-    usartWrite(cmd, 16);
-    usartSendString("> ");
-#endif
     dmaSend8(&cmd, 1);
     dmaWait();
 }
 
 void dmaSendSomeCont(u8 cmd) {
-#if __DEBUG_LEVEL > 3
-    usartSendString("<0x");
-    usartWrite(cmd, 16);
-    usartSendString("> ");
-#endif
     dmaSend8(&cmd, 1);
     dmaWait();
 }
@@ -138,16 +123,13 @@ void dmaSendSomeCont(u8 cmd) {
 void dmaReceiveData8(u8 *data) {
     u8 dummy = 0xFF;
     dmaSend8(&dummy, 1);
-#if __DEBUG_LEVEL > 3
-    usartSendString("<D rx> ");
-#endif
     dmaReceive8(data, 1);
     dmaWait();
 }
 
 void dmaSendData8(u8 *data, u32 n) {
-    TFT_DC_SET;
     TFT_CS_RESET;
+    TFT_DC_SET;
     dmaSend8(data, n);
     dmaWait();
     TFT_CS_SET;
@@ -155,9 +137,6 @@ void dmaSendData8(u8 *data, u32 n) {
 
 void dmaSendDataCont8(u8 *data, u32 n) {
     TFT_DC_SET;
-#if __DEBUG_LEVEL > 3
-    usartSendString("<D8 tx> ");
-#endif
     dmaSend8(data, n);
     dmaWait();
 }
@@ -165,9 +144,6 @@ void dmaSendDataCont8(u8 *data, u32 n) {
 void dmaSendData16(u16 *data, u32 n) {
     TFT_CS_RESET;
     TFT_DC_SET;
-#if __DEBUG_LEVEL > 3
-    usartSendString("<D16 tx> ");
-#endif
     dmaSend16(data, n);
     dmaWait();
     TFT_CS_SET;
@@ -175,18 +151,12 @@ void dmaSendData16(u16 *data, u32 n) {
 
 void dmaSendDataCont16(u16 *data, u32 n) {
     TFT_DC_SET;
-#if __DEBUG_LEVEL > 3
-    usartSendString("<D16 tx> ");
-#endif
     dmaSend16(data, n);
     dmaWait();
 }
 
 void dmaSendDataCircular16(u16 *data, u32 n) {
     TFT_DC_SET;
-#if __DEBUG_LEVEL > 3
-    usartSendString("<D16 circular tx> ");
-#endif
     dmaSendCircular16(data, n);
     dmaWait();
 }
@@ -202,13 +172,12 @@ void dmaFill16(u16 color, u32 n) {
     TFT_CS_SET;
 }
 
+//<editor-fold desc="IRQ handlers">
+
 void DMA1_Channel2_IRQHandler(void) {
     if (DMA_GetITStatus(DMA1_IT_TC2) != RESET) {
         DMA_ClearFlag(DMA1_FLAG_TC2);
         DMA_Cmd(DMA1_Channel2, DISABLE);
-#if __DEBUG_LEVEL > 2
-        usartSendString("{R_IRQ}\r\n");
-#endif
         dmaWorking = 0;
     }
 }
@@ -217,9 +186,8 @@ void DMA1_Channel3_IRQHandler(void) {
     if (DMA_GetITStatus(DMA1_IT_TC3) != RESET) {
         DMA_ClearFlag(DMA1_FLAG_TC3);
         DMA_Cmd(DMA1_Channel3, DISABLE);
-#if __DEBUG_LEVEL > 2
-        usartSendString("{T_IRQ}\r\n");
-#endif
         dmaWorking = 0;
     }
 }
+
+//</editor-fold>

@@ -7,31 +7,29 @@ void LCD_readPixels(u16 x1, u16 y1, u16 x2, u16 y2, u16 *buf) {
     u8  red, green, blue;
     u32 count = (u32) ((x2 - x1 + 1) * (y2 - y1 + 1));
 
-    LCD_setAddressWindow(x1, y1, x2, y2);
-    usartSendString("\r\n[pixels read]\r\n");
-    TFT_CS_SET;
-    TFT_DC_RESET;
-    TFT_CS_RESET;
-    spiRW(LCD_RAMRD);
-    usartSendString("RECV dummy\r\n");
-    spiRW(0xFF); // empty
+    LCD_setAddressWindowToRead(x1, y1, x2, y2);
 
-    usartSendString("RECV dR dG dB\r\n");
+    TFT_CS_RESET;
+    TFT_DC_SET;
+
+    LCD_spiRW8(0xFF); // empty
+
     for (int i = 0; i < count; ++i) {
-        red=spiRW(0xFF);
-        green=spiRW(0xFF);
-        blue=spiRW(0xFF);
+        red   = LCD_spiRW8(0xFF);
+        green = LCD_spiRW8(0xFF);
+        blue  = LCD_spiRW8(0xFF);
+
         buf[i] = (u16) ILI9341_COLOR(red, green, blue);
     }
+
     TFT_CS_SET;
+
+
 }
 
 void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
     u32 count = w * h;
-    LCD_setAddressWindow(x1, y1, (u16) (x1 + w - 1), (u16) (y1 + h - 1));
-#if __DEBUG_LEVEL > 0
-    usartSendString("\r\n[fill rect]\r\n");
-#endif
+    LCD_setAddressWindowToWrite(x1, y1, (u16) (x1 + w - 1), (u16) (y1 + h - 1));
     LCD_setSpi16();
     dmaFill16(color, count);
     LCD_setSpi8();
@@ -171,4 +169,3 @@ void LCD_drawRect(u16 x, u16 y, u16 w, u16 h, u16 color) {
     LCD_drawFastVLine(x, y, h, color);
     LCD_drawFastVLine((u16) (x + w - 1), y, h, color);
 }
-
