@@ -1,3 +1,4 @@
+#include <stm32f10x_spi.h>
 #include "core.h"
 
 //<editor-fold desc="Init commands">
@@ -32,18 +33,6 @@ u16 screen_height = LCD_PIXEL_HEIGHT;
 
 //<editor-fold desc="SPI functions">
 
-u16 LCD_spiRW16(u16 data) {
-    SPI_I2S_SendData(SPI_MASTER, data);
-    while (SPI_I2S_GetFlagStatus(SPI_MASTER, SPI_I2S_FLAG_TXE) == RESET); // wait while is not ready to tx
-    while (SPI_I2S_GetFlagStatus(SPI_MASTER, SPI_I2S_FLAG_BSY) == SET);   // wait while tx line is busy
-    if (SPI_I2S_GetFlagStatus(SPI_MASTER, SPI_I2S_FLAG_RXNE) == SET) return SPI_I2S_ReceiveData(SPI_MASTER);
-    return 0;
-}
-
-u8 LCD_spiRW8(u8 data) {
-    return (u8) LCD_spiRW16(data);
-}
-
 void LCD_setSpi8(void) {
     SPI_MASTER->CR1 &= ~SPI_CR1_SPE; // DISABLE SPI
     SPI_MASTER->CR1 &= ~SPI_CR1_DFF; // SPI 8
@@ -76,7 +65,7 @@ void LCD_pinsInit() {
     GPIO_Init(GPIOA, &gpioStructure);
 
     // GPIO for SPI
-    gpioStructure.GPIO_Pin  = SPI_MASTER_PIN_NSS | SPI_MASTER_PIN_SCK | SPI_MASTER_PIN_MOSI;
+    gpioStructure.GPIO_Pin  = SPI_MASTER_PIN_SCK | SPI_MASTER_PIN_MOSI;
     gpioStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_Init(SPI_MASTER_GPIO, &gpioStructure);
 
@@ -90,6 +79,7 @@ void LCD_pinsInit() {
     spiStructure.SPI_NSS  = SPI_NSS_Soft;
     spiStructure.SPI_CPOL = SPI_CPOL_High;
     spiStructure.SPI_CPHA = SPI_CPHA_2Edge;
+    spiStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4;
     SPI_Init(SPI_MASTER, &spiStructure);
 
     SPI_SSOutputCmd(SPI_MASTER, ENABLE);
@@ -133,42 +123,22 @@ void LCD_setOrientation(u8 o) {
     TFT_CS_SET;
 }
 
-//void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
-//    u16 pointData[2];
-//
-//    TFT_CS_RESET;
-//    dmaSendCmdCont(LCD_COLUMN_ADDR);
-//    pointData[0] = x1;
-//    pointData[1] = x2;
-//    LCD_setSpi16();
-//    dmaSendDataCont16(pointData, 2);
-//    LCD_setSpi8();
-//
-//    dmaSendCmdCont(LCD_PAGE_ADDR);
-//    pointData[0] = y1;
-//    pointData[1] = y2;
-//    LCD_setSpi16();
-//    dmaSendDataCont16(pointData, 2);
-//    LCD_setSpi8();
-//    TFT_CS_SET;
-//}
-
 void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
+    u16 pointData[2];
+
     TFT_CS_RESET;
-    TFT_DC_RESET;
-    LCD_spiRW8(LCD_COLUMN_ADDR);
+    dmaSendCmdCont(LCD_COLUMN_ADDR);
+    pointData[0] = x1;
+    pointData[1] = x2;
     LCD_setSpi16();
-    TFT_DC_SET;
-    LCD_spiRW16(x1);
-    LCD_spiRW16(x2);
+    dmaSendDataCont16(pointData, 2);
     LCD_setSpi8();
 
-    TFT_DC_RESET;
     dmaSendCmdCont(LCD_PAGE_ADDR);
+    pointData[0] = y1;
+    pointData[1] = y2;
     LCD_setSpi16();
-    TFT_DC_SET;
-    LCD_spiRW16(y1);
-    LCD_spiRW16(y2);
+    dmaSendDataCont16(pointData, 2);
     LCD_setSpi8();
     TFT_CS_SET;
 }

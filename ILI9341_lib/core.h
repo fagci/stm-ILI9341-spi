@@ -18,9 +18,6 @@
 u16 LCD_getWidth();
 u16 LCD_getHeight();
 
-u8  LCD_spiRW8(u8 data);
-u16 LCD_spiRW16(u16 data);
-
 void LCD_setSpi8(void);
 void LCD_setSpi16(void);
 

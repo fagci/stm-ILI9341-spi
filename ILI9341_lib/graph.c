@@ -12,12 +12,12 @@ void LCD_readPixels(u16 x1, u16 y1, u16 x2, u16 y2, u16 *buf) {
     TFT_CS_RESET;
     TFT_DC_SET;
 
-    LCD_spiRW8(0xFF); // empty
+    dmaReceiveData8(&red);
 
     for (int i = 0; i < count; ++i) {
-        red   = LCD_spiRW8(0xFF);
-        green = LCD_spiRW8(0xFF);
-        blue  = LCD_spiRW8(0xFF);
+        dmaReceiveData8(&red);
+        dmaReceiveData8(&green);
+        dmaReceiveData8(&blue);
 
         buf[i] = (u16) ILI9341_COLOR(red, green, blue);
     }
