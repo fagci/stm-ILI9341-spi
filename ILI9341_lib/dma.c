@@ -175,18 +175,18 @@ void dmaFill16(u16 color, u32 n) {
 //<editor-fold desc="IRQ handlers">
 
 void DMA1_Channel2_IRQHandler(void) {
-    if (DMA_GetITStatus(DMA1_IT_TC2) != RESET) {
-        DMA_ClearFlag(DMA1_FLAG_TC2);
-        DMA_Cmd(DMA1_Channel2, DISABLE);
+    if (DMA_GetITStatus(DMA1_IT_TC2) == SET) {
         dmaWorking = 0;
+        DMA_Cmd(DMA1_Channel2, DISABLE);
+        DMA_ClearITPendingBit(DMA1_IT_TC2);
     }
 }
 
 void DMA1_Channel3_IRQHandler(void) {
-    if (DMA_GetITStatus(DMA1_IT_TC3) != RESET) {
-        DMA_ClearFlag(DMA1_FLAG_TC3);
-        DMA_Cmd(DMA1_Channel3, DISABLE);
+    if (DMA_GetITStatus(DMA1_IT_TC3) == SET) {
         dmaWorking = 0;
+        DMA_Cmd(DMA1_Channel3, DISABLE);
+        DMA_ClearITPendingBit(DMA1_IT_TC3);
     }
 }
 
