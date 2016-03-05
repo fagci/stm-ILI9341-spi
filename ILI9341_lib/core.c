@@ -71,7 +71,7 @@ void LCD_pinsInit() {
     gpioStructure.GPIO_Speed = GPIO_Speed_50MHz;
 
     // GPIO for CS/DC/LED/RESET
-    gpioStructure.GPIO_Pin  = TFT_CS_PIN | TFT_DC_PIN | TFT_RESET_PIN | TFT_LED_PIN | TOUCH_CS_PIN;
+    gpioStructure.GPIO_Pin  = TFT_CS_PIN | TFT_DC_PIN | TFT_RESET_PIN | TFT_LED_PIN;
     gpioStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_Init(GPIOA, &gpioStructure);
 

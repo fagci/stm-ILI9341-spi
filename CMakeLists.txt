@@ -55,4 +55,6 @@ add_custom_command(DEPENDS ${PROJECT_NAME}.elf OUTPUT ${PROJECT_NAME}.bin COMMAN
 add_custom_target(generate_bin ALL DEPENDS ${PROJECT_NAME}.bin)
 add_custom_target(generate_hex ALL DEPENDS ${PROJECT_NAME}.hex)
 
-add_custom_target(write stm32flash -w ${PROJECT_NAME}.bin -g 0x0 /dev/ttyUSB1 DEPENDS ${PROJECT_NAME}.bin)
+add_custom_target(write0 stm32flash -w ${PROJECT_NAME}.bin -g 0x0 /dev/ttyUSB0 DEPENDS ${PROJECT_NAME}.bin)
+add_custom_target(write1 stm32flash -w ${PROJECT_NAME}.bin -g 0x0 /dev/ttyUSB1 DEPENDS ${PROJECT_NAME}.bin)
+add_custom_target(write2 stm32flash -w ${PROJECT_NAME}.bin -g 0x0 /dev/ttyUSB2 DEPENDS ${PROJECT_NAME}.bin)

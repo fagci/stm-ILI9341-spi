@@ -10,16 +10,21 @@ int main(void) {
     usartInit();
     LCD_setOrientation(ORIENTATION_LANDSCAPE_MIRROR);
 
-    usartSendString("BEGIN\r\n");
+    usartPrintLn("BEGIN");
 
     LCD_fillScreen(BLACK);
     LCD_putPixel(50, 50, testColor);
     LCD_readPixels(50, 50, 50, 50, px);
-    if(px[0] == testColor) usartSendString("READ OK\r\n");
-    usartWrite(px[0], 16);
+
+    if(px[0] == testColor) usartPrintLn("READ OK");
+
+    usartPrint("0x");
+    usartPrintNum(px[0], 16);
+    usartPrintLn("");
+
     LCD_fillScreen(RED);
 
-    usartSendString("END\r\n");
+    usartPrintLn("END");
 
     while (1);
 }

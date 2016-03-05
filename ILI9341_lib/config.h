@@ -8,9 +8,6 @@
 #define TFT_DC_PIN      GPIO_Pin_3
 #define TFT_CS_PIN      GPIO_Pin_4
 
-#define TOUCH_IRQ_PIN   GPIO_Pin_10
-#define TOUCH_CS_PIN    GPIO_Pin_9
-
 #define SPI_MASTER                   SPI1
 #define SPI_MASTER_CLK               RCC_APB2Periph_SPI1
 #define SPI_MASTER_GPIO              GPIOA

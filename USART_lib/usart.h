@@ -4,9 +4,11 @@
 #include <stm32f10x_usart.h>
 #include "../tiny_stdlib/itoa.h"
 
-void usartSendString(char *str);
-void usartSend(char chr);
+void usartWrite(char chr);
 void usartInit(void);
-void usartWrite(int val, u8 base);
+
+void usartPrint(const char *str);
+void usartPrintLn(const char *str);
+void usartPrintNum(int val, u8 base);
 
 #endif //TEST1_USART_H
