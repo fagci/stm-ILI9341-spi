@@ -3,7 +3,7 @@
 #include "ILI9341_lib/graph.h"
 
 int main(void) {
-    u16 px[1];
+    u16 px[200];
     u16 testColor = 0xACE0;
 
     LCD_init();
@@ -13,16 +13,20 @@ int main(void) {
     usartPrintLn("BEGIN");
 
     LCD_fillScreen(BLACK);
-    LCD_putPixel(50, 50, testColor);
-    LCD_readPixels(50, 50, 50, 50, px);
 
-    if(px[0] == testColor) usartPrintLn("READ OK");
+    LCD_drawCircle(10, 10, 5, testColor);
 
-    usartPrint("0x");
-    usartPrintNum(px[0], 16);
-    usartPrintLn("");
+    LCD_readPixels(4, 4, 16, 16, px);
 
     LCD_fillScreen(RED);
+
+    u16 d = 13;
+
+    for (u16 x = 0; x < d; ++x) {
+        for (u16 y = 0; y < d; ++y) {
+            LCD_putPixel(x, y, px[y * d + x]);
+        }
+    }
 
     usartPrintLn("END");
 
