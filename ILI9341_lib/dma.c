@@ -2,11 +2,6 @@
 
 DMA_InitTypeDef dmaStructure;
 
-#define dmaWait() while(SPI_I2S_GetFlagStatus(SPI_MASTER,SPI_I2S_FLAG_BSY) == SET);
-
-#define dmaStart(channel) DMA_Init(channel, &dmaStructure); \
-    DMA_Cmd(channel, ENABLE);
-
 void dmaInit(void) {
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
@@ -20,14 +15,6 @@ void dmaInit(void) {
 
     SPI_I2S_DMACmd(SPI_MASTER, SPI_I2S_DMAReq_Tx, ENABLE);
     SPI_I2S_DMACmd(SPI_MASTER, SPI_I2S_DMAReq_Rx, ENABLE);
-}
-
-static void dmaStartRx() {
-    dmaStart(DMA1_Channel2);
-}
-
-static void dmaStartTx() {
-    dmaStart(DMA1_Channel3);
 }
 
 //<editor-fold desc="Dma init options and start">
@@ -98,6 +85,8 @@ static void dmaSend16(u16 *data, u32 n) {
 
 //</editor-fold>
 
+//<editor-fold desc="DMA send receive functions">
+
 void dmaSendCmd(u8 cmd) {
     TFT_CS_RESET;
     TFT_DC_RESET;
@@ -112,13 +101,7 @@ void dmaSendCmdCont(u8 cmd) {
     dmaWait();
 }
 
-void dmaSendSomeCont(u8 cmd) {
-    dmaSend8(&cmd, 1);
-    dmaWait();
-}
-
-
-void dmaReceiveData8(u8 *data) {
+void dmaReceiveDataCont8(u8 *data) {
     u8 dummy = 0xFF;
     dmaSend8(&dummy, 1);
     dmaReceive8(data, 1);
@@ -158,6 +141,8 @@ void dmaSendDataCircular16(u16 *data, u32 n) {
     dmaSendCircular16(data, n);
     dmaWait();
 }
+
+//</editor-fold>
 
 void dmaFill16(u16 color, u32 n) {
     TFT_CS_RESET;

@@ -1,8 +1,6 @@
 #include <stm32f10x.h>
 #include "graph.h"
 
-#define abs(a) ((a)<0?-(a):a)
-
 void LCD_readPixels(u16 x1, u16 y1, u16 x2, u16 y2, u16 *buf) {
     u8  red, green, blue;
     u32 count = (u32) ((x2 - x1 + 1) * (y2 - y1 + 1));
@@ -12,12 +10,12 @@ void LCD_readPixels(u16 x1, u16 y1, u16 x2, u16 y2, u16 *buf) {
     TFT_CS_RESET;
     TFT_DC_SET;
 
-    dmaReceiveData8(&red);
+    dmaReceiveDataCont8(&red);
 
-    for (int i = 0; i < count; ++i) {
-        dmaReceiveData8(&red);
-        dmaReceiveData8(&green);
-        dmaReceiveData8(&blue);
+    for (u32 i = 0; i < count; ++i) {
+        dmaReceiveDataCont8(&red);
+        dmaReceiveDataCont8(&green);
+        dmaReceiveDataCont8(&blue);
 
         buf[i] = (u16) ILI9341_COLOR(red, green, blue);
     }

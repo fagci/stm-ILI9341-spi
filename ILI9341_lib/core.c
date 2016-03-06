@@ -1,6 +1,9 @@
 #include <stm32f10x_spi.h>
 #include "core.h"
 
+u16 screen_width  = LCD_PIXEL_WIDTH,
+    screen_height = LCD_PIXEL_HEIGHT;
+
 //<editor-fold desc="Init commands">
 
 static const uint8_t init_commands[] = {
@@ -44,21 +47,7 @@ static const uint8_t init_commands[] = {
 
 //</editor-fold>
 
-//<editor-fold desc="SPI functions">
-
-void LCD_setSpi8(void) {
-    SPI_MASTER->CR1 &= ~SPI_CR1_SPE; // DISABLE SPI
-    SPI_MASTER->CR1 &= ~SPI_CR1_DFF; // SPI 8
-    SPI_MASTER->CR1 |= SPI_CR1_SPE;  // ENABLE SPI
-}
-
-void LCD_setSpi16(void) {
-    SPI_MASTER->CR1 &= ~SPI_CR1_SPE; // DISABLE SPI
-    SPI_MASTER->CR1 |= SPI_CR1_DFF;  // SPI 16
-    SPI_MASTER->CR1 |= SPI_CR1_SPE;  // ENABLE SPI
-}
-
-// </editor-fold>
+//<editor-fold desc="LCD initialization functions">
 
 void LCD_pinsInit() {
     SPI_InitTypeDef  spiStructure;
@@ -113,16 +102,38 @@ void LCD_exitStandby() {
     dmaSendCmd(LCD_DISPLAY_ON);
 }
 
-u16 screen_width  = LCD_PIXEL_WIDTH,
-    screen_height = LCD_PIXEL_HEIGHT;
+void LCD_configure() {
+    u8 count;
+    u8 *address = (u8 *) init_commands;
 
-u16 LCD_getWidth() {
-    return screen_width;
+    TFT_CS_RESET;
+    while (1) {
+        count = *(address++);
+        if (count-- == 0) break;
+        dmaSendCmdCont(*(address++));
+        dmaSendDataCont8(address, count);
+        address += count;
+    }
+    TFT_CS_SET;
+
+    LCD_setOrientation(0);
+    LCD_setAddressWindow(0, 0, screen_width, screen_height);
 }
 
-u16 LCD_getHeight() {
-    return screen_height;
+void LCD_init() {
+    LCD_pinsInit();
+    dmaInit();
+
+    LCD_reset();
+    LCD_exitStandby();
+    LCD_configure();
+
+    TFT_LED_SET;
 }
+
+//</editor-fold>
+
+//<editor-fold desc="LCD common operations">
 
 void LCD_setOrientation(u8 o) {
     if (o == ORIENTATION_LANDSCAPE || o == ORIENTATION_LANDSCAPE_MIRROR) {
@@ -158,31 +169,28 @@ void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
     TFT_CS_SET;
 }
 
-void LCD_configure() {
-    u8 count;
-    u8 *address = (u8 *) init_commands;
-
-    TFT_CS_RESET;
-    while (1) {
-        count = *(address++);
-        if (count-- == 0) break;
-        dmaSendCmdCont(*(address++));
-        dmaSendDataCont8(address, count);
-        address += count;
-    }
-    TFT_CS_SET;
-
-    LCD_setOrientation(0);
-    LCD_setAddressWindow(0, 0, screen_width, screen_height);
+u16 LCD_getWidth() {
+    return screen_width;
 }
 
-void LCD_init() {
-    LCD_pinsInit();
-    dmaInit();
-
-    LCD_reset();
-    LCD_exitStandby();
-    LCD_configure();
-
-    TFT_LED_SET;
+u16 LCD_getHeight() {
+    return screen_height;
 }
+
+//</editor-fold>
+
+//<editor-fold desc="SPI functions">
+
+void LCD_setSpi8(void) {
+    SPI_MASTER->CR1 &= ~SPI_CR1_SPE; // DISABLE SPI
+    SPI_MASTER->CR1 &= ~SPI_CR1_DFF; // SPI 8
+    SPI_MASTER->CR1 |= SPI_CR1_SPE;  // ENABLE SPI
+}
+
+void LCD_setSpi16(void) {
+    SPI_MASTER->CR1 &= ~SPI_CR1_SPE; // DISABLE SPI
+    SPI_MASTER->CR1 |= SPI_CR1_DFF;  // SPI 16
+    SPI_MASTER->CR1 |= SPI_CR1_SPE;  // ENABLE SPI
+}
+
+// </editor-fold>

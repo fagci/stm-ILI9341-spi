@@ -19,29 +19,29 @@ set(LINK_SCRIPT /home/fagci/ClionProjects/Test2/stm32f10x.ld)
 set(STARTUP system_stm32f10x.c startup_stm32f10x.c)
 set(STARTUP ${STARTUP}
         ${PERIPH_LIB_SRC}/stm32f10x_rcc.c
-        ${PERIPH_LIB_SRC}/stm32f10x_tim.c
+#        ${PERIPH_LIB_SRC}/stm32f10x_tim.c
         ${PERIPH_LIB_SRC}/stm32f10x_gpio.c
-        ${PERIPH_LIB_SRC}/stm32f10x_exti.c
+#        ${PERIPH_LIB_SRC}/stm32f10x_exti.c
         ${PERIPH_LIB_SRC}/stm32f10x_spi.c
         ${PERIPH_LIB_SRC}/stm32f10x_dma.c
-        ${PERIPH_LIB_SRC}/stm32f10x_usart.c
-        ${PERIPH_LIB_SRC}/misc.c
-                tiny_stdlib/itoa.c
+#        ${PERIPH_LIB_SRC}/stm32f10x_usart.c
+#        tiny_stdlib/itoa.c
         ILI9341_lib/delay.c
         ILI9341_lib/core.c
         ILI9341_lib/dma.c
         ILI9341_lib/graph.c
 #        ILI9341_lib/text.c
-                USART_lib/usart.c
+#                USART_lib/usart.c
 #                test_suite/fps_counter.c
 #                test_suite/fill.c
 #                test_suite/primitives.c
         )
 
-set(DEBUG_FLAGS "-O0 -g")
+set(DEBUG_FLAGS "-O9")
+#set(DEBUG_FLAGS "-O0 -g")
 
 set(MCU_FLAGS "-march=armv7-m -mcpu=cortex-m3 -mthumb")
-set(CMAKE_C_FLAGS "${MCU_FLAGS} -fno-common -fno-builtin -nostdlib -ffreestanding -Wall ${DEBUG_FLAGS}")
+set(CMAKE_C_FLAGS "${MCU_FLAGS} -fno-common -fno-builtin -nostdlib -ffreestanding -pedantic -std=c99 -Wall ${DEBUG_FLAGS}")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 add_definitions(-DSTM32F103C8 -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER)
 set(CMAKE_EXE_LINKER_FLAGS "${DEBUG_FLAGS} -T${LINK_SCRIPT}")

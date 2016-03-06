@@ -1,20 +1,21 @@
-#include "core.h"
-#include "dma.h"
-
 #ifndef TEST1_ILI9341_H
 #define TEST1_ILI9341_H
 
+#include "core.h"
+#include "dma.h"
+
 #ifndef _int16_swap
 #define _int16_swap(a, b) { int16_t t = a; a = b; b = t; }
+#endif
+
+#ifndef abs
+#define abs(a) ((a)<0?-(a):a)
 #endif
 
 #define ILI9341_COLOR(r, g, b)\
      ((((uint16_t)b) >> 3) |\
             ((((uint16_t)g) << 3) & 0x07E0) |\
             ((((uint16_t)r) << 8) & 0xf800))
-
-void LCD_init();
-
 
 void LCD_readPixels(u16 x1, u16 y1, u16 x2, u16 y2, u16 *buf);
 
