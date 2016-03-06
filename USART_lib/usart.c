@@ -1,4 +1,4 @@
-#include <stm32f10x_usart.h>
+#include "usart.h"
 
 void usartInit(void) {
     GPIO_InitTypeDef  GPIO_InitStruct;
@@ -13,8 +13,8 @@ void usartInit(void) {
     GPIO_InitStruct.GPIO_Mode  = GPIO_Mode_AF_PP;
     GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    GPIO_InitStruct.GPIO_Pin   = GPIO_Pin_11;
-    GPIO_InitStruct.GPIO_Mode  = GPIO_Mode_IN_FLOATING;
+    GPIO_InitStruct.GPIO_Pin  = GPIO_Pin_11;
+    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     USART_DeInit(USART3);
@@ -26,29 +26,27 @@ void usartInit(void) {
     USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
     USART_Init(USART3, &USART_InitStructure);
 
-//    USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
-//    NVIC_EnableIRQ(USART3_IRQn);
-
     USART_Cmd(USART3, ENABLE);
 }
 
-void usartSend(char chr) {
+void usartWrite(char chr) {
     while (USART_GetFlagStatus(USART3, USART_FLAG_TC) == RESET);
-    USART_SendData(USART3, (chr & 0xFF));
-//    while (!(USART3->SR & USART_FLAG_TXE));
-//    USART3->DR = (uint16_t) (chr & 0xFF);
+    USART_SendData(USART3, (uint16_t) (chr & 0xFF));
 }
 
-void usartSendString(char *str) {
+void usartPrint(const char *str) {
     int i = 0;
     while (str[i])
-        usartSend(str[i++]);
+        usartWrite(str[i++]);
 }
 
-//void USART3_IRQHandler(void) {
-//    // Обработка события RXNE
-//    if (USART_GetITStatus(USART3, USART_IT_RXNE)) {
-//        USART_ClearITPendingBit(USART3, USART_IT_RXNE);
-//        usartSendString("GOT!\r\n");
-//    };
-//};
+void usartPrintLn(const char *str) {
+    usartPrint(str);
+    usartPrint("\r\n");
+}
+
+void usartPrintNum(int val, u8 base) {
+    char buf[16];
+    itoa(val, buf, base);
+    usartPrint(buf);
+}

@@ -1,17 +1,14 @@
-#include <stm32f10x_dma.h>
-#include "core.h"
 #include "dma.h"
 
-u8 dmaWorking = 0;
-#define dmaWait() while(dmaWorking);
 DMA_InitTypeDef dmaStructure;
+
+#define dmaWait() while(SPI_I2S_GetFlagStatus(SPI_MASTER,SPI_I2S_FLAG_BSY) == SET);
+
+#define dmaStart(channel) DMA_Init(channel, &dmaStructure); \
+    DMA_Cmd(channel, ENABLE);
 
 void dmaInit(void) {
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-
-    DMA_StructInit(&dmaStructure);
-    dmaStructure.DMA_PeripheralBaseAddr = (u32) &(SPI1->DR);
-    dmaStructure.DMA_Priority           = DMA_Priority_Medium;
 
     // TX
     NVIC_EnableIRQ(DMA1_Channel3_IRQn);
@@ -21,23 +18,19 @@ void dmaInit(void) {
     NVIC_EnableIRQ(DMA1_Channel2_IRQn);
     DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, ENABLE);
 
-    SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Tx, ENABLE);
-    SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Rx, ENABLE);
+    SPI_I2S_DMACmd(SPI_MASTER, SPI_I2S_DMAReq_Tx, ENABLE);
+    SPI_I2S_DMACmd(SPI_MASTER, SPI_I2S_DMAReq_Rx, ENABLE);
 }
 
 static void dmaStartRx() {
-    DMA_Init(DMA1_Channel2, &dmaStructure);
-    dmaWorking = 1;
-    TFT_CS_RESET;
-    DMA_Cmd(DMA1_Channel2, ENABLE);
+    dmaStart(DMA1_Channel2);
 }
 
 static void dmaStartTx() {
-    DMA_Init(DMA1_Channel3, &dmaStructure);
-    dmaWorking = 1;
-    TFT_CS_RESET;
-    DMA_Cmd(DMA1_Channel3, ENABLE);
+    dmaStart(DMA1_Channel3);
 }
+
+//<editor-fold desc="Dma init options and start">
 
 static void dmaReceive8(u8 *data, u32 n) {
     dmaStructure.DMA_MemoryBaseAddr = (u32) data;
@@ -53,6 +46,10 @@ static void dmaReceive8(u8 *data, u32 n) {
 }
 
 static void dmaSend8(u8 *data, u32 n) {
+    DMA_StructInit(&dmaStructure);
+    dmaStructure.DMA_PeripheralBaseAddr = (u32) &(SPI_MASTER->DR);
+    dmaStructure.DMA_Priority           = DMA_Priority_Medium;
+
     dmaStructure.DMA_MemoryBaseAddr = (u32) data;
     dmaStructure.DMA_BufferSize     = n;
 
@@ -66,6 +63,10 @@ static void dmaSend8(u8 *data, u32 n) {
 }
 
 static void dmaSendCircular16(u16 *data, u32 n) {
+    DMA_StructInit(&dmaStructure);
+    dmaStructure.DMA_PeripheralBaseAddr = (u32) &(SPI_MASTER->DR);
+    dmaStructure.DMA_Priority           = DMA_Priority_Medium;
+
     dmaStructure.DMA_MemoryBaseAddr = (u32) data;
     dmaStructure.DMA_BufferSize     = n;
 
@@ -79,6 +80,10 @@ static void dmaSendCircular16(u16 *data, u32 n) {
 }
 
 static void dmaSend16(u16 *data, u32 n) {
+    DMA_StructInit(&dmaStructure);
+    dmaStructure.DMA_PeripheralBaseAddr = (u32) &(SPI_MASTER->DR);
+    dmaStructure.DMA_Priority           = DMA_Priority_Medium;
+
     dmaStructure.DMA_MemoryBaseAddr = (u32) data;
     dmaStructure.DMA_BufferSize     = n;
 
@@ -91,27 +96,58 @@ static void dmaSend16(u16 *data, u32 n) {
     dmaStartTx();
 }
 
+//</editor-fold>
+
 void dmaSendCmd(u8 cmd) {
+    TFT_CS_RESET;
+    TFT_DC_RESET;
+    dmaSend8(&cmd, 1);
+    dmaWait();
+    TFT_CS_SET;
+}
+
+void dmaSendCmdCont(u8 cmd) {
     TFT_DC_RESET;
     dmaSend8(&cmd, 1);
     dmaWait();
 }
 
+void dmaSendSomeCont(u8 cmd) {
+    dmaSend8(&cmd, 1);
+    dmaWait();
+}
+
+
 void dmaReceiveData8(u8 *data) {
     u8 dummy = 0xFF;
-    dmaSend8(&dummy,1);
-    TFT_DC_SET;
+    dmaSend8(&dummy, 1);
     dmaReceive8(data, 1);
     dmaWait();
 }
 
 void dmaSendData8(u8 *data, u32 n) {
+    TFT_CS_RESET;
+    TFT_DC_SET;
+    dmaSend8(data, n);
+    dmaWait();
+    TFT_CS_SET;
+}
+
+void dmaSendDataCont8(u8 *data, u32 n) {
     TFT_DC_SET;
     dmaSend8(data, n);
     dmaWait();
 }
 
 void dmaSendData16(u16 *data, u32 n) {
+    TFT_CS_RESET;
+    TFT_DC_SET;
+    dmaSend16(data, n);
+    dmaWait();
+    TFT_CS_SET;
+}
+
+void dmaSendDataCont16(u16 *data, u32 n) {
     TFT_DC_SET;
     dmaSend16(data, n);
     dmaWait();
@@ -124,27 +160,30 @@ void dmaSendDataCircular16(u16 *data, u32 n) {
 }
 
 void dmaFill16(u16 color, u32 n) {
+    TFT_CS_RESET;
+    dmaSendCmdCont(LCD_GRAM);
     while (n != 0) {
         u16 ts = (u16) (n > UINT16_MAX ? UINT16_MAX : n);
         dmaSendDataCircular16(&color, ts);
         n -= ts;
     }
+    TFT_CS_SET;
 }
 
+//<editor-fold desc="IRQ handlers">
+
 void DMA1_Channel2_IRQHandler(void) {
-    if (DMA_GetITStatus(DMA1_IT_TC2)) {
-        DMA_ClearFlag(DMA1_FLAG_TC2);
+    if (DMA_GetITStatus(DMA1_IT_TC2) == SET) {
         DMA_Cmd(DMA1_Channel2, DISABLE);
-        TFT_CS_SET;
-        dmaWorking = 0;
+        DMA_ClearITPendingBit(DMA1_IT_TC2);
     }
 }
 
 void DMA1_Channel3_IRQHandler(void) {
-    if (DMA_GetITStatus(DMA1_IT_TC3)) {
-        DMA_ClearFlag(DMA1_FLAG_TC3);
+    if (DMA_GetITStatus(DMA1_IT_TC3) == SET) {
         DMA_Cmd(DMA1_Channel3, DISABLE);
-        TFT_CS_SET;
-        dmaWorking = 0;
+        DMA_ClearITPendingBit(DMA1_IT_TC3);
     }
 }
+
+//</editor-fold>

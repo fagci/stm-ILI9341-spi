@@ -1,27 +1,35 @@
 #include <stm32f10x_dma.h>
 #include "USART_lib/usart.h"
-#include "ILI9341_lib/text.h"
-#include "test_suite/primitives.h"
-
-#include "tiny_stdlib/itoa.h"
+#include "ILI9341_lib/graph.h"
 
 int main(void) {
+    u16 px[200];
+    u16 testColor = 0xACE0;
+
     LCD_init();
     usartInit();
     LCD_setOrientation(ORIENTATION_LANDSCAPE_MIRROR);
 
-    u16 testColor = 0xACE0;
-    LCD_fillScreen(testColor);
+    usartPrintLn("BEGIN");
+    for (int i = 0; i < 10; i++) {
+        LCD_fillScreen(GREEN);
+        LCD_fillScreen(BLACK);
+        LCD_drawCircle(10, 10, 5, testColor);
 
-    u16 px[81];
 
-    LCD_fillCircle(3, 3, 3, RED);
+        LCD_readPixels(4, 4, 16, 16, px);
 
-    LCD_readPixels(0, 0, 8, 8, px);
+        LCD_fillScreen(RED);
 
-    for (int i = 0; i < 81; ++i) {
-        LCD_putPixel(9 + i % 9, 9 + i / 9, px[i]);
+        u16 d = 13;
+
+        for (u16 x = 0; x < d; ++x) {
+            for (u16 y = 0; y < d; ++y) {
+                LCD_putPixel(x, y, px[y * d + x]);
+            }
+        }
     }
+    usartPrintLn("END");
 
     while (1);
 }

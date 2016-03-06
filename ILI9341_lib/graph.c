@@ -1,3 +1,4 @@
+#include <stm32f10x.h>
 #include "graph.h"
 
 #define abs(a) ((a)<0?-(a):a)
@@ -6,30 +7,27 @@ void LCD_readPixels(u16 x1, u16 y1, u16 x2, u16 y2, u16 *buf) {
     u8  red, green, blue;
     u32 count = (u32) ((x2 - x1 + 1) * (y2 - y1 + 1));
 
-    LCD_setAddressWindow(x1, y1, x2, y2);
+    LCD_setAddressWindowToRead(x1, y1, x2, y2);
 
-    dmaSendCmd(LCD_RAMRD);
-    dmaReceiveData8(&red); // empty
+    TFT_CS_RESET;
+    TFT_DC_SET;
+
+    dmaReceiveData8(&red);
 
     for (int i = 0; i < count; ++i) {
         dmaReceiveData8(&red);
         dmaReceiveData8(&green);
         dmaReceiveData8(&blue);
+
         buf[i] = (u16) ILI9341_COLOR(red, green, blue);
     }
 
-    // TODO: it is ugliest hack to make spi reusable
-
-    GPIO_InitTypeDef gpioStructure;
-    gpioStructure.GPIO_Pin   = TFT_CS_PIN;
-    gpioStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
-    gpioStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOA, &gpioStructure);
+    TFT_CS_SET;
 }
 
 void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
     u32 count = w * h;
-    LCD_setAddressWindow(x1, y1, (u16) (x1 + w - 1), (u16) (y1 + h - 1));
+    LCD_setAddressWindowToWrite(x1, y1, (u16) (x1 + w - 1), (u16) (y1 + h - 1));
     LCD_setSpi16();
     dmaFill16(color, count);
     LCD_setSpi8();
@@ -169,4 +167,3 @@ void LCD_drawRect(u16 x, u16 y, u16 w, u16 h, u16 color) {
     LCD_drawFastVLine(x, y, h, color);
     LCD_drawFastVLine((u16) (x + w - 1), y, h, color);
 }
-
