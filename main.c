@@ -1,5 +1,3 @@
-#include <stm32f10x_dma.h>
-#include "USART_lib/usart.h"
 #include "ILI9341_lib/graph.h"
 
 int main(void) {
@@ -7,11 +5,9 @@ int main(void) {
     u16 testColor = 0xACE0;
 
     LCD_init();
-    usartInit();
     LCD_setOrientation(ORIENTATION_LANDSCAPE_MIRROR);
 
-    usartPrintLn("BEGIN");
-    for (int i = 0; i < 10; i++) {
+    for (u8 i = 0; i < 10; i++) {
         LCD_fillScreen(GREEN);
         LCD_fillScreen(BLACK);
         LCD_drawCircle(10, 10, 5, testColor);
@@ -29,7 +25,6 @@ int main(void) {
             }
         }
     }
-    usartPrintLn("END");
 
     while (1);
 }
