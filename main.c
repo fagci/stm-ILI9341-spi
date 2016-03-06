@@ -12,9 +12,10 @@ int main(void) {
 
     usartPrintLn("BEGIN");
     for (int i = 0; i < 10; i++) {
+        LCD_fillScreen(GREEN);
         LCD_fillScreen(BLACK);
-
         LCD_drawCircle(10, 10, 5, testColor);
+
 
         LCD_readPixels(4, 4, 16, 16, px);
 

@@ -3,7 +3,8 @@
 u8              dmaWorking = 0;
 DMA_InitTypeDef dmaStructure;
 
-#define dmaWait() while(dmaWorking);
+//#define dmaWait() while(dmaWorking);
+#define dmaWait() while(SPI_I2S_GetFlagStatus(SPI_MASTER,SPI_I2S_FLAG_BSY) == SET);
 
 #define dmaStart(channel) DMA_Init(channel, &dmaStructure); \
     dmaWorking = 1; \
