@@ -2,10 +2,6 @@
 <module type="CPP_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/system_stm32f10x.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/startup_stm32f10x.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/main.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/delay.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/graph.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/dma.h" isTestSource="false" />
@@ -14,6 +10,12 @@
       <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/dma.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/core.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ILI9341_lib/graph.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/test_suite/primitives.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/test_suite/primitives.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/main.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/startup_stm32f10x.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/system_stm32f10x.c" isTestSource="false" />
     </content>
     <content url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_dma.c">
       <sourceFolder url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_dma.c" isTestSource="false" />

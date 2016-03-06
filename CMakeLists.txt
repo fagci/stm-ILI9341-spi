@@ -34,7 +34,7 @@ set(STARTUP ${STARTUP}
 #                USART_lib/usart.c
 #                test_suite/fps_counter.c
 #                test_suite/fill.c
-#                test_suite/primitives.c
+                test_suite/primitives.c
         )
 
 set(DEBUG_FLAGS "-O9")
