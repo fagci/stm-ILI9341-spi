@@ -1,13 +1,10 @@
 #include "dma.h"
 
-u8              dmaWorking = 0;
 DMA_InitTypeDef dmaStructure;
 
-//#define dmaWait() while(dmaWorking);
 #define dmaWait() while(SPI_I2S_GetFlagStatus(SPI_MASTER,SPI_I2S_FLAG_BSY) == SET);
 
 #define dmaStart(channel) DMA_Init(channel, &dmaStructure); \
-    dmaWorking = 1; \
     DMA_Cmd(channel, ENABLE);
 
 void dmaInit(void) {
@@ -177,7 +174,6 @@ void dmaFill16(u16 color, u32 n) {
 
 void DMA1_Channel2_IRQHandler(void) {
     if (DMA_GetITStatus(DMA1_IT_TC2) == SET) {
-        dmaWorking = 0;
         DMA_Cmd(DMA1_Channel2, DISABLE);
         DMA_ClearITPendingBit(DMA1_IT_TC2);
     }
@@ -185,7 +181,6 @@ void DMA1_Channel2_IRQHandler(void) {
 
 void DMA1_Channel3_IRQHandler(void) {
     if (DMA_GetITStatus(DMA1_IT_TC3) == SET) {
-        dmaWorking = 0;
         DMA_Cmd(DMA1_Channel3, DISABLE);
         DMA_ClearITPendingBit(DMA1_IT_TC3);
     }

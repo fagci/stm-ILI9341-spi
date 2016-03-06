@@ -95,7 +95,6 @@ void LCD_pinsInit() {
     spiStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;
     SPI_Init(SPI_MASTER, &spiStructure);
 
-//    SPI_SSOutputCmd(SPI_MASTER, ENABLE);
     SPI_Cmd(SPI_MASTER, ENABLE);
 }
 
