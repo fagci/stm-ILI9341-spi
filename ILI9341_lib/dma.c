@@ -2,6 +2,10 @@
 
 DMA_InitTypeDef dmaStructure;
 
+#define DMA_BUF_SIZE 2048
+u16 dmaBufIndex = 0;
+u16 dmaBuffer[DMA_BUF_SIZE];
+
 void dmaInit(void) {
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
@@ -135,6 +139,25 @@ inline void dmaSendDataCont16(u16 *data, u32 n) {
     dmaSend16(data, n);
     dmaWait();
 }
+
+inline void dmaSendDataBuf16() {
+    if(dmaBufIndex == 0) return;
+    TFT_DC_SET;
+    dmaSend16(dmaBuffer, dmaBufIndex);
+    dmaBufIndex = 0;
+    dmaWait();
+}
+
+inline void dmaSendDataContBuf16(u16 *data, u32 n) {
+    while (n--) {
+        dmaBuffer[dmaBufIndex] = *data++;
+        if (dmaBufIndex == DMA_BUF_SIZE - 1) {
+            dmaSendDataBuf16();
+        }
+        dmaBufIndex++;
+    }
+}
+
 
 inline void dmaSendDataCircular16(u16 *data, u32 n) {
     TFT_DC_SET;

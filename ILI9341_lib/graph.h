@@ -32,4 +32,7 @@ void LCD_drawLine(u16 x0, u16 y0, u16 x1, u16 y1, u16 color);
 void LCD_drawCircle(u16 x0, u16 y0, u16 r, u16 color);
 void LCD_fillCircle(u16 x0, u16 y0, u16 r, u16 color);
 
+void LCD_setVerticalScrolling(u16 startY, u16 endY);
+void LCD_scroll(u16 v);
+
 #endif //TEST1_ILI9341_H

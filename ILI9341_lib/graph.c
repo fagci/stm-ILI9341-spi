@@ -209,3 +209,23 @@ void LCD_drawRect(u16 x, u16 y, u16 w, u16 h, u16 color) {
     LCD_drawFastVLine(x, y, h, color);
     LCD_drawFastVLine((u16) (x + w - 1), y, h, color);
 }
+
+void LCD_setVerticalScrolling(u16 startY, u16 endY) {
+    dmaSendCmd(LCD_VSCRDEF);
+    u16 d[] = {
+            startY,
+            (u16) (LCD_PIXEL_HEIGHT - startY - endY),
+            endY
+    };
+    LCD_setSpi16();
+    dmaSendData16(d, 3);
+    LCD_setSpi8();
+}
+
+void LCD_scroll(u16 v) {
+    dmaSendCmd(LCD_VSCRSADD);
+    LCD_setSpi16();
+    dmaSendData16(&v, 1);
+    LCD_setSpi8();
+}
+
