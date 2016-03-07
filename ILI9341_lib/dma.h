@@ -25,6 +25,9 @@ void dmaSendData16(u16 *data, u32 n);
 void dmaSendDataCont8(u8 *data, u32 n);
 void dmaSendDataCont16(u16 *data, u32 n);
 
+void dmaSendDataBuf16();
+void dmaSendDataContBuf16(u16 *data, u32 n);
+
 void dmaFill16(u16 color, u32 n);
 
 #endif //TEST1_DMA_H

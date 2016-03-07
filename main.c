@@ -1,29 +1,23 @@
-#include "ILI9341_lib/graph.h"
+#include "ILI9341_lib/text.h"
+#include "test_suite/primitives.h"
+
 
 int main(void) {
-    u16 px[200];
-    u16 testColor = 0xACE0;
-
     LCD_init();
-    LCD_setOrientation(ORIENTATION_LANDSCAPE_MIRROR);
+    LCD_setOrientation(ORIENTATION_PORTRAIT);
 
-    for (u8 i = 0; i < 10; i++) {
-        LCD_fillScreen(GREEN);
-        LCD_fillScreen(BLACK);
-        LCD_drawCircle(10, 10, 5, testColor);
+    LCD_fillScreen(BLACK);
 
+    TEST_fillPrimitives(40);
 
-        LCD_readPixels(4, 4, 16, 16, px);
+    LCD_setVerticalScrolling(20, 60);
 
-        LCD_fillScreen(RED);
+    u16 t = 0;
 
-        u16 d = 13;
-
-        for (u16 x = 0; x < d; ++x) {
-            for (u16 y = 0; y < d; ++y) {
-                LCD_putPixel(x, y, px[y * d + x]);
-            }
-        }
+    while (1) {
+        if (t == 0) t = LCD_PIXEL_HEIGHT;
+        LCD_scroll(t--);
+        delay_ms(10);
     }
 
     while (1);

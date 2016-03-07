@@ -1,7 +1,7 @@
 #include <stm32f10x_spi.h>
 #include "core.h"
 
-u16 screen_width  = LCD_PIXEL_WIDTH,
+static u16 screen_width  = LCD_PIXEL_WIDTH,
     screen_height = LCD_PIXEL_HEIGHT;
 
 //<editor-fold desc="Init commands">
@@ -49,7 +49,7 @@ static const uint8_t init_commands[] = {
 
 //<editor-fold desc="LCD initialization functions">
 
-void LCD_pinsInit() {
+static void LCD_pinsInit() {
     SPI_InitTypeDef  spiStructure;
     GPIO_InitTypeDef gpioStructure;
 
@@ -88,12 +88,10 @@ void LCD_pinsInit() {
 }
 
 void LCD_reset() {
-    TFT_RST_SET;
-    delay_ms(10);
     TFT_RST_RESET;
     delay_ms(10);
     TFT_RST_SET;
-    delay_ms(150);
+    delay_ms(50);
 }
 
 void LCD_exitStandby() {
@@ -102,7 +100,7 @@ void LCD_exitStandby() {
     dmaSendCmd(LCD_DISPLAY_ON);
 }
 
-void LCD_configure() {
+static void LCD_configure() {
     u8 count;
     u8 *address = (u8 *) init_commands;
 
@@ -117,7 +115,6 @@ void LCD_configure() {
     TFT_CS_SET;
 
     LCD_setOrientation(0);
-    LCD_setAddressWindow(0, 0, screen_width, screen_height);
 }
 
 void LCD_init() {
@@ -149,7 +146,7 @@ void LCD_setOrientation(u8 o) {
     TFT_CS_SET;
 }
 
-void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
+inline void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
     u16 pointData[2];
 
     TFT_CS_RESET;
@@ -169,11 +166,11 @@ void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
     TFT_CS_SET;
 }
 
-u16 LCD_getWidth() {
+inline u16 LCD_getWidth() {
     return screen_width;
 }
 
-u16 LCD_getHeight() {
+inline u16 LCD_getHeight() {
     return screen_height;
 }
 
@@ -181,13 +178,13 @@ u16 LCD_getHeight() {
 
 //<editor-fold desc="SPI functions">
 
-void LCD_setSpi8(void) {
+inline void LCD_setSpi8(void) {
     SPI_MASTER->CR1 &= ~SPI_CR1_SPE; // DISABLE SPI
     SPI_MASTER->CR1 &= ~SPI_CR1_DFF; // SPI 8
     SPI_MASTER->CR1 |= SPI_CR1_SPE;  // ENABLE SPI
 }
 
-void LCD_setSpi16(void) {
+inline void LCD_setSpi16(void) {
     SPI_MASTER->CR1 &= ~SPI_CR1_SPE; // DISABLE SPI
     SPI_MASTER->CR1 |= SPI_CR1_DFF;  // SPI 16
     SPI_MASTER->CR1 |= SPI_CR1_SPE;  // ENABLE SPI
