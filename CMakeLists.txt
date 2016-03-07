@@ -19,20 +19,20 @@ set(LINK_SCRIPT /home/fagci/ClionProjects/Test2/stm32f10x.ld)
 set(STARTUP system_stm32f10x.c startup_stm32f10x.c)
 set(STARTUP ${STARTUP}
         ${PERIPH_LIB_SRC}/stm32f10x_rcc.c
-#        ${PERIPH_LIB_SRC}/stm32f10x_tim.c
+        ${PERIPH_LIB_SRC}/stm32f10x_tim.c
         ${PERIPH_LIB_SRC}/stm32f10x_gpio.c
 #        ${PERIPH_LIB_SRC}/stm32f10x_exti.c
         ${PERIPH_LIB_SRC}/stm32f10x_spi.c
         ${PERIPH_LIB_SRC}/stm32f10x_dma.c
 #        ${PERIPH_LIB_SRC}/stm32f10x_usart.c
-#        tiny_stdlib/itoa.c
+        tiny_stdlib/itoa.c
         ILI9341_lib/delay.c
         ILI9341_lib/core.c
         ILI9341_lib/dma.c
         ILI9341_lib/graph.c
-#        ILI9341_lib/text.c
+        ILI9341_lib/text.c
 #                USART_lib/usart.c
-#                test_suite/fps_counter.c
+                test_suite/fps_counter.c
 #                test_suite/fill.c
                 test_suite/primitives.c
         )

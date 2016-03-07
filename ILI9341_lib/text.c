@@ -7,7 +7,7 @@ u8  textSize = 1, wrap = 1;
 u16 textColor = RED, textBgColor = WHITE;
 
 // Draw a character
-void LCD_drawChar(u16 x, u16 y, unsigned char c, u16 color, u16 bg, uint8_t size) {
+inline static void LCD_drawChar(u16 x, u16 y, unsigned char c, u16 color, u16 bg, uint8_t size) {
 
     if ((x >= LCD_getWidth()) || // Clip right
         (y >= LCD_getHeight()) || // Clip bottom
@@ -20,15 +20,22 @@ void LCD_drawChar(u16 x, u16 y, unsigned char c, u16 color, u16 bg, uint8_t size
     int8_t i, j;
 
     u8  line;
-    u16 ds = size * size;
+    u16 ds              = size * size;
     u16 charPixels[48 * ds];
+    u8  transparentMode = (u8) (bg == TRANSPARENT_COLOR);
+
+    if (transparentMode) {
+        LCD_readPixels(x, y, (u16) (x + 6 - 1), (u16) (y + 8 - 1), charPixels);
+    }
 
     if (size == 1) {
         LCD_setAddressWindowToWrite(x, y, (u16) (x + 5), (u16) (y + 7));
         for (i = 0; i < 6; i++) {
             line   = (u8) (i < 5 ? pgm_read_byte(font + (c * 5) + i) : 0x0);
             for (j = 0; j < 8; j++, line >>= 1) {
-                charPixels[j * 6 + i] = line & 0x1 ? color : bg;
+                u16 pColor = line & 0x1 ? color : bg;
+                if (pColor == TRANSPARENT_COLOR) continue;
+                charPixels[j * 6 + i] = pColor;
             }
         }
         LCD_setSpi16();
@@ -53,14 +60,6 @@ void LCD_drawChar(u16 x, u16 y, unsigned char c, u16 color, u16 bg, uint8_t size
         LCD_setSpi16();
         dmaSendData16(charPixels, 48 * size * size);
         LCD_setSpi8();
-
-
-//        for (i = 0; i < 6; i++) {
-//            line   = (u8) (i < 5 ? pgm_read_byte(font + (c * 5) + i) : 0x0);
-//            for (j = 0; j < 8; j++, line >>= 1) {
-//                LCD_fillRect(x + (i * size), y + (j * size), size, size, line & 0x1 ? color : bg);
-//            }
-//        }
     }
 }
 
