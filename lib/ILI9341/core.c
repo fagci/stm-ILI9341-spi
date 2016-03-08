@@ -1,4 +1,3 @@
-#include <stm32f10x_spi.h>
 #include "core.h"
 
 static u16 screen_width  = LCD_PIXEL_WIDTH,

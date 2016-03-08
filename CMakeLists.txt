@@ -25,16 +25,17 @@ set(STARTUP ${STARTUP}
         ${PERIPH_LIB_SRC}/stm32f10x_spi.c
         ${PERIPH_LIB_SRC}/stm32f10x_dma.c
 #        ${PERIPH_LIB_SRC}/stm32f10x_usart.c
-        tiny_stdlib/itoa.c
-        ILI9341_lib/delay.c
-        ILI9341_lib/core.c
-        ILI9341_lib/dma.c
-        ILI9341_lib/graph.c
-        ILI9341_lib/text.c
-#                USART_lib/usart.c
-                test_suite/fps_counter.c
+        lib/tinystd/itoa.c
+        lib/ILI9341/delay.c
+        lib/ILI9341/core.c
+        lib/ILI9341/dma.c
+        lib/ILI9341/graph.c
+        lib/ILI9341/text.c
+        lib/encoder/encoder.c
+#                lib/usart/usart.c
+#                test_suite/fps_counter.c
 #                test_suite/fill.c
-                test_suite/primitives.c
+#                test_suite/primitives.c
         )
 
 set(DEBUG_FLAGS "-O9")

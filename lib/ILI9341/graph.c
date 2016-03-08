@@ -1,4 +1,3 @@
-#include <stm32f10x.h>
 #include "graph.h"
 
 void LCD_readPixels(u16 x1, u16 y1, u16 x2, u16 y2, u16 *buf) {
