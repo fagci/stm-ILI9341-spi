@@ -1,7 +1,7 @@
 #include "core.h"
 
 static u16 screen_width  = LCD_PIXEL_WIDTH,
-    screen_height = LCD_PIXEL_HEIGHT;
+           screen_height = LCD_PIXEL_HEIGHT;
 
 //<editor-fold desc="Init commands">
 
@@ -53,17 +53,25 @@ static void LCD_pinsInit() {
     GPIO_InitTypeDef gpioStructure;
 
     RCC_PCLK2Config(RCC_HCLK_Div2);
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2ENR_AFIOEN, ENABLE);
-    RCC_APB2PeriphClockCmd(SPI_MASTER_GPIO_CLK | SPI_MASTER_CLK, ENABLE);
+    RCC_APB1PeriphClockCmd(SPI_MASTER_CLK, ENABLE);
+    RCC_APB2PeriphClockCmd(SPI_MASTER_GPIO_CLK, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
+
+    GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
 
     // GPIO speed by default
     gpioStructure.GPIO_Speed = GPIO_Speed_50MHz;
 
     // GPIO for CS/DC/LED/RESET
-    gpioStructure.GPIO_Pin  = TFT_CS_PIN | TFT_DC_PIN | TFT_RESET_PIN | TFT_LED_PIN;
+    gpioStructure.GPIO_Pin  = TFT_DC_PIN | TFT_RESET_PIN | TFT_LED_PIN;
     gpioStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_Init(GPIOA, &gpioStructure);
+
+    gpioStructure.GPIO_Pin  = TFT_CS_PIN;
+    gpioStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_Init(GPIOB, &gpioStructure);
+
 
     // GPIO for SPI
     gpioStructure.GPIO_Pin  = SPI_MASTER_PIN_SCK | SPI_MASTER_PIN_MOSI;

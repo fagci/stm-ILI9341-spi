@@ -2,6 +2,9 @@
 
 DMA_InitTypeDef dmaStructure;
 
+#define DMA_RX_CHANNEL DMA1_Channel4
+#define DMA_TX_CHANNEL DMA1_Channel5
+
 #define DMA_BUF_SIZE 2048
 u16 dmaBufIndex = 0;
 u16 dmaBuffer[DMA_BUF_SIZE];
@@ -10,12 +13,12 @@ void dmaInit(void) {
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
     // TX
-    NVIC_EnableIRQ(DMA1_Channel3_IRQn);
-    DMA_ITConfig(DMA1_Channel3, DMA_IT_TC, ENABLE);
+    NVIC_EnableIRQ(DMA1_Channel5_IRQn);
+    DMA_ITConfig(DMA_TX_CHANNEL, DMA_IT_TC, ENABLE);
 
     // RX
-    NVIC_EnableIRQ(DMA1_Channel2_IRQn);
-    DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, ENABLE);
+    NVIC_EnableIRQ(DMA1_Channel4_IRQn);
+    DMA_ITConfig(DMA_RX_CHANNEL, DMA_IT_TC, ENABLE);
 
     SPI_I2S_DMACmd(SPI_MASTER, SPI_I2S_DMAReq_Tx, ENABLE);
     SPI_I2S_DMACmd(SPI_MASTER, SPI_I2S_DMAReq_Rx, ENABLE);
@@ -180,17 +183,17 @@ inline void dmaFill16(u16 color, u32 n) {
 
 //<editor-fold desc="IRQ handlers">
 
-void DMA1_Channel2_IRQHandler(void) {
-    if (DMA_GetITStatus(DMA1_IT_TC2) == SET) {
-        DMA_Cmd(DMA1_Channel2, DISABLE);
-        DMA_ClearITPendingBit(DMA1_IT_TC2);
+void DMA1_Channel4_IRQHandler(void) {
+    if (DMA_GetITStatus(DMA1_IT_TC4) == SET) {
+        DMA_Cmd(DMA_RX_CHANNEL, DISABLE);
+        DMA_ClearITPendingBit(DMA1_IT_TC4);
     }
 }
 
-void DMA1_Channel3_IRQHandler(void) {
-    if (DMA_GetITStatus(DMA1_IT_TC3) == SET) {
-        DMA_Cmd(DMA1_Channel3, DISABLE);
-        DMA_ClearITPendingBit(DMA1_IT_TC3);
+void DMA1_Channel5_IRQHandler(void) {
+    if (DMA_GetITStatus(DMA1_IT_TC5) == SET) {
+        DMA_Cmd(DMA_TX_CHANNEL, DISABLE);
+        DMA_ClearITPendingBit(DMA1_IT_TC5);
     }
 }
 

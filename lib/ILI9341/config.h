@@ -3,19 +3,18 @@
 
 // <editor-fold desc="Defaults">
 
-#define TFT_LED_PIN     GPIO_Pin_0
-#define TFT_RESET_PIN   GPIO_Pin_2
-#define TFT_DC_PIN      GPIO_Pin_3
-#define TFT_CS_PIN      GPIO_Pin_4
+#define TFT_LED_PIN     GPIO_Pin_8  // A8
+#define TFT_RESET_PIN   GPIO_Pin_13 // A13 (SWDIO)
+#define TFT_DC_PIN      GPIO_Pin_14 // A14 (SWDCLK)
+#define TFT_CS_PIN      GPIO_Pin_12  // B12
 
-#define SPI_MASTER                   SPI1
-#define SPI_MASTER_CLK               RCC_APB2Periph_SPI1
-#define SPI_MASTER_GPIO              GPIOA
-#define SPI_MASTER_GPIO_CLK          RCC_APB2Periph_GPIOA
-#define SPI_MASTER_PIN_NSS           GPIO_Pin_4
-#define SPI_MASTER_PIN_SCK           GPIO_Pin_5
-#define SPI_MASTER_PIN_MISO          GPIO_Pin_6
-#define SPI_MASTER_PIN_MOSI          GPIO_Pin_7
+#define SPI_MASTER                   SPI2
+#define SPI_MASTER_CLK               RCC_APB1Periph_SPI2
+#define SPI_MASTER_GPIO              GPIOB
+#define SPI_MASTER_GPIO_CLK          RCC_APB2Periph_GPIOB
+#define SPI_MASTER_PIN_SCK           GPIO_Pin_13
+#define SPI_MASTER_PIN_MISO          GPIO_Pin_14
+#define SPI_MASTER_PIN_MOSI          GPIO_Pin_15
 
 // </editor-fold>
 

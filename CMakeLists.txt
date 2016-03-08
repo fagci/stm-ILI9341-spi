@@ -24,6 +24,7 @@ set(STARTUP ${STARTUP}
 #        ${PERIPH_LIB_SRC}/stm32f10x_exti.c
         ${PERIPH_LIB_SRC}/stm32f10x_spi.c
         ${PERIPH_LIB_SRC}/stm32f10x_dma.c
+        ${PERIPH_LIB_SRC}/stm32f10x_adc.c
 #        ${PERIPH_LIB_SRC}/stm32f10x_usart.c
         lib/tinystd/itoa.c
         lib/ILI9341/delay.c
@@ -31,7 +32,8 @@ set(STARTUP ${STARTUP}
         lib/ILI9341/dma.c
         lib/ILI9341/graph.c
         lib/ILI9341/text.c
-        lib/encoder/encoder.c
+        lib/ADC/adc.c
+#        lib/encoder/encoder.c
 #                lib/usart/usart.c
 #                test_suite/fps_counter.c
 #                test_suite/fill.c
