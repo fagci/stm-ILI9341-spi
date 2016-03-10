@@ -2,20 +2,22 @@
 <module type="CPP_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/lib/tinystd/itoa.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/tinystd/itoa.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341/graph.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341/delay.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341/text.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341/text.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341/dma.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341/core.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341/delay.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341/text.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341/dma.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341/core.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341/graph.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341/text.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/PWM/pwm.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/PWM/pwm.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/ADC/adc.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/ADC/adc.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/tinystd/itoa.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/tinystd/itoa.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/startup_stm32f10x.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/main.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
