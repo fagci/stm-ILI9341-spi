@@ -4,6 +4,8 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/lib/tinystd/itoa.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/tinystd/itoa.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/encoder/encoder.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/encoder/encoder.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341/graph.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341/delay.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341/text.h" isTestSource="false" />

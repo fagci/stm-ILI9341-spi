@@ -3,6 +3,7 @@
 
 #include "lib/ADC/adc.h"
 #include "lib/PWM/pwm.h"
+#include "lib/encoder/encoder.h"
 
 #define GRAPH_H 200
 #define GRAPH_W ADC_DATA_SIZE
@@ -110,28 +111,38 @@ static void plotData() {
     LCD_writeString("YDiv: ");
     LCD_writeString(buf);
 
-    itoa(ADC_PERIOD, buf, 10);
-    LCD_setCursor(80, 230);
-    LCD_writeString("ADC Period: ");
-    LCD_writeString(buf);
-
-
+    LCD_setCursor(160, 221);
+    LCD_writeString("F mode: ");
+    LCD_writeString(ADC_getFreqMode());
 }
-
 
 int main(void) {
     LCD_init();
     ADC_init();
     PWM_init();
+    ENC_init();
 
     LCD_setOrientation(ORIENTATION_LANDSCAPE_MIRROR);
     LCD_fillScreen(BLACK);
 
+    plotData();
+
+    u16 encVal, encValOld;
+
+    encVal = encValOld = ENC_getValue();
+
+    ENC_setValue(1710);
+
     while (1) {
-        while (!isDataAvailable());
+        encVal = ENC_getValue();
+        while (!ADC_isDataAvailable());
         plotData();
-        markDataUsed();
+        ADC_markDataUsed();
         delay_ms(1000);
+        if (encVal != encValOld) {
+            ADC_changeFreq((u32) (encVal % 17));
+            encValOld = encVal;
+        }
     }
 
     while (1);

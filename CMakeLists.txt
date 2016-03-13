@@ -34,7 +34,7 @@ set(STARTUP ${STARTUP}
         lib/ILI9341/text.c
         lib/ADC/adc.c
         lib/PWM/pwm.c
-#        lib/encoder/encoder.c
+        lib/encoder/encoder.c
 #                lib/usart/usart.c
 #                test_suite/fps_counter.c
 #                test_suite/fill.c

@@ -1,7 +1,12 @@
+#include <stm32f10x.h>
 #include "encoder.h"
 
 u16 ENC_getValue() {
     return (u16) (ENCODER_TIMx->CNT / 2);
+}
+
+void ENC_setValue(u16 v) {
+    ENCODER_TIMx->CNT = v;
 }
 
 void ENC_init() {
