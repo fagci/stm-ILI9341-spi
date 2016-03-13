@@ -9,8 +9,8 @@
 
 #define ADC_DATA_SIZE 320
 
-// 2 KHz
-#define ADC_PERIOD (SystemCoreClock / 2000) / 2
+// 1 KHz
+#define ADC_PERIOD (SystemCoreClock / 1000) / 2
 
 void ADC_init();
 u16 *ADC_getData();

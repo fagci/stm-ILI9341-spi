@@ -33,7 +33,7 @@ void timer_config(void) {
 
     /* Time base configuration */
     TIM_TimeBaseStructInit(&tim);
-    tim.TIM_Period        = (u16) (ADC_PERIOD - 1);//875 - 1;
+    tim.TIM_Period        = (u16) (ADC_PERIOD / 125 - 1);//875 - 1;
     tim.TIM_Prescaler     = 0;
     tim.TIM_ClockDivision = 0;
     tim.TIM_CounterMode   = TIM_CounterMode_Up;

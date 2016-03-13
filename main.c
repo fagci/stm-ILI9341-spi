@@ -1,5 +1,3 @@
-#include <stm32f10x_gpio.h>
-#include <stm32f10x_tim.h>
 #include "lib/ILI9341/text.h"
 #include "lib/tinystd/itoa.h"
 
@@ -8,8 +6,10 @@
 
 #define GRAPH_H 200
 #define GRAPH_W ADC_DATA_SIZE
+#define GRAPH_VERTICAL_PADDING 30
 
-#define MAX_MV_VOLTAGE 3300
+#define MAX_MV_VOLTAGE (u16)3300
+#define MAX_ADC_VALUE (u16)4096
 
 static void plotData() {
     u16 *adcDmaData = ADC_getData();
@@ -24,34 +24,29 @@ static void plotData() {
 
     u16 plotYOld = plotY;
 
-    s16 maxVal     = 4096;
-    s16 maxValHalf = (s16) (maxVal / 2);
+    u16 maxValHalf = MAX_ADC_VALUE / (u8) 2;
 
-    u16 graphVerticalPadding = 20;
+    u16 graphPosX = (LCD_getWidth() - (u16) GRAPH_W) / (u8) 2,
+        graphPosY = (LCD_getHeight() - (u16) GRAPH_H) / (u8) 2;
 
-    u16 maxValHeight = (u16) (GRAPH_H - (graphVerticalPadding) * 2);
+    u16 adcValueDivision = MAX_ADC_VALUE / (GRAPH_H - GRAPH_VERTICAL_PADDING * 2);
 
-    u16 div = maxVal / maxValHeight;
 
-    u16 graphPosX = (u16) ((LCD_getWidth() - GRAPH_W) / 2),
-        graphPosY = (u16) ((LCD_getHeight() - GRAPH_H) / 2);
-
+    // GRAPH with grid
     LCD_fillRect(graphPosX, graphPosY, graphWidth, graphHeight, DGRAY);
-
     LCD_drawFastHLine(graphPosX, graphHalfHeight + graphPosY, graphWidth, LGRAY);
+    LCD_drawFastHLine(graphPosX, graphPosY + graphHeight - GRAPH_VERTICAL_PADDING, graphWidth, LGRAY);
+    LCD_drawFastHLine(graphPosX, graphPosY + GRAPH_VERTICAL_PADDING, graphWidth, LGRAY);
 
-    LCD_drawFastHLine(graphPosX, graphPosY + graphHeight - graphVerticalPadding, graphWidth, LGRAY);
-    LCD_drawFastHLine(graphPosX, graphPosY + graphVerticalPadding, graphWidth, LGRAY);
-
-    u16 max = 0, min = 65535;
+    u16 maxValue = 0, minValue = 65535;
 
     while (1) {
         u16 val = adcDmaData[plotX];
 
-        max = val > max ? val : max;
-        min = val < min ? val : min;
+        maxValue = val > maxValue ? val : maxValue;
+        minValue = val < minValue ? val : minValue;
 
-        plotY = (u16) (graphHalfHeight - (val - maxValHalf) / div); // 0 is larger x
+        plotY = (u16) (graphHalfHeight - (val - maxValHalf) / adcValueDivision); // 0 is larger x
 
         if (plotX == 0) plotYOld = plotY;
 
@@ -68,11 +63,11 @@ static void plotData() {
         plotYOld = plotY;
     }
 
-    u16 plotYMin = (u16) (graphHalfHeight - (min - maxValHalf) / div); // 0 is larger x
-    u16 plotYMax = (u16) (graphHalfHeight - (max - maxValHalf) / div); // 0 is larger x
+    u16 plotYMin = (u16) (graphHalfHeight - (minValue - maxValHalf) / adcValueDivision); // 0 is larger x
+    u16 plotYMax = (u16) (graphHalfHeight - (maxValue - maxValHalf) / adcValueDivision); // 0 is larger x
 
-    u32 vMin = MAX_MV_VOLTAGE * 1000 / maxVal * min / 1000;
-    u32 vMax = MAX_MV_VOLTAGE * 1000 / maxVal * max / 1000;
+    u16 vMin = MAX_MV_VOLTAGE * 1000 / MAX_ADC_VALUE * minValue / 1000;
+    u16 vMax = MAX_MV_VOLTAGE * 1000 / MAX_ADC_VALUE * maxValue / 1000;
 
     LCD_drawFastHLine(graphPosX, graphPosY + plotYMin, graphWidth, BLUE);
     LCD_drawFastHLine(graphPosX, graphPosY + plotYMax, graphWidth, RED);
@@ -98,17 +93,17 @@ static void plotData() {
     LCD_fillRect(0, graphPosY + graphHeight, LCD_getWidth(), graphPosY, BLACK);
     LCD_setTextBgColor(BLACK);
 
-    itoa(min, buf, 10);
+    itoa(minValue, buf, 10);
     LCD_setCursor(0, 221);
     LCD_writeString("Min: ");
     LCD_writeString(buf);
 
-    itoa(max, buf, 10);
+    itoa(maxValue, buf, 10);
     LCD_setCursor(0, 230);
     LCD_writeString("Max: ");
     LCD_writeString(buf);
 
-    itoa(div, buf, 10);
+    itoa(adcValueDivision, buf, 10);
     LCD_setCursor(80, 221);
     LCD_writeString("YDiv: ");
     LCD_writeString(buf);
@@ -134,7 +129,7 @@ int main(void) {
         while (!isDataAvailable());
         plotData();
         markDataUsed();
-        delay_ms(150);
+        delay_ms(1000);
     }
 
     while (1);
