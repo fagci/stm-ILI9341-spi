@@ -23,7 +23,7 @@ void PWM_init() {
     timOc.TIM_OCMode       = TIM_OCMode_PWM1;
     timOc.TIM_OCPolarity   = TIM_OCPolarity_High;
     timOc.TIM_OutputState  = TIM_OutputState_Enable;
-    timOc.TIM_Pulse        = period / 2;
+    timOc.TIM_Pulse        = period / 4;
     TIM_OC2Init(TIM4, &timOc);
     TIM_OC2PreloadConfig(TIM4,TIM_OCPreload_Enable);
 

@@ -17,12 +17,7 @@ static void plotData() {
     u16 graphWidth  = GRAPH_W,
         graphHeight = GRAPH_H;
 
-    u16 graphHalfHeight = (u16) (graphHeight / 2);
-
-    u16 plotX = 0,
-        plotY = graphHalfHeight;
-
-    u16 plotYOld = plotY;
+    u16 graphHalfHeight = graphHeight / (u8) 2;
 
     u16 maxValHalf = MAX_ADC_VALUE / (u8) 2;
 
@@ -31,6 +26,14 @@ static void plotData() {
 
     u16 adcValueDivision = MAX_ADC_VALUE / (GRAPH_H - GRAPH_VERTICAL_PADDING * 2);
 
+    u16 plotX = 0,
+        plotY = graphHalfHeight;
+
+    u16 plotYOld = plotY;
+
+    u16 maxValue = 0,
+        minValue = 65535;
+
 
     // GRAPH with grid
     LCD_fillRect(graphPosX, graphPosY, graphWidth, graphHeight, DGRAY);
@@ -38,15 +41,13 @@ static void plotData() {
     LCD_drawFastHLine(graphPosX, graphPosY + graphHeight - GRAPH_VERTICAL_PADDING, graphWidth, LGRAY);
     LCD_drawFastHLine(graphPosX, graphPosY + GRAPH_VERTICAL_PADDING, graphWidth, LGRAY);
 
-    u16 maxValue = 0, minValue = 65535;
-
     while (1) {
         u16 val = adcDmaData[plotX];
 
         maxValue = val > maxValue ? val : maxValue;
         minValue = val < minValue ? val : minValue;
 
-        plotY = (u16) (graphHalfHeight - (val - maxValHalf) / adcValueDivision); // 0 is larger x
+        plotY = (u16) (graphHalfHeight - (val - maxValHalf) / adcValueDivision); // 0 is larger Y
 
         if (plotX == 0) plotYOld = plotY;
 
@@ -55,6 +56,7 @@ static void plotData() {
                 (u16) (plotX + graphPosX + 1), plotY + graphPosY,
                 GREEN
         );
+
         if (plotX == graphWidth - 1) {
             break;
         }
@@ -66,11 +68,11 @@ static void plotData() {
     u16 plotYMin = (u16) (graphHalfHeight - (minValue - maxValHalf) / adcValueDivision); // 0 is larger x
     u16 plotYMax = (u16) (graphHalfHeight - (maxValue - maxValHalf) / adcValueDivision); // 0 is larger x
 
-    u16 vMin = MAX_MV_VOLTAGE * 1000 / MAX_ADC_VALUE * minValue / 1000;
-    u16 vMax = MAX_MV_VOLTAGE * 1000 / MAX_ADC_VALUE * maxValue / 1000;
+    u16 vMin = (u16) (MAX_MV_VOLTAGE * (u32) 1000000 / (MAX_ADC_VALUE - (u8) 1) * minValue / (u32) 1000000);
+    u16 vMax = (u16) (MAX_MV_VOLTAGE * (u32) 1000000 / (MAX_ADC_VALUE - (u8) 1) * maxValue / (u32) 1000000);
 
-    LCD_drawFastHLine(graphPosX, graphPosY + plotYMin, graphWidth, BLUE);
-    LCD_drawFastHLine(graphPosX, graphPosY + plotYMax, graphWidth, RED);
+//    LCD_drawFastHLine(graphPosX, graphPosY + plotYMin, graphWidth, BLUE);
+//    LCD_drawFastHLine(graphPosX, graphPosY + plotYMax, graphWidth, RED);
 
     LCD_setTextColor(YELLOW);
     char buf[16];
