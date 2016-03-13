@@ -1,19 +1,39 @@
-#include <stm32f10x_dma.h>
-#include <stm32f10x_adc.h>
 #include "adc.h"
-#include "../ILI9341/graph.h"
 
-__IO u16 adcDmaData[ADC_DATA_SIZE];
+static s16 adcDmaData[ADC_DATA_SIZE];
 
-__IO u16 *ADC_getData() {
+s16 *ADC_getData() {
     return adcDmaData;
 }
+
+void timer_config(void) {
+    TIM_TimeBaseInitTypeDef tim;
+
+    /* TIM2 Periph clock enable */
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+
+    /* Time base configuration */
+    TIM_TimeBaseStructInit(&tim);
+    tim.TIM_Period        = 50000 - 1;//875 - 1;
+    tim.TIM_Prescaler     = 0;
+    tim.TIM_ClockDivision = 0;
+    tim.TIM_CounterMode   = TIM_CounterMode_Up;
+    TIM_TimeBaseInit(TIM3, &tim);
+
+    /* TIM2 TRGO selection */
+    TIM_SelectOutputTrigger(TIM3, TIM_TRGOSource_Update);
+}
+
+void timer_start(void) {
+    TIM_Cmd(TIM3, ENABLE);
+}
+
 
 void ADC_init() {
     // PA7
 
     //clock for ADC (max 14MHz --> 72/6=12MHz)
-    RCC_ADCCLKConfig(RCC_PCLK2_Div6);
+    RCC_ADCCLKConfig(RCC_PCLK2_Div2);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_ADC1, ENABLE);
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
@@ -48,9 +68,9 @@ void ADC_init() {
     ADC_InitTypeDef adc;
     adc.ADC_ScanConvMode       = DISABLE;
     adc.ADC_ContinuousConvMode = DISABLE;
-    adc.ADC_ExternalTrigConv   = ADC_ExternalTrigConv_None;
+    adc.ADC_ExternalTrigConv   = ADC_ExternalTrigConv_T3_TRGO;
     adc.ADC_DataAlign          = ADC_DataAlign_Right;
-    adc.ADC_Mode               = ADC_Mode_Independent;
+    adc.ADC_Mode               = ADC_Mode_FastInterl;
     adc.ADC_NbrOfChannel       = 1;
     ADC_Init(ADC1, &adc);
 
@@ -68,11 +88,25 @@ void ADC_init() {
 
     ADC_DMACmd(ADC1, ENABLE);
     ADC_Cmd(ADC1, ENABLE);
+
+    timer_config();
+    timer_start();
+}
+
+volatile u8 dataAvailable = 0;
+
+inline u8 isDataAvailable(){
+    return dataAvailable;
+}
+
+inline void markDataUsed(){
+    dataAvailable = 0;
 }
 
 static void DMA1_Channel1_IRQHandler(void) {
     if (DMA_GetITStatus(DMA1_IT_TC1) == SET) {
-        DMA_Cmd(DMA1_Channel1, DISABLE);
+//        DMA_Cmd(DMA1_Channel1, DISABLE);
         DMA_ClearITPendingBit(DMA1_IT_TC1);
+        dataAvailable = 1;
     }
 }

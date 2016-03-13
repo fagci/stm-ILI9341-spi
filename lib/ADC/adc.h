@@ -10,7 +10,10 @@
 #define ADC_DATA_SIZE 320
 
 void ADC_init();
-__IO u16 *ADC_getData();
+s16 *ADC_getData();
 
+
+u8   isDataAvailable();
+void markDataUsed();
 
 #endif //TEST2_ADC_H
