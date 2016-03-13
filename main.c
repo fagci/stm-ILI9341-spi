@@ -21,7 +21,7 @@ static void plotData() {
 
     s16 s16h = 65535 / 2;
 
-//        LCD_fillScreen(BLACK);
+        LCD_fillScreen(BLACK);
     LCD_drawFastHLine(0, h2, w, DGRAY);
 
     while (1) {
