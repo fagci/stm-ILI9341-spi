@@ -1,5 +1,3 @@
-#include <stm32f10x_gpio.h>
-#include <stm32f10x_tim.h>
 #include "pwm.h"
 
 void PWM_init() {
@@ -12,23 +10,24 @@ void PWM_init() {
     gpio.GPIO_Mode  = GPIO_Mode_AF_PP;
     GPIO_Init(GPIOB, &gpio);
 
+    u16 period = (SystemCoreClock / 1000000) /2; // 1 MHz
+
     TIM_TimeBaseInitTypeDef tim;
     tim.TIM_ClockDivision = TIM_CKD_DIV1;
     tim.TIM_CounterMode   = TIM_CounterMode_Up;
-    tim.TIM_Period        = (uint16_t) (SystemCoreClock / 10000 - 1);
-    tim.TIM_Prescaler     = 0;
+    tim.TIM_Period        = period - 1;
+    tim.TIM_Prescaler     = 1000;
     TIM_TimeBaseInit(TIM4, &tim);
 
     TIM_OCInitTypeDef timOc;
     timOc.TIM_OCMode       = TIM_OCMode_PWM1;
-    timOc.TIM_OCPolarity   = TIM_OCPolarity_Low;
+    timOc.TIM_OCPolarity   = TIM_OCPolarity_High;
     timOc.TIM_OutputState  = TIM_OutputState_Enable;
-    timOc.TIM_Pulse        = (uint16_t) (SystemCoreClock / 40000 - 1);
+    timOc.TIM_Pulse        = period / 2;
     TIM_OC2Init(TIM4, &timOc);
+    TIM_OC2PreloadConfig(TIM4,TIM_OCPreload_Enable);
 
     TIM_Cmd(TIM4, ENABLE);
-
-    TIM_SetCompare1(TIM4, 512);
 }
 
 void PWM_setFreq(u16 f) {

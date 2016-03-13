@@ -21,9 +21,9 @@
 #define DMAn_Channeln DMA1_Channel1
 #define RCC_AHBPeriph_DMAn RCC_AHBPeriph_DMA1
 
-static s16 adcDmaData[ADC_DATA_SIZE];
+static u16 adcDmaData[ADC_DATA_SIZE];
 
-s16 *ADC_getData() {
+u16 *ADC_getData() {
     return adcDmaData;
 }
 
@@ -33,7 +33,7 @@ void timer_config(void) {
 
     /* Time base configuration */
     TIM_TimeBaseStructInit(&tim);
-    tim.TIM_Period        = 50000 - 1;//875 - 1;
+    tim.TIM_Period        = (u16) (ADC_PERIOD - 1);//875 - 1;
     tim.TIM_Prescaler     = 0;
     tim.TIM_ClockDivision = 0;
     tim.TIM_CounterMode   = TIM_CounterMode_Up;
@@ -44,6 +44,10 @@ void timer_config(void) {
 
 void timer_start(void) {
     TIM_Cmd(TIMx, ENABLE);
+}
+
+void timer_stop(void) {
+    TIM_Cmd(TIMx, DISABLE);
 }
 
 void dma_init() {
@@ -81,7 +85,7 @@ void adc_init() {
 
 //clock for ADC (max 14MHz --> 72/6=12MHz)
     //TODO: check for maximum clock
-    RCC_ADCCLKConfig(RCC_PCLK2_Div2);
+    //RCC_ADCCLKConfig(RCC_PCLK2_Div2);
     ADC_RCC_APBnPeriphClockCmd(RCC_APBnPeriph_ADCx, ENABLE);
 
     // ADC
@@ -90,13 +94,11 @@ void adc_init() {
     adc.ADC_ContinuousConvMode = DISABLE;
     adc.ADC_ExternalTrigConv   = ADC_ExternalTrigConv_Tn_trigger;
     adc.ADC_DataAlign          = ADC_DataAlign_Right;
-    adc.ADC_Mode               = ADC_Mode_FastInterl;
+    adc.ADC_Mode               = ADC_Mode_Independent;
     adc.ADC_NbrOfChannel       = 1;
     ADC_Init(ADCx, &adc);
 
     ADC_RegularChannelConfig(ADCx, ADC_Channel_n, 1, ADC_SampleTime_1Cycles5);
-
-    ADC_ExternalTrigConvCmd(ADCx, ENABLE);
 
     ADC_Cmd(ADCx, ENABLE);   //enable ADCx
 
@@ -106,6 +108,7 @@ void adc_init() {
     ADC_StartCalibration(ADCx);   // Start new calibration (ADC must be off at that time)
     while (ADC_GetCalibrationStatus(ADCx));
 
+    ADC_ExternalTrigConvCmd(ADCx, ENABLE);
     ADC_DMACmd(ADCx, ENABLE);
     ADC_Cmd(ADCx, ENABLE);
 }
@@ -126,12 +129,14 @@ inline u8 isDataAvailable() {
 
 inline void markDataUsed() {
     dataAvailable = 0;
+    timer_start();
 }
 
 void DMA1_Channel1_IRQHandler(void) {
     if (DMA_GetITStatus(DMAn_IT_TCn) == SET) {
 //        DMA_Cmd(DMA1_Channel1, DISABLE);
         DMA_ClearITPendingBit(DMAn_IT_TCn);
+        timer_stop();
         dataAvailable = 1;
     }
 }

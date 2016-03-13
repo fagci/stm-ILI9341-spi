@@ -6,33 +6,99 @@
 #include "lib/ADC/adc.h"
 #include "lib/PWM/pwm.h"
 
+#define GRAPH_H 200
+#define GRAPH_W ADC_DATA_SIZE
+
 static void plotData() {
-    LCD_fillRect(0, 0, 10, 10, GREEN);
+    u16 *adcDmaData = ADC_getData();
 
-    s16 *adcDmaData = ADC_getData();
+    u16 graphWidth  = GRAPH_W,
+        graphHeight = GRAPH_H;
 
-    u16 w = LCD_getWidth(),
-        h = LCD_getHeight();
+    u16 graphHalfHeight = (u16) (graphHeight / 2);
 
-    u16 x  = 0;
-    u16 h2 = (u16) (h / 2);
-    u16 y  = h2,
-        oy = h2;
+    u16 plotX = 0,
+        plotY = graphHalfHeight;
 
-    s16 s16h = 65535 / 2;
+    u16 plotYOld = plotY;
 
-        LCD_fillScreen(BLACK);
-    LCD_drawFastHLine(0, h2, w, DGRAY);
+    s16 maxVal     = 4096;
+    s16 maxValHalf = (s16) (maxVal / 2);
+
+    u16 graphVerticalPadding = 20;
+
+    u16 maxValHeight = (u16) (GRAPH_H - (graphVerticalPadding) * 2);
+
+    u16 div = maxVal / maxValHeight;
+
+    u16 graphPosX = (u16) ((LCD_getWidth() - GRAPH_W) / 2),
+        graphPosY = (u16) ((LCD_getHeight() - GRAPH_H) / 2);
+
+    LCD_fillRect(graphPosX, graphPosY, graphWidth, graphHeight, DGRAY);
+
+    LCD_drawFastHLine(graphPosX, graphHalfHeight + graphPosY, graphWidth, LGRAY);
+
+    LCD_drawFastHLine(graphPosX, graphPosY + graphHeight - graphVerticalPadding, graphWidth, LGRAY);
+    LCD_drawFastHLine(graphPosX, graphPosY + graphVerticalPadding, graphWidth, LGRAY);
+
+    u16 max = 0, min = 65535;
 
     while (1) {
-        y = (u16) ((adcDmaData[x] - s16h) / 30 + h2);
-        LCD_drawLine(x, oy, (u16) (x + 1), y, GREEN);
-        if (x == w - 1) {
+        u16 val = adcDmaData[plotX];
+
+        max = val > max ? val : max;
+        min = val < min ? val : min;
+
+        plotY = (u16) (graphHalfHeight - (val - maxValHalf) / div); // 0 is larger x
+
+        if (plotX == 0) plotYOld = plotY;
+
+        LCD_drawLine(
+                plotX + graphPosX, plotYOld + graphPosY,
+                (u16) (plotX + graphPosX + 1), plotY + graphPosY,
+                GREEN
+        );
+        if (plotX == graphWidth - 1) {
             break;
         }
-        x++;
-        oy = y;
+
+        plotX++;
+        plotYOld = plotY;
     }
+
+    u16 plotYMin = (u16) (graphHalfHeight - (min - maxValHalf) / div); // 0 is larger x
+    u16 plotYMax = (u16) (graphHalfHeight - (max - maxValHalf) / div); // 0 is larger x
+
+    LCD_drawFastHLine(graphPosX, graphPosY + plotYMin, graphWidth, BLUE);
+    LCD_drawFastHLine(graphPosX, graphPosY + plotYMax, graphWidth, RED);
+
+    LCD_setTextBgColor(BLACK);
+    LCD_setTextColor(YELLOW);
+    char buf[16];
+
+    LCD_fillRect(0, graphPosY + graphHeight, LCD_getWidth(), graphPosY, BLACK);
+
+    itoa(min, buf, 10);
+    LCD_setCursor(0, 221);
+    LCD_writeString("Min: ");
+    LCD_writeString(buf);
+
+    itoa(max, buf, 10);
+    LCD_setCursor(0, 230);
+    LCD_writeString("Max: ");
+    LCD_writeString(buf);
+
+    itoa(div, buf, 10);
+    LCD_setCursor(80, 221);
+    LCD_writeString("YDiv: ");
+    LCD_writeString(buf);
+
+    itoa(ADC_PERIOD, buf, 10);
+    LCD_setCursor(80, 230);
+    LCD_writeString("ADC Period: ");
+    LCD_writeString(buf);
+
+
 }
 
 
@@ -44,24 +110,11 @@ int main(void) {
     LCD_setOrientation(ORIENTATION_LANDSCAPE_MIRROR);
     LCD_fillScreen(BLACK);
 
-
-    u16 color[] = {RED, GREEN};
-
-    u8 i = 0;
-
-//    DMA_Cmd(DMA1_Channel1, ENABLE);
-
     while (1) {
-        LCD_fillRect(0, 0, 10, 10, YELLOW);
-//        while (!isDataAvailable()) {
-//            i = (u8) (i == 0 ? 1 : 0);
-//            LCD_fillRect(0, 0, 10, 10, color[i]);
-//            delay_ms(200);
-//        }
+        while (!isDataAvailable());
         plotData();
-        //markDataUsed();
-        LCD_fillRect(0, 0, 10, 10, WHITE);
-        delay_ms(1000);
+        markDataUsed();
+        delay_ms(50);
     }
 
     while (1);
