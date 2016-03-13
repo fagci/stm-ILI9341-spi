@@ -9,6 +9,8 @@
 #define GRAPH_H 200
 #define GRAPH_W ADC_DATA_SIZE
 
+#define MAX_MV_VOLTAGE 3300
+
 static void plotData() {
     u16 *adcDmaData = ADC_getData();
 
@@ -69,14 +71,32 @@ static void plotData() {
     u16 plotYMin = (u16) (graphHalfHeight - (min - maxValHalf) / div); // 0 is larger x
     u16 plotYMax = (u16) (graphHalfHeight - (max - maxValHalf) / div); // 0 is larger x
 
+    u32 vMin = MAX_MV_VOLTAGE * 1000 / maxVal * min / 1000;
+    u32 vMax = MAX_MV_VOLTAGE * 1000 / maxVal * max / 1000;
+
     LCD_drawFastHLine(graphPosX, graphPosY + plotYMin, graphWidth, BLUE);
     LCD_drawFastHLine(graphPosX, graphPosY + plotYMax, graphWidth, RED);
 
-    LCD_setTextBgColor(BLACK);
     LCD_setTextColor(YELLOW);
     char buf[16];
 
+    LCD_setTextBgColor(DGRAY);
+
+    itoa(vMin, buf, 10);
+    LCD_setCursor(0, graphPosY + plotYMin + 2);
+    LCD_writeString("Min: ");
+    LCD_writeString(buf);
+    LCD_writeString("mv");
+
+    itoa(vMax, buf, 10);
+    LCD_setCursor(0, graphPosY + plotYMax - 10);
+    LCD_writeString("Max: ");
+    LCD_writeString(buf);
+    LCD_writeString("mv");
+
+
     LCD_fillRect(0, graphPosY + graphHeight, LCD_getWidth(), graphPosY, BLACK);
+    LCD_setTextBgColor(BLACK);
 
     itoa(min, buf, 10);
     LCD_setCursor(0, 221);
@@ -114,7 +134,7 @@ int main(void) {
         while (!isDataAvailable());
         plotData();
         markDataUsed();
-        delay_ms(50);
+        delay_ms(150);
     }
 
     while (1);
