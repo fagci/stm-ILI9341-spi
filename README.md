@@ -2,6 +2,8 @@
 
 YouTube video:
 
+[![STM32 ILI9341 spi](http://img.youtube.com/vi/5nLQ-VqMv-g/0.jpg)](http://www.youtube.com/watch?v=5nLQ-VqMv-g "Oscilloscope using this library")
+
 [![STM32 ILI9341 spi](http://img.youtube.com/vi/XFrHwLjROr4/0.jpg)](http://www.youtube.com/watch?v=XFrHwLjROr4 "Transparent text background")
 
 [![STM32 ILI9341 spi](http://img.youtube.com/vi/-2-tuqgc90k/0.jpg)](http://www.youtube.com/watch?v=-2-tuqgc90k "STM32 ILI9341 spi")
