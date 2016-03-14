@@ -22,8 +22,11 @@ static void plotData() {
 
     u16 maxValHalf = MAX_ADC_VALUE / (u8) 2;
 
-    u16 graphPosX = (LCD_getWidth() - (u16) GRAPH_W) / (u8) 2,
-        graphPosY = (LCD_getHeight() - (u16) GRAPH_H) / (u8) 2;
+    u16 lcdWidth  = LCD_getWidth(),
+        lcdHeight = LCD_getHeight();
+
+    u16 graphPosX = (lcdWidth - (u16) GRAPH_W) / (u8) 2,
+        graphPosY = (lcdHeight - (u16) GRAPH_H) / (u8) 2;
 
     u16 adcValueDivision = MAX_ADC_VALUE / (GRAPH_H - GRAPH_VERTICAL_PADDING * 2);
 
@@ -39,8 +42,13 @@ static void plotData() {
     // GRAPH with grid
     LCD_fillRect(graphPosX, graphPosY, graphWidth, graphHeight, DGRAY);
     LCD_drawFastHLine(graphPosX, graphHalfHeight + graphPosY, graphWidth, LGRAY);
-    LCD_drawFastHLine(graphPosX, graphPosY + graphHeight - GRAPH_VERTICAL_PADDING, graphWidth, LGRAY);
-    LCD_drawFastHLine(graphPosX, graphPosY + GRAPH_VERTICAL_PADDING, graphWidth, LGRAY);
+    LCD_drawFastDashedHLine(graphPosX, graphPosY + graphHeight - GRAPH_VERTICAL_PADDING, graphWidth, LGRAY, DGRAY, 2,
+                            4);
+    LCD_drawFastDashedHLine(graphPosX, graphPosY + GRAPH_VERTICAL_PADDING, graphWidth, LGRAY, DGRAY, 2, 4);
+
+    for (u16 x = ADC_SAMPLES_PER_FREQ; x < graphWidth; x += ADC_SAMPLES_PER_FREQ) {
+        LCD_drawFastDashedVLine(x + graphPosX, graphPosY, graphHeight, LGRAY, DGRAY, 2, 4);
+    }
 
     while (1) {
         u16 val = adcDmaData[plotX];

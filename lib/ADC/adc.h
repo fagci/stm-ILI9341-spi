@@ -8,11 +8,12 @@
 #include <stm32f10x_dma.h>
 
 #define ADC_DATA_SIZE 320
+#define ADC_SAMPLES_PER_FREQ 32
 
-void ADC_init();
-u16 *ADC_getData();
-void ADC_changeFreq(u32 n);
-const char * ADC_getFreqMode();
+void       ADC_init();
+u16        *ADC_getData();
+void       ADC_changeFreq(u32 n);
+const char *ADC_getFreqMode();
 
 u8   ADC_isDataAvailable();
 void ADC_markDataUsed();

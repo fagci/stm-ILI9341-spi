@@ -26,7 +26,9 @@ void LCD_drawRect(u16 x, u16 y, u16 w, u16 h, u16 color);
 
 void LCD_putPixel(u16 x, u16 y, u16 color);
 void LCD_drawFastHLine(u16 x0, u16 y0, u16 w, u16 color);
+void LCD_drawFastDashedHLine(u16 x0, u16 y0, u16 w, u16 color, u16 bgColor, u8 fillLength, u8 gapLength);
 void LCD_drawFastVLine(u16 x0, u16 y0, u16 h, u16 color);
+void LCD_drawFastDashedVLine(u16 x0, u16 y0, u16 h, u16 color, u16 bgColor, u8 fillLength, u8 gapLength);
 void LCD_drawLine(u16 x0, u16 y0, u16 x1, u16 y1, u16 color);
 
 void LCD_drawCircle(u16 x0, u16 y0, u16 r, u16 color);

@@ -25,6 +25,29 @@ static u16 adcDmaData[ADC_DATA_SIZE];
 
 static u16 freqMode = 10;
 
+#define FREQ_MODES_COUNT 17
+
+const u16 timerConfigs[34] = {
+//  	Period Prescaler Freq
+        49999, 7,   //      5
+        31999, 4,   //   12,5
+        15999, 4,   //     25
+        39999, 0,   //     50
+        15999, 0,   //    125
+        7999, 0,    //    250
+        3999, 0,    //    500
+        1599, 0,    //   1250
+        799, 0,     //   2500
+        399, 0,     //   5000
+        159, 0,     //  12500
+        79, 0,      //  25000
+        39, 0,      //  50000
+        15, 0,      // 125000
+        7, 0,       // 250000
+        3, 0,       // 500000
+        1, 0        //1000000
+};
+
 const char *freqModes[] = {
         "5Hz (5s)",
         "12,5Hz (80ms)",
@@ -107,7 +130,7 @@ static void adc_init() {
 
 //clock for ADC (max 14MHz --> 72/6=12MHz)
     //TODO: check for maximum clock
-//    RCC_ADCCLKConfig(RCC_PCLK2_Div2);
+    RCC_ADCCLKConfig(RCC_PCLK2_Div2);
     ADC_RCC_APBnPeriphClockCmd(RCC_APBnPeriph_ADCx, ENABLE);
 
     // ADC
@@ -135,94 +158,19 @@ static void adc_init() {
     ADC_Cmd(ADCx, ENABLE);
 }
 
-inline const char * ADC_getFreqMode(){
+inline const char *ADC_getFreqMode() {
     return freqModes[freqMode];
 }
 
 void ADC_changeFreq(u32 n) {
-    u16 prescaler, period;
-    freqMode = (u16) (n % 17);
+    freqMode = (u16) (n % FREQ_MODES_COUNT);
 
     timer_stop();
 
     TIM_TimeBaseInitTypeDef tim;
 
-    switch (n) {
-        case 0 : // 5s=>5Hz=5s
-            prescaler = 5375;
-            period    = 3124;
-            break;
-        case 1 : // 2s=>12,5Hz=80ms
-            prescaler = 2687;
-            period    = 2499;
-            break;
-        case 2 : // 1s=>25Hz=40ms
-            prescaler = 1343;
-            period    = 2499;
-            break;
-        case 3 : // 500ms=>50Hz=20ms
-            prescaler = 671;
-            period    = 2499;
-            break;
-        case 4 : // 200ms=>125Hz=8ms
-            prescaler = 335;
-            period    = 1999;
-            break;
-        case 5 : // 100ms=>250Hz=4ms
-            prescaler = 167;
-            period    = 1999;
-            break;
-        case 6 : // 50ms=>500Hz=2ms
-            prescaler = 83;
-            period    = 1999;
-            break;
-        case 7 : // 20ms=>1,25kHz=800us
-            prescaler = 41;
-            period    = 1599;
-            break;
-        case 8 : // 10ms=>2,5kHz400us
-            prescaler = 20;
-            period    = 1599;
-            break;
-        case 9 : // 5ms=>5kHz=200us
-            prescaler = 20;
-            period    = 799;
-            break;
-        case 10 : // 2ms=>12,5kHz=80us
-            prescaler = 20;
-            period    = 319;
-            break;
-        case 11 : // 1ms=>25kHz=40us
-            prescaler = 20;
-            period    = 159;
-            break;
-        case 12 : // 500us=>50kHz=20us
-            prescaler = 20;
-            period    = 79;
-            break;
-        case 13 : // 200us=>125kHz=8us
-            prescaler = 20;
-            period    = 31;
-            break;
-        case 14 : // 100us=>250kHz=4us
-            prescaler = 20;
-            period    = 15;
-            break;
-        case 15 : // 50us=>500kHz=2us
-            prescaler = 20;
-            period    = 7;
-            break;
-        case 16 : // 25us=>1MHz=1us
-            prescaler = 20;
-            period    = 3;
-            break;
-        default :
-            prescaler = 20;
-            period    = 319;
-    }
-
-    tim.TIM_Period        = period;
-    tim.TIM_Prescaler     = prescaler;
+    tim.TIM_Period        = timerConfigs[freqMode * 2];
+    tim.TIM_Prescaler     = timerConfigs[freqMode * 2 + 1];
     tim.TIM_ClockDivision = 0;
     tim.TIM_CounterMode   = TIM_CounterMode_Up;
     TIM_TimeBaseInit(TIMn, &tim);

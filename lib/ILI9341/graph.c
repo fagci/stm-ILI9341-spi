@@ -34,13 +34,6 @@ void LCD_fillScreen(u16 color) {
     LCD_fillRect(0, 0, LCD_getWidth(), LCD_getHeight(), color);
 }
 
-inline void LCD_drawFastHLine(u16 x0, u16 y0, u16 w, u16 color) {
-    if (w == 1) {
-        LCD_putPixel(x0, y0, color);
-        return;
-    }
-    LCD_fillRect(x0, y0, w, 1, color);
-}
 
 inline void LCD_putPixel(u16 x, u16 y, u16 color) {
     LCD_setAddressWindowToWrite(x, y, x, y);
@@ -52,6 +45,54 @@ inline void LCD_putPixel(u16 x, u16 y, u16 color) {
 inline static void LCD_putPixelCont(u16 x, u16 y, u16 color) {
     LCD_setAddressWindowToWrite(x, y, x, y);
     dmaFill16(color, 1);
+}
+
+inline void LCD_drawFastHLine(u16 x0, u16 y0, u16 w, u16 color) {
+    if (w == 1) {
+        LCD_putPixel(x0, y0, color);
+        return;
+    }
+    LCD_fillRect(x0, y0, w, 1, color);
+}
+
+inline void LCD_drawFastDashedHLine(u16 x0, u16 y0, u16 w, u16 color, u16 bgColor, u8 fillLength, u8 gapLength) {
+    if (fillLength == 0 || gapLength == 0) return;
+    if (w == 1) {
+        LCD_putPixel(x0, y0, color);
+        return;
+    }
+    u16 i = 0, f, g;
+    while (i < w) {
+        f = fillLength % (w - i);
+        if (f == 0) return;
+        LCD_fillRect(i + x0, y0, f, 1, color);
+        i += f;
+
+        g = gapLength % (w - i);
+        if (g == 0) return;
+        LCD_fillRect(i + x0, y0, g, 1, bgColor);
+        i += g;
+    }
+}
+
+inline void LCD_drawFastDashedVLine(u16 x0, u16 y0, u16 h, u16 color, u16 bgColor, u8 fillLength, u8 gapLength) {
+    if (fillLength == 0 || gapLength == 0) return;
+    if (h == 1) {
+        LCD_putPixel(x0, y0, color);
+        return;
+    }
+    u16 i = 0, f, g;
+    while (i < h) {
+        f = fillLength % (h - i);
+        if (f == 0) return;
+        LCD_fillRect(x0, i + y0, 1, f, color);
+        i += f;
+
+        g = gapLength % (h - i);
+        if (g == 0) return;
+        LCD_fillRect(x0, i + y0, 1, g, bgColor);
+        i += g;
+    }
 }
 
 inline void LCD_drawFastVLine(u16 x0, u16 y0, u16 h, u16 color) {
@@ -76,7 +117,7 @@ void LCD_drawCircle(u16 x0, u16 y0, u16 r, u16 color) {
     u16 y = r;
 
     LCD_setSpi16();
-    
+
     LCD_putPixelCont(x0, y0 + r, color);
     LCD_putPixelCont(x0, y0 - r, color);
     LCD_putPixelCont(x0 + r, y0, color);
