@@ -1,7 +1,6 @@
-#include <stm32f10x.h>
 #include "encoder.h"
 
-u16 ENC_getValue() {
+volatile inline u16 ENC_getValue() {
     return (u16) (ENCODER_TIMx->CNT / 2);
 }
 
@@ -26,5 +25,6 @@ void ENC_init() {
     TIM_TimeBaseInit(ENCODER_TIMx, &timer_base);
 
     TIM_EncoderInterfaceConfig(ENCODER_TIMx, TIM_EncoderMode_TI1, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
+
     TIM_Cmd(ENCODER_TIMx, ENABLE);
 }

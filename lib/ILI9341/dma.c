@@ -161,7 +161,6 @@ inline void dmaSendDataContBuf16(u16 *data, u32 n) {
     }
 }
 
-
 inline static void dmaSendDataCircular16(u16 *data, u32 n) {
     TFT_DC_SET;
     dmaSendCircular16(data, n);

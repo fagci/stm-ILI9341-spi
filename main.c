@@ -12,145 +12,153 @@
 #define MAX_MV_VOLTAGE (u16)3300
 #define MAX_ADC_VALUE (u16)4096
 
+u16 lcdWidth,
+    lcdHeight;
+
+u16 graphPosX,
+    graphPosY;
+
+u16 plotYMax,
+    plotYMin;
+
+u16 adcOldValues[ADC_DATA_SIZE];
+
 static void plotData() {
     u16 *adcDmaData = ADC_getData();
 
-    u16 graphWidth  = GRAPH_W,
-        graphHeight = GRAPH_H;
+    u16 graphHalfHeight = GRAPH_H / 2;
 
-    u16 graphHalfHeight = graphHeight / (u8) 2;
-
-    u16 maxValHalf = MAX_ADC_VALUE / (u8) 2;
-
-    u16 lcdWidth  = LCD_getWidth(),
-        lcdHeight = LCD_getHeight();
-
-    u16 graphPosX = (lcdWidth - (u16) GRAPH_W) / (u8) 2,
-        graphPosY = (lcdHeight - (u16) GRAPH_H) / (u8) 2;
+    u16 maxValHalf = MAX_ADC_VALUE / 2;
 
     u16 adcValueDivision = MAX_ADC_VALUE / (GRAPH_H - GRAPH_VERTICAL_PADDING * 2);
 
-    u16 plotX = 0,
-        plotY = graphHalfHeight;
+    u16 plotX        = 0,
+        plotY        = graphHalfHeight,
+        plotyHistory = plotY;
 
-    u16 plotYOld = plotY;
+    u16 plotYOld        = plotY,
+        plotYHistoryOld = plotY;
 
     u16 maxValue = 0,
         minValue = 65535;
 
+    u16 currentValue;
+
+
+    u16 pYMaxO = plotYMax;
+    u16 pYMinO = plotYMin;
+
+    plotYMax = 0;
+    plotYMin = GRAPH_H;
 
     // GRAPH with grid
-    LCD_fillRect(graphPosX, graphPosY, graphWidth, graphHeight, DGRAY);
-    LCD_drawFastHLine(graphPosX, graphHalfHeight + graphPosY, graphWidth, LGRAY);
-    LCD_drawFastDashedHLine(graphPosX, graphPosY + graphHeight - GRAPH_VERTICAL_PADDING, graphWidth, LGRAY, DGRAY, 2,
-                            4);
-    LCD_drawFastDashedHLine(graphPosX, graphPosY + GRAPH_VERTICAL_PADDING, graphWidth, LGRAY, DGRAY, 2, 4);
+    LCD_drawFastHLine(graphPosX, graphHalfHeight + graphPosY, GRAPH_W, LGRAY);
+    LCD_drawFastDashedHLine(graphPosX, graphPosY + GRAPH_H - GRAPH_VERTICAL_PADDING, GRAPH_W, LGRAY, DGRAY, 2, 4);
+    LCD_drawFastDashedHLine(graphPosX, graphPosY + GRAPH_VERTICAL_PADDING, GRAPH_W, LGRAY, DGRAY, 2, 4);
 
-    for (u16 x = ADC_SAMPLES_PER_FREQ; x < graphWidth; x += ADC_SAMPLES_PER_FREQ) {
-        LCD_drawFastDashedVLine(x + graphPosX, graphPosY, graphHeight, LGRAY, DGRAY, 2, 4);
+    for (u16 x = ADC_SAMPLES_PER_FREQ; x < GRAPH_W; x += ADC_SAMPLES_PER_FREQ) {
+        LCD_drawFastDashedVLine(x + graphPosX, graphPosY, GRAPH_H, LGRAY, DGRAY, 2, 4);
     }
 
-    while (1) {
-        u16 val = adcDmaData[plotX];
 
-        maxValue = val > maxValue ? val : maxValue;
-        minValue = val < minValue ? val : minValue;
+    while (plotX < GRAPH_W) {
+        currentValue = adcDmaData[plotX];
+        maxValue     = currentValue > maxValue ? currentValue : maxValue;
+        minValue     = currentValue < minValue ? currentValue : minValue;
 
-        plotY = (u16) (graphHalfHeight - (val - maxValHalf) / adcValueDivision); // 0 is larger Y
-
-        if (plotX == 0) plotYOld = plotY;
-
-        LCD_drawLine(
-                plotX + graphPosX, plotYOld + graphPosY,
-                (u16) (plotX + graphPosX + 1), plotY + graphPosY,
-                GREEN
-        );
-
-        if (plotX == graphWidth - 1) {
-            break;
-        }
+        currentValue = adcDmaData[plotX] = (u16) (graphHalfHeight -
+                                                  (adcDmaData[plotX] - maxValHalf) / adcValueDivision); // 0 is larger Y
+        plotYMax     = currentValue > plotYMax ? currentValue : plotYMax;
+        plotYMin     = currentValue < plotYMin ? currentValue : plotYMin;
 
         plotX++;
-        plotYOld = plotY;
     }
-
-    u16 plotYMin = (u16) (graphHalfHeight - (minValue - maxValHalf) / adcValueDivision); // 0 is larger x
-    u16 plotYMax = (u16) (graphHalfHeight - (maxValue - maxValHalf) / adcValueDivision); // 0 is larger x
 
     u16 vMin = (u16) (MAX_MV_VOLTAGE * (u32) 1000000 / (MAX_ADC_VALUE - (u8) 1) * minValue / (u32) 1000000);
     u16 vMax = (u16) (MAX_MV_VOLTAGE * (u32) 1000000 / (MAX_ADC_VALUE - (u8) 1) * maxValue / (u32) 1000000);
 
-//    LCD_drawFastHLine(graphPosX, graphPosY + plotYMin, graphWidth, BLUE);
-//    LCD_drawFastHLine(graphPosX, graphPosY + plotYMax, graphWidth, RED);
-
-    LCD_setTextColor(YELLOW);
     char buf[16];
 
     LCD_setTextBgColor(DGRAY);
 
+    LCD_drawFastHLine(graphPosX, graphPosY + pYMinO, GRAPH_W, DGRAY);
+    LCD_drawFastHLine(graphPosX, graphPosY + pYMaxO, GRAPH_W, DGRAY);
+    LCD_fillRect(graphPosX, (u16) (graphPosY + pYMinO - 10), 100, 10, DGRAY);
+    LCD_fillRect(graphPosX, (u16) (graphPosY + pYMaxO), 100, 10, DGRAY);
+
     itoa(vMin, buf, 10);
-    LCD_setCursor(0, graphPosY + plotYMin + 2);
+    LCD_setCursor(0, (u16) (graphPosY + plotYMax + 2));
     LCD_writeString("Min: ");
     LCD_writeString(buf);
     LCD_writeString("mv");
 
     itoa(vMax, buf, 10);
-    LCD_setCursor(0, graphPosY + plotYMax - 10);
+    LCD_setCursor(0, (u16) (graphPosY + plotYMin - 10));
     LCD_writeString("Max: ");
     LCD_writeString(buf);
     LCD_writeString("mv");
 
+    LCD_drawFastDashedHLine(graphPosX, graphPosY + plotYMin, GRAPH_W, BLUE, DGRAY, 1, 2);
+    LCD_drawFastDashedHLine(graphPosX, graphPosY + plotYMax, GRAPH_W, RED, DGRAY, 1, 2);
 
-    LCD_fillRect(0, graphPosY + graphHeight, LCD_getWidth(), graphPosY, BLACK);
-    LCD_setTextBgColor(BLACK);
+    LCD_setTextColor(YELLOW);
 
-    itoa(minValue, buf, 10);
-    LCD_setCursor(0, 221);
-    LCD_writeString("Min: ");
-    LCD_writeString(buf);
+    plotX = 0;
+    while (plotX < GRAPH_W) {
+        plotY        = adcDmaData[plotX];
+        plotyHistory = adcOldValues[plotX];
+        LCD_drawLine(plotX + graphPosX, plotYHistoryOld + graphPosY, (u16) (plotX + graphPosX),
+                     plotyHistory + graphPosY, DGRAY);
+        LCD_drawLine(plotX + graphPosX, plotYOld + graphPosY, (u16) (plotX + graphPosX), plotY + graphPosY, GREEN);
+        adcOldValues[plotX] = plotY;
 
-    itoa(maxValue, buf, 10);
-    LCD_setCursor(0, 230);
-    LCD_writeString("Max: ");
-    LCD_writeString(buf);
-
-    itoa(adcValueDivision, buf, 10);
-    LCD_setCursor(80, 221);
-    LCD_writeString("YDiv: ");
-    LCD_writeString(buf);
-
-    LCD_setCursor(160, 221);
-    LCD_writeString("F mode: ");
-    LCD_writeString(ADC_getFreqMode());
+        plotX++;
+        plotYOld        = plotY;
+        plotYHistoryOld = plotyHistory;
+    }
 }
 
 int main(void) {
+    u16 encVal,
+        encOldVal = 0;
+
     LCD_init();
     ADC_init();
     PWM_init();
     ENC_init();
+    ENC_setValue(1710);
 
     LCD_setOrientation(ORIENTATION_LANDSCAPE_MIRROR);
     LCD_fillScreen(BLACK);
 
-    plotData();
+    lcdWidth  = LCD_getWidth();
+    lcdHeight = LCD_getHeight();
+    graphPosX = (lcdWidth - (u16) GRAPH_W) / (u8) 2;
+    graphPosY = (lcdHeight - (u16) GRAPH_H) / (u8) 2;
 
-    u16 encVal, encValOld;
+    LCD_fillRect(graphPosX, graphPosY, GRAPH_W, GRAPH_H, DGRAY);
 
-    encVal = encValOld = ENC_getValue();
-
-    ENC_setValue(1710);
+    plotYMax = plotYMin = GRAPH_H / 2;
+    for (u16 i = 0; i < ADC_DATA_SIZE; ++i) {
+        adcOldValues[i] = GRAPH_H / 2;
+    }
 
     while (1) {
-        encVal = ENC_getValue();
         while (!ADC_isDataAvailable());
         plotData();
-        ADC_markDataUsed();
-        delay_ms(1000);
-        if (encVal != encValOld) {
+
+        encVal = ENC_getValue();
+        if (encOldVal != encVal) {
             ADC_changeFreq((u32) (encVal % 17));
-            encValOld = encVal;
+            LCD_fillRect(0, (u16) (graphPosY + GRAPH_H), LCD_getWidth(), graphPosY, BLACK);
+            LCD_setTextBgColor(BLACK);
+            LCD_setCursor(0, 221);
+            LCD_writeString((unsigned char *) "F mode: ");
+            LCD_writeString((unsigned char *) ADC_getFreqMode());
+            encOldVal = encVal;
         }
+        ADC_markDataUsed();
+//        delay_ms(120);
     }
 
     while (1);

@@ -42,11 +42,6 @@ inline void LCD_putPixel(u16 x, u16 y, u16 color) {
     LCD_setSpi8();
 }
 
-inline static void LCD_putPixelCont(u16 x, u16 y, u16 color) {
-    LCD_setAddressWindowToWrite(x, y, x, y);
-    dmaFill16(color, 1);
-}
-
 inline void LCD_drawFastHLine(u16 x0, u16 y0, u16 w, u16 color) {
     if (w == 1) {
         LCD_putPixel(x0, y0, color);
@@ -116,12 +111,10 @@ void LCD_drawCircle(u16 x0, u16 y0, u16 r, u16 color) {
 
     u16 y = r;
 
-    LCD_setSpi16();
-
-    LCD_putPixelCont(x0, y0 + r, color);
-    LCD_putPixelCont(x0, y0 - r, color);
-    LCD_putPixelCont(x0 + r, y0, color);
-    LCD_putPixelCont(x0 - r, y0, color);
+    LCD_putPixel(x0, y0 + r, color);
+    LCD_putPixel(x0, y0 - r, color);
+    LCD_putPixel(x0 + r, y0, color);
+    LCD_putPixel(x0 - r, y0, color);
 
     while (x < y) {
         if (f >= 0) {
@@ -133,17 +126,15 @@ void LCD_drawCircle(u16 x0, u16 y0, u16 r, u16 color) {
         dx += 2;
         f += dx;
 
-        LCD_putPixelCont(x0 + x, y0 + y, color);
-        LCD_putPixelCont(x0 - x, y0 + y, color);
-        LCD_putPixelCont(x0 + x, y0 - y, color);
-        LCD_putPixelCont(x0 - x, y0 - y, color);
-        LCD_putPixelCont(x0 + y, y0 + x, color);
-        LCD_putPixelCont(x0 - y, y0 + x, color);
-        LCD_putPixelCont(x0 + y, y0 - x, color);
-        LCD_putPixelCont(x0 - y, y0 - x, color);
+        LCD_putPixel(x0 + x, y0 + y, color);
+        LCD_putPixel(x0 - x, y0 + y, color);
+        LCD_putPixel(x0 + x, y0 - y, color);
+        LCD_putPixel(x0 - x, y0 - y, color);
+        LCD_putPixel(x0 + y, y0 + x, color);
+        LCD_putPixel(x0 - y, y0 + x, color);
+        LCD_putPixel(x0 + y, y0 - x, color);
+        LCD_putPixel(x0 - y, y0 - x, color);
     }
-
-    LCD_setSpi8();
 }
 
 // Used to do circles and roundrects
@@ -219,7 +210,6 @@ void LCD_drawLine(u16 x0, u16 y0, u16 x1, u16 y1, u16 color) {
     } else {
         yStep = -1;
     }
-
     for (; x0 <= x1; x0++) {
         if (steep) {
             LCD_putPixel(y0, x0, color);
