@@ -1,15 +1,15 @@
 #include "fps_counter.h"
 
-u16  fps = 0;
-char text[15];
+volatile static u16  fps = 0;
+volatile u16 fpsResult = 0;
 
 void TIM2_IRQHandler(void) {
     TIM2->SR &= ~TIM_SR_UIF;
-    itoa(fps, text, 10);
+    fpsResult = fps;
     fps = 0;
 }
 
-void initFpsTimer() {
+static void initFpsTimer() {
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
     NVIC_EnableIRQ(TIM2_IRQn);
@@ -23,12 +23,14 @@ void initFpsTimer() {
     TIM_Cmd(TIM2, ENABLE);
 }
 
-void FPS_start() {
+inline void FPS_start() {
     initFpsTimer();
 }
-void FPS_frame() {
+
+inline void FPS_frame() {
     fps++;
 }
-unsigned char *FPS_getText() {
-    return (unsigned char *) text;
+
+inline u16 FPS_getCount() {
+    return fpsResult;
 }

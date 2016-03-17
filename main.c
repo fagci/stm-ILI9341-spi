@@ -1,6 +1,8 @@
 #include "lib/ILI9341/text.h"
 #include "lib/tinystd/itoa.h"
 
+#include "test_suite/fill.h"
+
 #include "lib/ADC/adc.h"
 #include "lib/PWM/pwm.h"
 #include "lib/encoder/encoder.h"
@@ -123,6 +125,7 @@ int main(void) {
         encOldVal = 0;
 
     LCD_init();
+
     ADC_init();
     PWM_init();
     ENC_init();

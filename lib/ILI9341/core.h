@@ -7,11 +7,15 @@
 #include "commands.h"
 #include "dma.h"
 
-#define LCD_setAddressWindowToWrite(x1,y1,x2,y2) \
+#define LCD_setXYToWrite(x1, y1) \
+    LCD_setXY(x1, y1); \
+    dmaSendCmd(LCD_GRAM)
+
+#define LCD_setAddressWindowToWrite(x1, y1, x2, y2) \
     LCD_setAddressWindow(x1, y1, x2, y2); \
     dmaSendCmd(LCD_GRAM)
 
-#define LCD_setAddressWindowToRead(x1,y1,x2,y2) \
+#define LCD_setAddressWindowToRead(x1, y1, x2, y2) \
     LCD_setAddressWindow(x1, y1, x2, y2); \
     dmaSendCmd(LCD_RAMRD)
 
@@ -24,6 +28,7 @@ void LCD_setSpi8(void);
 void LCD_setSpi16(void);
 
 void LCD_setOrientation(u8 o);
+void LCD_setXY(u16 x1, u16 y1);
 void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2);
 
 #endif //TEST1_ILI9341_CORE_H

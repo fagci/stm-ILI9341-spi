@@ -3,10 +3,29 @@
 void LCD_readPixels(u16 x1, u16 y1, u16 x2, u16 y2, u16 *buf) {
     u8  red, green, blue;
     u32 count = (u32) ((x2 - x1 + 1) * (y2 - y1 + 1));
-
-    LCD_setAddressWindowToRead(x1, y1, x2, y2);
+    u16 pointData[2];
 
     TFT_CS_RESET;
+
+    pointData[0] = x1;
+    pointData[1] = x2;
+
+    LCD_setSpi8();
+    dmaSendCmdCont(LCD_COLUMN_ADDR);
+    LCD_setSpi16();
+    dmaSendDataCont16(pointData, 2);
+
+    pointData[0] = y1;
+    pointData[1] = y2;
+
+    LCD_setSpi8();
+    dmaSendCmdCont(LCD_PAGE_ADDR);
+    LCD_setSpi16();
+    dmaSendDataCont16(pointData, 2);
+
+    LCD_setSpi8();
+    dmaSendCmdCont(LCD_RAMRD);
+
     TFT_DC_SET;
 
     dmaReceiveDataCont8(&red);
@@ -18,16 +37,27 @@ void LCD_readPixels(u16 x1, u16 y1, u16 x2, u16 y2, u16 *buf) {
 
         buf[i] = (u16) ILI9341_COLOR(red, green, blue);
     }
+    LCD_setSpi16();
 
     TFT_CS_SET;
 }
 
 inline void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
     u32 count = w * h;
-    LCD_setAddressWindowToWrite(x1, y1, (u16) (x1 + w - 1), (u16) (y1 + h - 1));
-    LCD_setSpi16();
-    dmaFill16(color, count);
-    LCD_setSpi8();
+    u16 pointData[2];
+    TFT_CS_RESET;
+    dmaSendCmdCont(LCD_COLUMN_ADDR);
+    pointData[0] = x1;
+    pointData[1] = (u16) (x1 + w - 1);
+    dmaSendDataCont16(pointData, 2);
+
+    dmaSendCmdCont(LCD_PAGE_ADDR);
+    pointData[0] = y1;
+    pointData[1] = (u16) (y1 + h - 1);
+    dmaSendDataCont16(pointData, 2);
+    dmaSendCmdCont(LCD_GRAM);
+    dmaFillCont16(color, count);
+    TFT_CS_SET;
 }
 
 void LCD_fillScreen(u16 color) {
@@ -36,10 +66,14 @@ void LCD_fillScreen(u16 color) {
 
 
 inline void LCD_putPixel(u16 x, u16 y, u16 color) {
-    LCD_setAddressWindowToWrite(x, y, x, y);
-    LCD_setSpi16();
-    dmaFill16(color, 1);
-    LCD_setSpi8();
+    TFT_CS_RESET;
+    dmaSendCmdCont(LCD_COLUMN_ADDR);
+    dmaSendDataCont16(&x, 1);
+    dmaSendCmdCont(LCD_PAGE_ADDR);
+    dmaSendDataCont16(&y, 1);
+    dmaSendCmd(LCD_GRAM);
+    dmaSendDataCont16(&color, 1);
+    TFT_CS_SET;
 }
 
 inline void LCD_drawFastHLine(u16 x0, u16 y0, u16 w, u16 color) {
@@ -247,15 +281,11 @@ void LCD_setVerticalScrolling(u16 startY, u16 endY) {
             (u16) (LCD_PIXEL_HEIGHT - startY - endY),
             endY
     };
-    LCD_setSpi16();
     dmaSendData16(d, 3);
-    LCD_setSpi8();
 }
 
 void LCD_scroll(u16 v) {
     dmaSendCmd(LCD_VSCRSADD);
-    LCD_setSpi16();
     dmaSendData16(&v, 1);
-    LCD_setSpi8();
 }
 

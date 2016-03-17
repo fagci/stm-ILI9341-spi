@@ -180,6 +180,15 @@ inline void dmaFill16(u16 color, u32 n) {
     TFT_CS_SET;
 }
 
+inline void dmaFillCont16(u16 color, u32 n) {
+    dmaSendCmdCont(LCD_GRAM);
+    while (n != 0) {
+        u16 ts = (u16) (n > UINT16_MAX ? UINT16_MAX : n);
+        dmaSendDataCircular16(&color, ts);
+        n -= ts;
+    }
+}
+
 //<editor-fold desc="IRQ handlers">
 
 void DMA1_Channel4_IRQHandler(void) {

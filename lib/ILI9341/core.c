@@ -131,8 +131,9 @@ void LCD_init() {
     LCD_reset();
     LCD_exitStandby();
     LCD_configure();
-
+    LCD_setOrientation(ORIENTATION_PORTRAIT);
     TFT_LED_SET;
+    LCD_setSpi16(); //set 16bit SPI forever
 }
 
 //</editor-fold>
@@ -153,6 +154,15 @@ void LCD_setOrientation(u8 o) {
     TFT_CS_SET;
 }
 
+inline void LCD_setXY(u16 x1, u16 y1) {
+    TFT_CS_RESET;
+    dmaSendCmdCont(LCD_COLUMN_ADDR);
+    dmaSendDataCont16(&x1, 1);
+    dmaSendCmdCont(LCD_PAGE_ADDR);
+    dmaSendDataCont16(&y1, 1);
+    TFT_CS_SET;
+}
+
 inline void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
     u16 pointData[2];
 
@@ -160,16 +170,12 @@ inline void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
     dmaSendCmdCont(LCD_COLUMN_ADDR);
     pointData[0] = x1;
     pointData[1] = x2;
-    LCD_setSpi16();
     dmaSendDataCont16(pointData, 2);
-    LCD_setSpi8();
 
     dmaSendCmdCont(LCD_PAGE_ADDR);
     pointData[0] = y1;
     pointData[1] = y2;
-    LCD_setSpi16();
     dmaSendDataCont16(pointData, 2);
-    LCD_setSpi8();
     TFT_CS_SET;
 }
 

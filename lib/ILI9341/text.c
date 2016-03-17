@@ -39,7 +39,18 @@ inline static void LCD_drawChar(u16 x0, u16 y0, unsigned char c, u16 color, u16 
         LCD_readPixels(x0, y0, x1, y1, charPixels);
     }
 
-    LCD_setAddressWindowToWrite(x0, y0, x1, y1);
+    u16 pointData[2];
+    TFT_CS_RESET;
+    dmaSendCmdCont(LCD_COLUMN_ADDR);
+    pointData[0] = x0;
+    pointData[1] = x1;
+    dmaSendDataCont16(pointData, 2);
+
+    dmaSendCmdCont(LCD_PAGE_ADDR);
+    pointData[0] = y0;
+    pointData[1] = y1;
+    dmaSendDataCont16(pointData, 2);
+    dmaSendCmdCont(LCD_GRAM);
 
     for (i = 0; i < 6; i++) {
         line = (u8) (i < 5 ? pgm_read_byte(font + characterNumber + i) : 0x0);
@@ -61,9 +72,8 @@ inline static void LCD_drawChar(u16 x0, u16 y0, unsigned char c, u16 color, u16 
         }
     }
 
-    LCD_setSpi16();
-    dmaSendData16(charPixels, count);
-    LCD_setSpi8();
+    dmaSendDataCont16(charPixels, count);
+    TFT_CS_SET;
 }
 
 inline void LCD_write(unsigned char c) {

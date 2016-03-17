@@ -1,16 +1,16 @@
 #include "itoa.h"
 
-unsigned long itoa(int value, char *sp, int radix) {
-    unsigned long len;
-    char          tmp[16], *tp = tmp;
-    int           i, v, sign   = radix == 10 && value < 0;
+u32 itoa(s32 value, unsigned char *sp, u8 radix) {
+    u32 len;
+    unsigned char          tmp[16], *tp = tmp;
+    s32           i, v, sign   = radix == 10 && value < 0;
 
     v = sign ? -value : value;
 
     while (v || tp == tmp) {
         i = v % radix;
         v /= radix;
-        *tp++ = i < 10 ? (char) (i + '0') : (char) (i + 'a' - 10);
+        *tp++ = i < 10 ? (unsigned char) (i + '0') : (unsigned char) (i + 'a' - 10);
     }
 
 
