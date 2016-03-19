@@ -25,7 +25,7 @@ set(STARTUP ${STARTUP}
         ${PERIPH_LIB_SRC}/stm32f10x_spi.c
         ${PERIPH_LIB_SRC}/stm32f10x_dma.c
         ${PERIPH_LIB_SRC}/stm32f10x_adc.c
-#        ${PERIPH_LIB_SRC}/stm32f10x_usart.c
+        ${PERIPH_LIB_SRC}/stm32f10x_usart.c
         lib/tinystd/itoa.c
         lib/ILI9341/delay.c
         lib/ILI9341/core.c
@@ -35,7 +35,7 @@ set(STARTUP ${STARTUP}
         lib/ADC/adc.c
         lib/PWM/pwm.c
         lib/encoder/encoder.c
-#                lib/usart/usart.c
+                lib/usart/usart.c
                 test_suite/fps_counter.c
                 test_suite/fill.c
 #                test_suite/primitives.c

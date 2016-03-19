@@ -1,33 +1,53 @@
 #include "graph.h"
 
+inline static void setAddressWindowCont(u16 x1, u16 y1, u16 x2, u16 y2) {
+    dmaSendCmdCont(LCD_COLUMN_ADDR);
+    dmaSendDataCont16(&x1, 1);
+    dmaSendDataCont16(&x2, 1);
+    dmaSendCmdCont(LCD_PAGE_ADDR);
+    dmaSendDataCont16(&y1, 1);
+    dmaSendDataCont16(&y2, 1);
+}
+
+inline static void setXYCont(u16 x, u16 y) {
+    dmaSendCmdCont(LCD_COLUMN_ADDR);
+    dmaSendDataCont16(&x, 1);
+    dmaSendDataCont16(&x, 1);
+    dmaSendCmdCont(LCD_PAGE_ADDR);
+    dmaSendDataCont16(&y, 1);
+    dmaSendDataCont16(&y, 1);
+}
+
+inline void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
+    u16 sw = LCD_getWidth();
+    u16 sh = LCD_getHeight();
+    u16 mx = x1 + w;
+    u16 my = y1 + h;
+    if (x1 >= sw || y1 >= sh) return;
+    if (mx >= sw) w = sw - x1;
+    if (my >= sh) h = sh - y1;
+
+    u32 count = w * h;
+    TFT_CS_RESET;
+    setAddressWindowCont(x1, y1, (u16) (x1 + w - 1), (u16) (y1 + h - 1));
+    dmaFill16(color, count);
+    TFT_CS_SET;
+}
+
+inline void LCD_fillScreen(u16 color) {
+    LCD_fillRect(0, 0, LCD_getWidth(), LCD_getHeight(), color);
+}
+
 void LCD_readPixels(u16 x1, u16 y1, u16 x2, u16 y2, u16 *buf) {
     u8  red, green, blue;
-    u32 count = (u32) ((x2 - x1 + 1) * (y2 - y1 + 1));
-    u16 pointData[2];
-
+    u16 w     = x2 - x1 + (u8) 1,
+        h     = y2 - y1 + (u8) 1;
+    u32 count = w * h;
     TFT_CS_RESET;
-
-    pointData[0] = x1;
-    pointData[1] = x2;
-
-    LCD_setSpi8();
-    dmaSendCmdCont(LCD_COLUMN_ADDR);
-    LCD_setSpi16();
-    dmaSendDataCont16(pointData, 2);
-
-    pointData[0] = y1;
-    pointData[1] = y2;
-
-    LCD_setSpi8();
-    dmaSendCmdCont(LCD_PAGE_ADDR);
-    LCD_setSpi16();
-    dmaSendDataCont16(pointData, 2);
-
-    LCD_setSpi8();
+    setAddressWindowCont(x1, y1, x2, y2);
     dmaSendCmdCont(LCD_RAMRD);
 
     TFT_DC_SET;
-
     dmaReceiveDataCont8(&red);
 
     for (u32 i = 0; i < count; ++i) {
@@ -37,51 +57,40 @@ void LCD_readPixels(u16 x1, u16 y1, u16 x2, u16 y2, u16 *buf) {
 
         buf[i] = (u16) ILI9341_COLOR(red, green, blue);
     }
-    LCD_setSpi16();
-
     TFT_CS_SET;
 }
-
-inline void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color) {
-    u32 count = w * h;
-    u16 pointData[2];
-    TFT_CS_RESET;
-    dmaSendCmdCont(LCD_COLUMN_ADDR);
-    pointData[0] = x1;
-    pointData[1] = (u16) (x1 + w - 1);
-    dmaSendDataCont16(pointData, 2);
-
-    dmaSendCmdCont(LCD_PAGE_ADDR);
-    pointData[0] = y1;
-    pointData[1] = (u16) (y1 + h - 1);
-    dmaSendDataCont16(pointData, 2);
-    dmaSendCmdCont(LCD_GRAM);
-    dmaFillCont16(color, count);
-    TFT_CS_SET;
-}
-
-void LCD_fillScreen(u16 color) {
-    LCD_fillRect(0, 0, LCD_getWidth(), LCD_getHeight(), color);
-}
-
 
 inline void LCD_putPixel(u16 x, u16 y, u16 color) {
+    if (x >= LCD_getWidth() || y >= LCD_getHeight()) return;
     TFT_CS_RESET;
-    dmaSendCmdCont(LCD_COLUMN_ADDR);
-    dmaSendDataCont16(&x, 1);
-    dmaSendCmdCont(LCD_PAGE_ADDR);
-    dmaSendDataCont16(&y, 1);
+    setXYCont(x, y);
     dmaSendCmd(LCD_GRAM);
     dmaSendDataCont16(&color, 1);
     TFT_CS_SET;
 }
 
 inline void LCD_drawFastHLine(u16 x0, u16 y0, u16 w, u16 color) {
+    u16 sw = LCD_getWidth();
+    u16 mx = x0 + w;
+    if (x0 >= sw || y0 >= LCD_getHeight()) return;
+    if (mx >= sw) w = sw - x0;
     if (w == 1) {
         LCD_putPixel(x0, y0, color);
         return;
     }
     LCD_fillRect(x0, y0, w, 1, color);
+}
+
+inline void LCD_drawFastVLine(u16 x0, u16 y0, u16 h, u16 color) {
+    u16 sh = LCD_getHeight();
+    u16 my = y0 + h;
+    if (x0 >= LCD_getWidth() || y0 >= sh) return;
+    if (my >= sh) h = sh - y0;
+    if (h == 1) {
+        LCD_putPixel(x0, y0, color);
+        return;
+    }
+    LCD_fillRect(x0, y0, 1, h, color);
 }
 
 inline void LCD_drawFastDashedHLine(u16 x0, u16 y0, u16 w, u16 color, u16 bgColor, u8 fillLength, u8 gapLength) {
@@ -124,14 +133,6 @@ inline void LCD_drawFastDashedVLine(u16 x0, u16 y0, u16 h, u16 color, u16 bgColo
     }
 }
 
-inline void LCD_drawFastVLine(u16 x0, u16 y0, u16 h, u16 color) {
-    if (h == 1) {
-        LCD_putPixel(x0, y0, color);
-        return;
-    }
-    LCD_fillRect(x0, y0, 1, h, color);
-}
-
 void LCD_drawCircle(u16 x0, u16 y0, u16 r, u16 color) {
     if (r == 0) {
         LCD_putPixel(x0, y0, color);
@@ -171,7 +172,6 @@ void LCD_drawCircle(u16 x0, u16 y0, u16 r, u16 color) {
     }
 }
 
-// Used to do circles and roundrects
 void LCD_fillCircleHelper(u16 x0, u16 y0, u16 r, u8 cornername, s16 delta, u16 color) {
     if (r == 0)
         return;
@@ -212,48 +212,45 @@ void LCD_fillCircle(u16 x0, u16 y0, u16 r, u16 color) {
     LCD_fillCircleHelper(x0, y0, r, 3, 0, color);
 }
 
+
 void LCD_drawLine(u16 x0, u16 y0, u16 x1, u16 y1, u16 color) {
-    s16 Dx = (s16) abs(x1 - x0),
-        Dy = (s16) abs(y1 - y0);
+    u16 i, dxabs, dyabs, x, y, px, py;
+    s16 dx, dy;
+    s8  sdx, sdy;
 
-    if (Dx == 0 && Dy == 0) {
-        LCD_putPixel(x0, y0, color);
-        return;
-    }
+    dx    = x1 - x0;      /* the horizontal distance of the line */
+    dy    = y1 - y0;      /* the vertical distance of the line */
+    dxabs = (u16) abs(dx);
+    dyabs = (u16) abs(dy);
+    sdx   = (s8) sgn(dx);
+    sdy   = (s8) sgn(dy);
+    x     = dyabs >> 1;
+    y     = dxabs >> 1;
+    px    = x0;
+    py    = y0;
 
-    s16 steep = Dy > Dx;
-    s16 dx, dy, err, yStep;
+//    VGA[(py << 8) + (py << 6) + px] = color;
 
-    if (steep) {
-        _int16_swap(x0, y0);
-        _int16_swap(x1, y1);
-    }
-
-    if (x0 > x1) {
-        _int16_swap(x0, x1);
-        _int16_swap(y0, y1);
-    }
-
-    dx = x1 - x0;
-    dy = (s16) abs(y1 - y0);
-
-    err = (s16) (dx / 2);
-
-    if (y0 < y1) {
-        yStep = 1;
-    } else {
-        yStep = -1;
-    }
-    for (; x0 <= x1; x0++) {
-        if (steep) {
-            LCD_putPixel(y0, x0, color);
-        } else {
-            LCD_putPixel(x0, y0, color);
+    if (dxabs >= dyabs) { // more horizontal
+        for (i = 0; i < dxabs; i++) {
+            y += dyabs;
+            if (y >= dxabs) {
+                y -= dxabs;
+                py += sdy;
+            }
+            px += sdx;
+            LCD_putPixel(px, py, color);
         }
-        err -= dy;
-        if (err < 0) {
-            y0 += yStep;
-            err += dx;
+    }
+    else { // more vertical
+        for (i = 0; i < dyabs; i++) {
+            x += dxabs;
+            if (x >= dyabs) {
+                x -= dyabs;
+                px += sdx;
+            }
+            py += sdy;
+            LCD_putPixel(px, py, color);
         }
     }
 }

@@ -9,10 +9,10 @@
       <sourceFolder url="file://$MODULE_DIR$/main.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/startup_stm32f10x.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/ADC/adc.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/ADC/adc.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/encoder/encoder.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/encoder/encoder.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/usart/usart.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/usart/usart.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/tinystd/itoa.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/tinystd/itoa.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341/graph.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341/delay.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341/text.c" isTestSource="false" />
@@ -25,8 +25,10 @@
       <sourceFolder url="file://$MODULE_DIR$/lib/ILI9341/graph.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/PWM/pwm.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/lib/PWM/pwm.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/tinystd/itoa.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/tinystd/itoa.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/ADC/adc.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/ADC/adc.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/encoder/encoder.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lib/encoder/encoder.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/system_stm32f10x.c" isTestSource="false" />
     </content>
     <content url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_adc.c">
@@ -46,6 +48,9 @@
     </content>
     <content url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_tim.c">
       <sourceFolder url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_tim.c" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c">
+      <sourceFolder url="file://$USER_HOME$/libraries/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c" isTestSource="false" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library">

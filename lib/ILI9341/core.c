@@ -70,8 +70,7 @@ static void LCD_pinsInit() {
 
     gpioStructure.GPIO_Pin  = TFT_CS_PIN;
     gpioStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO_Init(GPIOB, &gpioStructure);
-
+    GPIO_Init(SPI_MASTER_GPIO, &gpioStructure);
 
     // GPIO for SPI
     gpioStructure.GPIO_Pin  = SPI_MASTER_PIN_SCK | SPI_MASTER_PIN_MOSI;
@@ -133,7 +132,6 @@ void LCD_init() {
     LCD_configure();
     LCD_setOrientation(ORIENTATION_PORTRAIT);
     TFT_LED_SET;
-    LCD_setSpi16(); //set 16bit SPI forever
 }
 
 //</editor-fold>
@@ -154,29 +152,20 @@ void LCD_setOrientation(u8 o) {
     TFT_CS_SET;
 }
 
-inline void LCD_setXY(u16 x1, u16 y1) {
+inline void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
     TFT_CS_RESET;
     dmaSendCmdCont(LCD_COLUMN_ADDR);
     dmaSendDataCont16(&x1, 1);
+    dmaSendDataCont16(&x2, 1);
+
     dmaSendCmdCont(LCD_PAGE_ADDR);
     dmaSendDataCont16(&y1, 1);
+    dmaSendDataCont16(&y2, 1);
     TFT_CS_SET;
 }
 
-inline void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
-    u16 pointData[2];
-
-    TFT_CS_RESET;
-    dmaSendCmdCont(LCD_COLUMN_ADDR);
-    pointData[0] = x1;
-    pointData[1] = x2;
-    dmaSendDataCont16(pointData, 2);
-
-    dmaSendCmdCont(LCD_PAGE_ADDR);
-    pointData[0] = y1;
-    pointData[1] = y2;
-    dmaSendDataCont16(pointData, 2);
-    TFT_CS_SET;
+inline void LCD_setXY(u16 x1, u16 y1) {
+    LCD_setAddressWindow(x1, y1, x1, y1);
 }
 
 inline u16 LCD_getWidth() {
@@ -191,16 +180,24 @@ inline u16 LCD_getHeight() {
 
 //<editor-fold desc="SPI functions">
 
+volatile static u8 spiBits = 8;
+
 inline void LCD_setSpi8(void) {
+    if (spiBits == 8)
+        return;
     SPI_MASTER->CR1 &= ~SPI_CR1_SPE; // DISABLE SPI
     SPI_MASTER->CR1 &= ~SPI_CR1_DFF; // SPI 8
     SPI_MASTER->CR1 |= SPI_CR1_SPE;  // ENABLE SPI
+    spiBits = 8;
 }
 
 inline void LCD_setSpi16(void) {
+    if (spiBits == 16)
+        return;
     SPI_MASTER->CR1 &= ~SPI_CR1_SPE; // DISABLE SPI
     SPI_MASTER->CR1 |= SPI_CR1_DFF;  // SPI 16
     SPI_MASTER->CR1 |= SPI_CR1_SPE;  // ENABLE SPI
+    spiBits = 16;
 }
 
 // </editor-fold>

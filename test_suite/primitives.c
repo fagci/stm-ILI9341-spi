@@ -1,5 +1,5 @@
 #include "primitives.h"
-#include "../ILI9341_lib/graph.h"
+#include "../lib/ILI9341/graph.h"
 
 void TEST_fillPrimitives(u16 step) {
     LCD_fillScreen(BLACK);
@@ -28,6 +28,8 @@ void TEST_fillPrimitives(u16 step) {
             LCD_putPixel(x + quartStep, y + quartStep, YELLOW);
 
             LCD_drawLine(x + halfStep, y + halfStep, x + step, y + step, WHITE);
+//            LCD_drawLine(x, y + step, x + step, y, RED);
+
         }
     }
 }

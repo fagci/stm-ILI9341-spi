@@ -1,6 +1,8 @@
 #ifndef TEST1_CONFIG_H
 #define TEST1_CONFIG_H
 
+#define DEBUG_MODE 0
+
 // <editor-fold desc="Defaults">
 
 #define TFT_LED_PIN     GPIO_Pin_8  // A8

@@ -5,12 +5,14 @@
 #include "dma.h"
 
 #ifndef _int16_swap
-#define _int16_swap(a, b) { int16_t t = a; a = b; b = t; }
+#define _int16_swap(a, b) { s16 t = a; a = b; b = t; }
 #endif
 
 #ifndef abs
 #define abs(a) ((a)<0?-(a):a)
 #endif
+
+#define sgn(x) ((x<0)?-1:((x>0)?1:0))
 
 #define ILI9341_COLOR(r, g, b)\
      ((((uint16_t)b) >> 3) |\

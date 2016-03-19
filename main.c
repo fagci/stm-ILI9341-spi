@@ -125,44 +125,53 @@ int main(void) {
         encOldVal = 0;
 
     LCD_init();
-
-    ADC_init();
-    PWM_init();
-    ENC_init();
-    ENC_setValue(1710);
-
     LCD_setOrientation(ORIENTATION_LANDSCAPE_MIRROR);
+
     LCD_fillScreen(BLACK);
+    LCD_putPixel(50, 50, GREEN);
 
-    lcdWidth  = LCD_getWidth();
-    lcdHeight = LCD_getHeight();
-    graphPosX = (lcdWidth - (u16) GRAPH_W) / (u8) 2;
-    graphPosY = (lcdHeight - (u16) GRAPH_H) / (u8) 2;
+    u16 pb[1];
+    LCD_readPixels(50, 50, 50, 50, pb);
 
-    LCD_fillRect(graphPosX, graphPosY, GRAPH_W, GRAPH_H, DGRAY);
+    LCD_putPixel(100, 100, YELLOW);
 
-    plotYMax = plotYMin = GRAPH_H / 2;
-    for (u16 i = 0; i < ADC_DATA_SIZE; ++i) {
-        adcOldValues[i] = GRAPH_H / 2;
-    }
-
-    while (1) {
-        while (!ADC_isDataAvailable());
-        plotData();
-
-        encVal = ENC_getValue();
-        if (encOldVal != encVal) {
-            ADC_changeFreq((u32) (encVal % 17));
-            LCD_fillRect(0, (u16) (graphPosY + GRAPH_H), LCD_getWidth(), graphPosY, BLACK);
-            LCD_setTextBgColor(BLACK);
-            LCD_setCursor(0, 221);
-            LCD_writeString((unsigned char *) "F mode: ");
-            LCD_writeString((unsigned char *) ADC_getFreqMode());
-            encOldVal = encVal;
-        }
-        ADC_markDataUsed();
-//        delay_ms(120);
-    }
+//
+//    ADC_init();
+//    PWM_init();
+//    ENC_init();
+//
+//    ENC_setValue(1710);
+//
+//    LCD_fillScreen(BLACK);
+//
+//    lcdWidth  = LCD_getWidth();
+//    lcdHeight = LCD_getHeight();
+//    graphPosX = (lcdWidth - (u16) GRAPH_W) / (u8) 2;
+//    graphPosY = (lcdHeight - (u16) GRAPH_H) / (u8) 2;
+//
+//    LCD_fillRect(graphPosX, graphPosY, GRAPH_W, GRAPH_H, DGRAY);
+//
+//    plotYMax = plotYMin = GRAPH_H / 2;
+//    for (u16 i = 0; i < ADC_DATA_SIZE; ++i) {
+//        adcOldValues[i] = GRAPH_H / 2;
+//    }
+//
+//    while (1) {
+//        while (!ADC_isDataAvailable());
+//        plotData();
+//
+//        encVal = ENC_getValue();
+//        if (encOldVal != encVal) {
+//            ADC_changeFreq((u32) (encVal % 17));
+//            LCD_fillRect(0, (u16) (graphPosY + GRAPH_H), LCD_getWidth(), graphPosY, BLACK);
+//            LCD_setTextBgColor(BLACK);
+//            LCD_setCursor(0, 221);
+//            LCD_writeString((unsigned char *) "F mode: ");
+//            LCD_writeString((unsigned char *) ADC_getFreqMode());
+//            encOldVal = encVal;
+//        }
+//        ADC_markDataUsed();
+//    }
 
     while (1);
 }

@@ -36,6 +36,7 @@ inline static void dmaReceive8(u8 *data, u32 n) {
     dmaStructure.DMA_MemoryDataSize     = DMA_MemoryDataSize_Byte;
     dmaStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
 
+    LCD_setSpi8();
     dmaStartRx();
 }
 
@@ -53,6 +54,7 @@ inline static void dmaSend8(u8 *data, u32 n) {
     dmaStructure.DMA_MemoryDataSize     = DMA_MemoryDataSize_Byte;
     dmaStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
 
+    LCD_setSpi8();
     dmaStartTx();
 }
 
@@ -70,6 +72,7 @@ inline static void dmaSendCircular16(u16 *data, u32 n) {
     dmaStructure.DMA_MemoryDataSize     = DMA_MemoryDataSize_HalfWord;
     dmaStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
 
+    LCD_setSpi16();
     dmaStartTx();
 }
 
@@ -87,6 +90,7 @@ inline static void dmaSend16(u16 *data, u32 n) {
     dmaStructure.DMA_MemoryDataSize     = DMA_MemoryDataSize_HalfWord;
     dmaStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
 
+    LCD_setSpi16();
     dmaStartTx();
 }
 

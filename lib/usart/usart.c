@@ -1,5 +1,7 @@
 #include "usart.h"
 
+u8 usartReady = 0;
+
 void usartInit(void) {
     GPIO_InitTypeDef  GPIO_InitStruct;
     USART_InitTypeDef USART_InitStructure;
@@ -30,6 +32,10 @@ void usartInit(void) {
 }
 
 void usartWrite(char chr) {
+    if(!usartReady) {
+        usartInit();
+        usartReady = 1;
+    }
     while (USART_GetFlagStatus(USART3, USART_FLAG_TC) == RESET);
     USART_SendData(USART3, (uint16_t) (chr & 0xFF));
 }
