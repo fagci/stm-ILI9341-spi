@@ -1,5 +1,7 @@
 # STM32 ILI9341 spi
 
+[![Beerpay](https://beerpay.io/fagcinsk/stm-ILI9341-spi/badge.svg?style=flat)](https://beerpay.io/fagcinsk/stm-ILI9341-spi)
+
 YouTube video:
 
 [![STM32 ILI9341 spi](http://img.youtube.com/vi/5nLQ-VqMv-g/0.jpg)](http://www.youtube.com/watch?v=5nLQ-VqMv-g "Oscilloscope using this library")
